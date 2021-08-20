@@ -26,16 +26,18 @@ int main ()
                 }
             else                                           // koef[1]*x + koef[2] = 0
                 {
-                    printf ("x = %f", -koef[2]/koef[1]);
+                    float x = -koef[2]/koef[1];
+                    printf ("x = %f", x);
                 }
         }
     else
         {
-            float D = koef[1]*koef[1] - 4*koef[0]*koef[2]; //formule of Discriminant
+            float D = koef[1]*koef[1] - 4*koef[0]*koef[2]; //la formule de Discriminante
 
             if (D == 0)
                 {
-                    printf ("Full square: x = %f", -koef[1]/( 2*koef[0] ) );
+                    float x = -koef[1]/( 2*koef[0] );
+                    printf ("Full square: x = %f", x );
                 }
             if (D < 0)
                 {
@@ -47,10 +49,8 @@ int main ()
                     float x2 = ( -koef[1]-sqrt(D) )/( 2*koef[0] );
                     printf ("Two roots: x = %f, x = %f", x1, x2);
                 }
-
         }
-
-
 
     return 0;
 }
+
