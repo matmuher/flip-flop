@@ -4,19 +4,19 @@
 
 int main ()
 {
-    float koef[NUM_OF_KOEFS];   //массив с коэффицентами
+    float koef[NUM_OF_KOEFS];   //array with koefs
 
     printf ("The square equation looks like this:\n(koef_0)*x^2+(koef_1)*x+(koef_2)=0\n");
 
-    for (int i = 0; i < NUM_OF_KOEFS; i++)         /*ввод коэфицентов*/
+    for (int i = 0; i < NUM_OF_KOEFS; i++)         /*koefs input*/
         {
             printf ("Please, enter koef_%d\n",i);
             scanf ("%f",&koef[i]);
-        }                                          /*решение*/
+        }                                          /*solution*/
 
     if (koef[0] == 0) // x = -koef[2]/koef[1]
         {
-            if (koef[1] == 0 && koef[2] != 0)    // например: -5 = 0
+            if (koef[1] == 0 && koef[2] != 0)    // f.e.: -5 = 0
                 {
                     printf ("No roots");
                 }
@@ -31,7 +31,7 @@ int main ()
         }
     else
         {
-            float D = koef[1]*koef[1] - 4*koef[0]*koef[2]; //формула дискриминанта
+            float D = koef[1]*koef[1] - 4*koef[0]*koef[2]; //formule of Discriminant
 
             if (D == 0)
                 {
@@ -54,4 +54,3 @@ int main ()
 
     return 0;
 }
-
