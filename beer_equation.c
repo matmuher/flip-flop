@@ -1,6 +1,7 @@
 #include "beer_equation.h"
 
 
+
 bool close_to_zero (float val)
 {
 assert (isfinite (val));
@@ -71,6 +72,32 @@ return ONE;
 }
 
 
+int square_eq_optimizer (float *koef, float *x_ptr)
+{
+float multip_2_and_0_koefs = koef[2]*koef[0];
+
+if (close_to_zero (koef[1]) && multip_2_and_0_koefs > 0) // f.e.: 5*x^2 + 0*x + 5 = 0
+    {
+    return ZERO; // e.continue: x = sqrt(-5/5) -> no roots from negative numbers
+    }
+else if (close_to_zero (koef[1]) && multip_2_and_0_koefs <= 0)
+    {
+    if (close_to_zero (multip_2_and_0_koefs)) // f.e.: 5*x^2 + 0*x + 0 = 0
+        {
+        x_ptr[0] = 0; // e.continue: x = 0
+        x_ptr[1] = 0;
+
+        return TWO;
+        }
+    // f.e.: 5*x^2 + 0*x - 5 = 0
+    // e.continue: x = -sqrt(1) and x = +sqrt(1) -> 2 roots
+    x_ptr[0] = sqrt (-koef[2]/koef[0]);
+    x_ptr[1] = -(x_ptr[0]);
+
+    return TWO;
+    }
+}
+
 // SOLVER VIA DISCRIMINANT
 int via_D_solver (float *koef, float *x_ptr)
 {
@@ -102,7 +129,7 @@ if (D > 0)
 
     return TWO;
     }
-    
+
 return ERROR;//?
 }
 
@@ -117,29 +144,13 @@ assert (isfinite (koef[1]));
 assert (isfinite (koef[2]));
 
 int via_D_solver (float *koef, float *x_ptr);
-float multip_2_and_0_koefs = koef[2]*koef[0];
+int square_eq_optimizer (float *koef, float *x_ptr);
 
-if (close_to_zero (koef[1]) && multip_2_and_0_koefs > 0) // f.e.: 5*x^2 + 0*x + 5 = 0
+if (close_to_zero(koef[1]))
     {
-    return ZERO; // e.continue: x = sqrt(-5/5) -> no roots from negative numbers
+    return square_eq_optimizer (koef, x_ptr);
     }
-else if (close_to_zero (koef[1]) && multip_2_and_0_koefs <= 0)
-    {
-    if (close_to_zero (multip_2_and_0_koefs)) // f.e.: 5*x^2 + 0*x + 0 = 0
-        {
-        x_ptr[0] = 0; // e.continue: x = 0
-        x_ptr[1] = 0;
 
-        return TWO;
-        }
-    // f.e.: 5*x^2 + 0*x - 5 = 0
-    // e.continue: x = -sqrt(1) and x = +sqrt(1) -> 2 roots
-    x_ptr[0] = sqrt (-koef[2]/koef[0]);
-    x_ptr[1] = -(x_ptr[0]);
-
-    return TWO;
-    }
-    
 return via_D_solver (koef, x_ptr);
 }
 
