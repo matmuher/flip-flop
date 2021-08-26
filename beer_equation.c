@@ -1,7 +1,6 @@
 #include "beer_equation.h"
 
 
-
 bool close_to_zero (float val)
 {
 assert (isfinite (val));
@@ -103,7 +102,7 @@ if (D > 0)
 
     return TWO;
     }
-
+    
 return ERROR;//?
 }
 
@@ -140,7 +139,7 @@ else if (close_to_zero (koef[1]) && multip_2_and_0_koefs <= 0)
 
     return TWO;
     }
-
+    
 return via_D_solver (koef, x_ptr);
 }
 
