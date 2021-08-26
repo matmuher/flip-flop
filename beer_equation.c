@@ -27,6 +27,7 @@ assert (koef != NULL);
 assert (num_of_koefs > 0);
 
 void wrong_input_proccess (int status);
+    
 for (int koef_id = 0; koef_id < num_of_koefs; koef_id++)
     {
     int status = 0;
@@ -35,9 +36,9 @@ for (int koef_id = 0; koef_id < num_of_koefs; koef_id++)
         {
         printf ("\nPlease, enter value of koef_%d\n"
                 "koef_%d = ", koef_id, koef_id);
-
+        
         status = scanf ("%f", &koef[koef_id]);
-
+        
         puts("");
 
         wrong_input_proccess (status);
@@ -96,6 +97,7 @@ else if (close_to_zero (koef[1]) && multip_2_and_0_koefs <= 0)
     return TWO;
     }
 }
+
 
 // SOLVER VIA DISCRIMINANT
 int via_D_solver (float *koef, float *x_ptr)
@@ -164,6 +166,7 @@ assert (isfinite (koef[1]));
 assert (isfinite (koef[2]));
 
 int num_of_answers = -1;
+    
 if (close_to_zero(koef[0])) //LINER
     {
     float line_koef[2] = {koef[1], koef[2]};
@@ -174,6 +177,7 @@ else //SQUARE
     {
     num_of_answers = square_eq (koef, answers_array);
     }
+    
 return num_of_answers;
 }
 
