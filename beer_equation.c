@@ -1,7 +1,6 @@
 #include "beer_equation.h"
 
 
-
 bool close_to_zero (float val)
 {
 assert (isfinite (val));
