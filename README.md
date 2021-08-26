@@ -6,9 +6,9 @@ HOW TO BUILD IT INTO BINARY FOR WINDOWS:
 
 3. to build test file enter in console:
 
-g++ -c test.c
-g++ -c beer_equation.c
-g++ -o test beer_equation.o test.o
+g++ -c test.c\n
+g++ -c beer_equation.c\n
+g++ -o test beer_equation.o test.o\n
 
 This will create test.exe in the directory
 
