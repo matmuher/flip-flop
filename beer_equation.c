@@ -4,6 +4,7 @@
 bool close_to_zero (float val)
 {
 assert (isfinite (val));
+    
 return (fabs (val) < BIT_GREATER_ZERO)? true : false;
 }
 
@@ -74,6 +75,12 @@ return ONE;
 
 int square_eq_optimizer (float *koef, float *x_ptr)
 {
+assert (koef != NULL);
+assert (x_ptr != NULL);
+assert (isfinite (koef[0]));
+assert (isfinite (koef[1]));
+assert (isfinite (koef[2]));
+    
 float multip_2_and_0_koefs = koef[2]*koef[0];
 
 if (close_to_zero (koef[1]) && multip_2_and_0_koefs > 0) // f.e.: 5*x^2 + 0*x + 5 = 0
