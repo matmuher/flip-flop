@@ -18,6 +18,13 @@ enum num_of_roots {ERROR = -1, ZERO = 0, ONE = 1, TWO = 2, INF = 8};
 bool close_to_zero (float  val);
 
 /*!
+@brief Inputs equations' coefficients
+@param[in] koef float array for roots with size == 2
+@param[in] num_of_koefs number of coefficients
+*/
+void koefs_input (float *koef, int num_of_koefs);
+
+/*!
 @brief Solves liner equation
 @param[in] koef float array of coefficients with size == 2
 @param[in] x_ptr float array for roots with size == 1
@@ -55,12 +62,5 @@ int three_koefs_eq (float *koef, float *answers_array);
 @param[in] arr_of_answers float array of roots for 2  elements
 */
 void eq_answer_print (int num_of_answers, float *arr_of_answers);
-
-/*!
-@brief Inputs equations' coefficients
-@param[in] koef float array for roots with size == 2
-@param[in] num_of_koefs number of coefficients
-*/
-void koefs_input (float *koef, int num_of_koefs);
 
  #endif
