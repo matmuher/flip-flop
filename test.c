@@ -52,7 +52,9 @@ int test_square (int test_id, float *koefs, int true_roots_num, float *true_root
 
     printf ("\nTest #%d\n", test_id);
 
-    if (return_roots_num != true_roots_num && !are_close_values (return_roots[0], true_roots[0]) && !are_close_values (return_roots[0], true_roots[0]))
+    if (return_roots_num != true_roots_num &&
+        !are_close_values (return_roots[0], true_roots[0]) &&
+        !are_close_values (return_roots[0], true_roots[0]))
         {
         if (return_roots_num != true_roots_num)
             {
@@ -77,12 +79,13 @@ int test_square (int test_id, float *koefs, int true_roots_num, float *true_root
                 "Return values:\n"
                 " Number of roots = %d\n"
                 " Root #1 = %f\n"
-                " Root #2 = %f\n", true_roots_num, true_roots[0], true_roots[1], return_roots_num, return_roots[0], return_roots[1]);
+                " Root #2 = %f\n", true_roots_num, true_roots[0], true_roots[1],
+                                   return_roots_num, return_roots[0], return_roots[1]);
         }
     else
         {
-        puts ("Successful!\n");
+        puts ("Successful!");
         }
 
-    return error? 1:0;
+    return error ? 1:0;
     }

@@ -3,16 +3,17 @@
 
 bool are_close_values (float val1, float val2)
     {
-    if ((isnan(val1) && isnan(val2)) || (isinf(val1) && isinf(val2)))
+    if (isnan (val1) && isnan (val2) || isinf (val1) && isinf (val2))
         {
         return true;
         }
-    if (!isnan(val1) && isnan(val2) || isnan(val1) && !isnan(val2) || !isinf(val1) && isinf(val2) || isinf(val1) && !isinf(val2))
+    if (!isnan (val1) && isnan (val2) || isnan (val1) && !isnan (val2) ||
+        !isinf (val1) && isinf (val2) || isinf (val1) && !isinf (val2))
         {
         return false;
         }
 
-    return (fabs (val1-val2) < BIT_GREATER_ZERO)? true : false;
+    return (fabs (val1-val2) < BIT_GREATER_ZERO) ? true : false;
     }
 
 
@@ -33,8 +34,6 @@ void koefs_input (float *koef, int num_of_koefs)
     {
     assert (koef != NULL);
     assert (num_of_koefs > 0);
-
-    void wrong_input_proccess (int status);
 
     for (int koef_id = 0; koef_id < num_of_koefs; koef_id++)
         {
@@ -74,7 +73,7 @@ int solve_line_eq (float *koef, float *x_ptr)
 
     // koef[1]*x + koef[2] = 0
     // x = -koef[2]/koef[1]
-    x_ptr[0] = -koef[1]/koef[0];
+    x_ptr[0] = -koef[1] / koef[0];
 
     return ONE;
     }
@@ -109,6 +108,7 @@ int square_eq_optimizer (float *koef, float *x_ptr)
 
     return TWO;
     }
+
 
 // SOLVER VIA DISCRIMINANT
 int solve_via_D (float *koef, float *x_ptr)
@@ -173,6 +173,7 @@ int solve_three_koefs_eq (float *koef, float *answers_array)
     assert (isfinite (koef[2]));
 
     int num_of_answers = -1;
+
     if (are_close_values (koef[0], 0)) //LINER
         {
         float line_koef[2] = {koef[1], koef[2]};
@@ -196,26 +197,36 @@ void eq_answer_print (int num_of_answers, float *arr_of_answers)
 
     char delimiter[] = "\n************";
 
-    if (num_of_answers == ONE || num_of_answers == TWO)
+    //switch (num_of_answers)
+    switch (num_of_answers)
         {
-        printf ("%s\nAnswers:\n", delimiter);
-
-        for (int answer_id = 0; answer_id < num_of_answers; answer_id++)
+        case ONE:
+        case TWO:
             {
-            printf ("x = %f\n", arr_of_answers[answer_id]);
+            printf ("%s\nAnswers:\n", delimiter);
+
+            for (int answer_id = 0; answer_id < num_of_answers; answer_id++)
+                {
+                printf ("x = %f\n", arr_of_answers[answer_id]);
+                }
+
+            break;
             }
-        }
-    else if (num_of_answers == ZERO)
-        {
-        printf ("%s\nNo roots\n", delimiter);
-        }
-    else if (num_of_answers == INF)
-        {
-        printf ("%s\nInfinity roots\n", delimiter);
-        }
-    else
-        {
-        printf ("%s\nWrong number of answers\n", delimiter);
+        case ZERO:
+            {
+            printf ("%s\nNo roots\n", delimiter);
+            break;
+            }
+        case INF:
+            {
+            printf ("%s\nInfinity roots\n", delimiter);
+            break;
+            }
+        default:
+            {
+            printf ("%s\nWrong number of answers\n", delimiter);
+            break;
+            }
         }
     }
 

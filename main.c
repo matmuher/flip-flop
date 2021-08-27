@@ -1,5 +1,6 @@
 #include "beer_equation.h"
 
+//SOLVES 3 COEFS EQUATION
 int main ()
     {
     float koef[KOEFS_NUM] = {NAN, NAN, NAN};

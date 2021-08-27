@@ -1,7 +1,7 @@
 #ifndef BEER_EQ_H
 #define BEER_EQ_H
 
-#define NDEBUG
+//#define NDEBUG
 
 #include <stdio.h>
 #include <math.h>
