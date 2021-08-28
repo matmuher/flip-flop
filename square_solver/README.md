@@ -17,4 +17,8 @@
 That is how interface looks like:
 ![start of sq_eq_so](https://user-images.githubusercontent.com/89156045/131215813-993972e6-366a-4ab8-b10b-9388f9ba0f24.JPG)
 ![sq_eq_so answer](https://user-images.githubusercontent.com/89156045/131215817-33e91307-3423-49ad-96d2-c61443fee83a.JPG)
-## Launch it to solve your square equation!
+
+# Having troubles with square equation in your project?
+You can use functions from my project!
+
+*More details about functions used in project you can get in documentation: check docs.rar, index.html file
