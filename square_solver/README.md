@@ -7,7 +7,7 @@
   3. start test.bat
 
 *After that will be created test.exe in this directory*
-## 3_coefs_equation_solver.exe
+## square_solver.exe
 *This file will start programm that solves square equation, using your input coefficients
 
   4. start square_sovler.bat
