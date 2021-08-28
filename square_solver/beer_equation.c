@@ -1,6 +1,5 @@
 #include "beer_equation.h"
 
-
 bool are_close_values (float val1, float val2)
     {
     if (isnan (val1) && isnan (val2) || isinf (val1) && isinf (val2))
@@ -13,7 +12,7 @@ bool are_close_values (float val1, float val2)
         return false;
         }
 
-    return (fabs (val1-val2) < BIT_GREATER_ZERO) ? true : false;
+    return (fabs (val1-val2) < FLOAT_ZERO) ? true : false;
     }
 
 
@@ -23,30 +22,28 @@ void wrong_input_proccess (int status)
 
     if (status == 0)
         {
-        puts ("\nWrong input. Try again (f.e. 8.5 or 9 or 3.14 or something like this)");
+        puts ("\nWrong input. Try again, please");
 
         scanf ("%*s");
         }
     }
 
 
-void koefs_input (float *koef, int num_of_koefs)
+void coefs_input (float *coefs, int num_of_coefs)
     {
-    assert (koef != NULL);
-    assert (num_of_koefs > 0);
+    assert (coefs != NULL);
+    assert (num_of_coefs > 0);
 
-    for (int koef_id = 0; koef_id < num_of_koefs; koef_id++)
+    for (int coef_id = 0; coef_id < num_of_coefs; coef_id++)
         {
         int status = 0;
 
         while (status != 1)
             {
-            printf ("\nPlease, enter value of koef_%d\n"
-                    "koef_%d = ", koef_id, koef_id);
+            printf ("\nPlease, enter value of coefs_%d\n"
+                    "coefs_%d = ", coef_id, coef_id);
 
-            status = scanf ("%f", &koef[koef_id]);
-
-            puts (""); // for explicit output, when assert works out
+            status = scanf ("%f", &coefs[coef_id]);
 
             wrong_input_proccess (status);
             }
@@ -54,135 +51,149 @@ void koefs_input (float *koef, int num_of_koefs)
     }
 
 
-// LINER EQUATION SOLVER: koef[1]*x + koef[2] = 0
-int solve_line_eq (float *koef, float *x_ptr)
+// LINEAR EQUATION SOLVER: coefs[1]*x + coefs[2] = 0
+int solve_line_eq (float *coefs, float *x_ptr)
     {
-    assert (koef != NULL);
+    assert (coefs != NULL);
     assert (x_ptr != NULL);
-    assert (isfinite (koef[0]));
-    assert (isfinite (koef[1]));
+    assert (isfinite (coefs[0]));
+    assert (isfinite (coefs[1]));
 
-    if (are_close_values (koef[0], 0) && !are_close_values (koef[1], 0)) // f.e.: x*0 - 5 = 0
+    if (are_close_values (coefs[0], 0) && !are_close_values (coefs[1], 0)) // f.e.: x*0 - 5 = 0
         {
-        return ZERO;
+        return ZERO_ROOTS;
         }
-    else if (are_close_values (koef[0], 0) && are_close_values (koef[1], 0)) // f.e.: x*0 + 0 = 0
+    else if (are_close_values (coefs[0], 0) && are_close_values (coefs[1], 0)) // f.e.: x*0 + 0 = 0
         {
-        return INF;
+        return INFINITY_ROOTS;
         }
 
-    // koef[1]*x + koef[2] = 0
-    // x = -koef[2]/koef[1]
-    x_ptr[0] = -koef[1] / koef[0];
+    // coefs[1]*x + coefs[2] = 0
+    // x = -coefs[2]/coefs[1]
+    x_ptr[0] = -coefs[1] / coefs[0];
 
-    return ONE;
+    return ONE_ROOT;
     }
 
-
-int square_eq_optimizer (float *koef, float *x_ptr)
+/*!
+@brief Optimize solve_square_eq ()
+@details parameters are same as solve_square_eq () has
+*/
+static int square_eq_optimizer (float *coefs, float *x_ptr)
     {
-    assert (koef != NULL);
+    assert (coefs != NULL);
     assert (x_ptr != NULL);
-    assert (isfinite (koef[0]));
-    assert (isfinite (koef[1]));
-    assert (isfinite (koef[2]));
+    assert (isfinite (coefs[0]));
+    assert (isfinite (coefs[1]));
+    assert (isfinite (coefs[2]));
 
-    float multip_2_and_0_koefs = koef[2]*koef[0];
-
-    if (multip_2_and_0_koefs > BIT_GREATER_ZERO) // f.e.: 5*x^2 + 0*x + 5 = 0
+    if (are_close_values (coefs[1], 0)) // coefs_0 * x^2 + coefs_1 * 0 + coefs_2 = 0
         {
-        return ZERO; // x = sqrt(-5/5) -> no roots from negative numbers
+        float help_coefs = -coefs[2] / coefs[0];
+
+        if (help_coefs < 0) // x = sqrt (help_coefs) -> sqrt (negative)
+            {
+            return ZERO_ROOTS; // no roots in real numbers
+            }
+        else
+            {
+            x_ptr[0] = sqrt (help_coefs); // x = sqrt (0 or positive)
+            x_ptr[1] = -x_ptr[0];
+
+            return TWO_ROOTS;
+            }
         }
-
-    if (are_close_values (multip_2_and_0_koefs, 0)) // f.e.: 5*x^2 + 0*x + 0 = 0
+    else if (are_close_values (coefs[2], 0))  // x * (coefs_0 * x - coefs_1) = 0
         {
-        x_ptr[0] = 0; // x = 0
         x_ptr[1] = 0;
 
-        return TWO;
-        }
-    // f.e.: 5*x^2 + 0*x - 5 = 0
-    // x = -sqrt(1) and x = +sqrt(1) -> 2 roots
-    x_ptr[0] = sqrt (-koef[2]/koef[0]);
-    x_ptr[1] = -(x_ptr[0]);
+        float line_coefs[] = {coefs[0], coefs[1]};
 
-    return TWO;
+        solve_line_eq (line_coefs, x_ptr); // will place root in x_ptr[0]
+
+        return TWO_ROOTS;
+        }
+
+    return ROOT_ERROR;
     }
 
 
-// SOLVER VIA DISCRIMINANT
-int solve_via_D (float *koef, float *x_ptr)
+/*!
+@brief Solves square equation using Discriminant
+@details parameters are same as solve_square_eq () has
+*/
+static int solve_using_D (float *coefs, float *x_ptr)
     {
-    assert (koef != NULL);
+    assert (coefs != NULL);
     assert (x_ptr != NULL);
-    assert (isfinite (koef[0]));
-    assert (isfinite (koef[1]));
-    assert (isfinite (koef[2]));
+    assert (isfinite (coefs[0]));
+    assert (isfinite (coefs[1]));
+    assert (isfinite (coefs[2]));
 
-    float D = koef[1]*koef[1] - 4*koef[0]*koef[2]; //la formule de Discriminante
+    float D = coefs[1]*coefs[1] - 4*coefs[0]*coefs[2]; //la formule de Discriminante
+    float double_coefs_0 = 2 * coefs[0];
+    float minus_coefs_1 = -coefs[1];
+
 
     if (are_close_values (D, 0))
         {
-        x_ptr[0] = (-koef[1])/(2*koef[0]); // sqrt_D == 0
+        x_ptr[0] = minus_coefs_1 / double_coefs_0; // sqrt_D == 0
         x_ptr[1] = x_ptr[0];
 
-        return TWO;
+        return TWO_ROOTS;
         }
-    else if (D < -BIT_GREATER_ZERO)
+    else if (D < -FLOAT_ZERO)
         {
-        return ZERO;
+        return ZERO_ROOTS;
         }
 
     float sqrt_D = sqrt(D);
 
-    x_ptr[0] = (-koef[1] + sqrt_D)/(2*koef[0]);
-    x_ptr[1] = (-koef[1] - sqrt_D)/(2*koef[0]);
+    x_ptr[0] = (minus_coefs_1 + sqrt_D) / double_coefs_0;
+    x_ptr[1] = (minus_coefs_1 - sqrt_D) / double_coefs_0;
 
-    return TWO;
+    return TWO_ROOTS;
     }
 
 
-//SQUARE EQUATION SOLVER: koef[0]*x^2 + koef[1]*x + koef[2] = 0
-int solve_square_eq (float *koef, float *x_ptr)
+//SQUARE EQUATION SOLVER: coefs[0]*x^2 + coefs[1]*x + coefs[2] = 0
+int solve_square_eq (float *coefs, float *x_ptr)
     {
-    assert (koef != NULL);
+    assert (coefs != NULL);
     assert (x_ptr != NULL);
-    assert (isfinite (koef[0]));
-    assert (isfinite (koef[1]));
-    assert (isfinite (koef[2]));
+    assert (isfinite (coefs[0]));
+    assert (isfinite (coefs[1]));
+    assert (isfinite (coefs[2]));
 
-    int solve_via_D (float *koef, float *x_ptr);
-    int square_eq_optimizer (float *koef, float *x_ptr);
-
-    if (are_close_values (koef[1], 0))
+    if (are_close_values (coefs[1], 0) || are_close_values (coefs[2], 0))
         {
-        return square_eq_optimizer (koef, x_ptr);
+        return square_eq_optimizer (coefs, x_ptr);
         }
 
-    return solve_via_D (koef, x_ptr);
+    return solve_using_D (coefs, x_ptr);
     }
 
 
 // 3 KOEFS EQUATION SOLVER
-int solve_three_koefs_eq (float *koef, float *answers_array)
+int solve_three_coefs_eq (float *coefs, float *answers_array)
     {
-    assert (koef != NULL);
+    assert (coefs != NULL);
     assert (answers_array != NULL);
-    assert (isfinite (koef[0]));
-    assert (isfinite (koef[1]));
-    assert (isfinite (koef[2]));
+    assert (isfinite (coefs[0]));
+    assert (isfinite (coefs[1]));
+    assert (isfinite (coefs[2]));
 
     int num_of_answers = -1;
 
-    if (are_close_values (koef[0], 0)) //LINER
+    if (are_close_values (coefs[0], 0)) //LINEAR
         {
-        float line_koef[2] = {koef[1], koef[2]};
+        float line_coefs[2] = {coefs[1], coefs[2]};
 
-        num_of_answers = solve_line_eq (line_koef, answers_array);
+        num_of_answers = solve_line_eq (line_coefs, answers_array);
         }
     else //SQUARE
         {
-        num_of_answers = solve_square_eq (koef, answers_array);
+        num_of_answers = solve_square_eq (coefs, answers_array);
         }
 
     return num_of_answers;
@@ -200,8 +211,8 @@ void eq_answer_print (int num_of_answers, float *arr_of_answers)
     //switch (num_of_answers)
     switch (num_of_answers)
         {
-        case ONE:
-        case TWO:
+        case ONE_ROOT:
+        case TWO_ROOTS:
             {
             printf ("%s\nAnswers:\n", delimiter);
 
@@ -212,12 +223,12 @@ void eq_answer_print (int num_of_answers, float *arr_of_answers)
 
             break;
             }
-        case ZERO:
+        case ZERO_ROOTS:
             {
             printf ("%s\nNo roots\n", delimiter);
             break;
             }
-        case INF:
+        case INFINITY_ROOTS:
             {
             printf ("%s\nInfinity roots\n", delimiter);
             break;
