@@ -21,4 +21,4 @@ That is how interface looks like:
 # Having troubles with square equation in your project?
 You can use functions from my project!
 
-*More details about functions used in project you can get in documentation: check docs.rar, index.html file
+*More details about functions used in project you can get in documentation: check docs.rar/index.html file
