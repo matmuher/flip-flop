@@ -104,7 +104,7 @@ char* format_line (char* line, beg_end_ptr* line_ptrs, int LINE_MAX_LEN)
             }
         }
 
-    // End of line — straightly after last al/num symbol
+    // End of line â€” straightly after last al/num symbol
     *++last_alnum = '\0';
 
     line_ptrs->end_ptr = last_alnum;
