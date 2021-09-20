@@ -69,7 +69,7 @@ char* string_stick (char destination[], char source[]);
 @details Calculates size of str by function string_len, allocates memory\n
          using calloc function from stdlib.h,\n
          if everything is alright copies str to allocated  memory.
-         if no — returns NULL-pointer\n\n
+         if no â€” returns NULL-pointer\n\n
 
          After using returned pointer MUST be passed to free to avoid a memory leak.
 @params[in] str C-string that is needed to be duplicated in dynamic memory
