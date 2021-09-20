@@ -3,7 +3,6 @@
 #include "..\hamlet_dynamic_proc\string_funk.h"
 #include "..\hamlet_dynamic_proc\d_hamlet_functions.h"
 
-// Allocates memory for each string
 
 int main()
     {
