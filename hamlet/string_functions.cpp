@@ -137,6 +137,7 @@ char* string_copy (char destination[], char source[])
 
 int string_len (const char str[])
     {
+    assert (str != NULL);
 
     int len = 0;
 
