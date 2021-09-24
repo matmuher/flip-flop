@@ -63,7 +63,6 @@ char* fget_string (char str[], int n, FILE* file_pointer)
     {
     assert (str != NULL);
     assert (file_pointer != NULL);
-
     // at lest n = 1 otherwise there is no sense
     // to use it
     assert (n > 0);
@@ -151,6 +150,7 @@ char* string_stick (char destination[], char source[])
     {
     assert (destination != NULL);
     assert (source != NULL);
+    assert (destination != source);
 
     char* destination_end = destination + string_len (destination) - 1;
 
