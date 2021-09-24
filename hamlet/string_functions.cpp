@@ -43,10 +43,8 @@ char* find_char (const char str[], char chr)
             {
             return (char*) str;
             }
-
         str++;
         }
-
     // After "while" execution, str will contain
     // adress of '\0' i.e. end of string
     if (chr == '\0')
