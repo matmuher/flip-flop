@@ -37,26 +37,25 @@ char* find_char (const char str[], char chr)
     {
     assert (str != NULL);
 
-    char* chr_pointer = NULL;
-
     while (*str != '\0')
         {
         if (*str == chr)
             {
-            chr_pointer = (char*)str;
-            break;
+            return (char*) str;
             }
 
         str++;
         }
-    // after "while" execution, str will contain
+
+    // After "while" execution, str will contain
     // adress of '\0' i.e. end of string
     if (chr == '\0')
         {
-        return (char*)str;
+        return (char*) str;
         }
 
-    return chr_pointer;
+    // There is no symbol in line:(
+    return NULL;
     }
 
 
@@ -64,14 +63,32 @@ char* fget_string (char str[], int n, FILE* file_pointer)
     {
     assert (str != NULL);
     assert (file_pointer != NULL);
+
     // at lest n = 1 otherwise there is no sense
     // to use it
     assert (n > 0);
 
     n = n + 1; // considering '\0' character in the end
+
     char* str_beggining = str;
 
-    while ((--n) && ((*str  = getc (file_pointer)) != '\n') && (*str != EOF) && *str) {str++;}
+    while (LOOP)
+        {
+        if (( (*str  = getc (file_pointer)) == '\n' ))
+            {
+            break;
+            }
+        else if ((*str != EOF) && *str)
+            {
+            break;
+            }
+        else if (!--n)
+            {
+            break;
+            }
+
+        str++;
+        }
     *str = '\0';
 
     if (str == str_beggining)
@@ -108,6 +125,7 @@ char* string_copy (char destination[], char source[])
     {
     assert (destination != NULL);
     assert (source != NULL);
+    assert (destination != source);
 
     char* destination_begin = destination;
 
@@ -133,9 +151,7 @@ char* string_stick (char destination[], char source[])
     assert (destination != NULL);
     assert (source != NULL);
 
-    char* destination_end = destination;
-
-    while (*destination_end) {destination_end++;}
+    char* destination_end = destination + string_len (destination) - 1;
 
     string_copy (destination_end, source);
 

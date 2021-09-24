@@ -1,8 +1,11 @@
 #ifndef STRING_FUNC_H
 #define STRING_FUNC_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+
+const int LOOP = 1;
 
 /*!
 @brief Outputs given C-type string to console
@@ -69,7 +72,7 @@ char* string_stick (char destination[], char source[]);
 @details Calculates size of str by function string_len, allocates memory\n
          using calloc function from stdlib.h,\n
          if everything is alright copies str to allocated  memory.
-         if no â€” returns NULL-pointer\n\n
+         if no — returns NULL-pointer\n\n
 
          After using returned pointer MUST be passed to free to avoid a memory leak.
 @params[in] str C-string that is needed to be duplicated in dynamic memory
@@ -80,9 +83,16 @@ char* string_stick (char destination[], char source[]);
 char* string_dup (char str[]);
 
 
-#include <stdio.h>
-
-
+/*!
+@brief Read string from file (file_pointer) to string str
+@details Writes line or n characters from file to str\n
+         and adds '\0' in the end
+@params[in] str array for writing a string
+@params[in] n number of characters to read from file
+@params[in] file_pointer pointer to file (type FILE*)
+@params[out] str array with written line
+@return pointer to the begging of str, that is C-string
+*/
 char* fget_string (char str[], int n, FILE* file_pointer);
 
 
@@ -96,11 +106,10 @@ char* fget_string (char str[], int n, FILE* file_pointer);
 */
 int string_cmp (char left_str[], char right_str[]);
 
-
-enum LOGIC
-    {
-    FALSE = 0,
-    TRUE = 1
-    };
+/*!
+@brief Prints line with length equal to line_len
+       that consists of of symbol symbols
+*/
+void print_line (const char symbol, size_t line_len);
 
 #endif
