@@ -6,6 +6,7 @@
 #include <assert.h>
 
 const int LOOP = 1;
+const int ZERO_SHIFT = 0;
 
 /*!
 @brief Outputs given C-type string to console
@@ -105,6 +106,15 @@ char* fget_string (char str[], int n, FILE* file_pointer);
         Positive value if left_string appears after right_string\n
 */
 int string_cmp (char left_str[], char right_str[]);
+
+/*!
+@brief Compares strings lexicographically straightly or reversely
+@params[in] shift 1 if straightly, -1 if reversely
+@return Negative value if left_string appears before right_string in lexicographical order\n
+        Zero if strings are equal\n
+        Positive value if left_string appears after right_string\n
+*/
+int string_cmp_ext (const char* str_1, const char* str_2, int shift);
 
 /*!
 @brief Prints line with length equal to line_len
