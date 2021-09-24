@@ -157,3 +157,63 @@ char* string_stick (char destination[], char source[])
 
     return destination;
     }
+
+int string_cmp_ext (const char* str_1, const char* str_2, int shift)
+    {
+    assert (str_1 != NULL);
+    assert (str_2 != NULL);
+    assert (shift != ZERO_SHIFT);
+    // Works only with shift = {-1, 1}
+    assert (shift * shift == 1);
+
+    if (shift > 0)
+        {
+        while (LOOP)
+            {
+            // str_1 end
+            if (*str_1)
+                {
+                break;
+                }
+            // str_2 end
+            else if (*str_2)
+                {
+                break;
+                }
+            // chars are not equal
+            else if (*str_1 != *str_2)
+                {
+                break;
+                }
+
+            str_1++;
+            str_2++;
+            }
+
+        return *str_1 - *str_2;
+        }
+
+    char* str_1_end = find_char (str_1, '\0');
+    char* str_2_end = find_char (str_2, '\0');
+
+    while (LOOP)
+        {
+        if (str_1_end == str_1)
+            {
+            break;
+            }
+        else if (str_2_end == str_2)
+            {
+            break;
+            }
+        else if (*str_2_end != *str_1_end)
+            {
+            break;
+            }
+
+        str_1_end--;
+        str_2_end--;
+        }
+
+    return *str_1_end - *str_2_end;
+    }
