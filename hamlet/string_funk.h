@@ -98,27 +98,27 @@ char* fget_string (char str[], int n, FILE* file_pointer);
 
 
 /*!
-@brief Compares 2 C-stings lexicographically
-@params[in] left_str C-string
-@params[in] right_str C_string
-@return Negative value if left_string appears before right_string in lexicographical order\n
+@brief Compares strings in lexicographic order
+@details Function iterates symbols from left/right_start
+         to left/right_end with step = shift, so:\n
+         if you want to compare strings straightly:\n
+         left_start < left_end, shift = 1,\n
+         if reversely:\n
+         left_start > left_end, shift = -1\n
+@params[in] left/right_start from here comparison will start
+@params[in] left/right_end here comparison will stop
+@params[in] shift 1 or -1, depends on straight or reverse comparison
+@return Negative value if left string appears before right string in lexicographical order\n
         Zero if strings are equal\n
         Positive value if left_string appears after right_string\n
 */
-int string_cmp (char left_str[], char right_str[]);
+int string_compare (char* const left_start, char* const left_end,
+                    char* const right_start, char* const right_end, const int shift);
 
-/*!
-@brief Compares strings lexicographically straightly or reversely
-@params[in] shift 1 if straightly, -1 if reversely
-@return Negative value if left_string appears before right_string in lexicographical order\n
-        Zero if strings are equal\n
-        Positive value if left_string appears after right_string\n
-*/
-int string_cmp_ext (const char* str_1, const char* str_2, int shift);
 
 /*!
 @brief Prints line with length equal to line_len
-       that consists of of symbol symbols
+       that consists of symbol symbols
 */
 void print_line (const char symbol, size_t line_len);
 

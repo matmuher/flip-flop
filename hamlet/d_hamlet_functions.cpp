@@ -1,10 +1,11 @@
 #include "d_hamlet_functions.h"
+#include "..\..\..\memory_free\elephant_calloc_extern.h"
 
 int get_size (FILE* file_pointer)
     {
     assert (file_pointer != NULL);
 
-    int cur_pos = ftell (file_pointer);
+    size_t cur_pos = ftell (file_pointer);
 
     // Get size
     fseek (file_pointer, 0, SEEK_END);
@@ -28,6 +29,8 @@ int is_eof (FILE* file_pointer)
 
 void print_line (const char symbol, size_t line_len)
     {
+    assert (line_len > 0);
+
     for (size_t sym_id = 0; sym_id < line_len; sym_id++)
         {
         putchar (symbol);
@@ -46,71 +49,44 @@ void say_delimiter()
     }
 
 
-int struct_cmp_beg_ptr (const void* first_ptr_void, const void* second_ptr_void)
+int compare_line_straight (const void* first_line_void, const void* second_line_void)
     {
-    assert (first_ptr_void != NULL);
-    assert (second_ptr_void != NULL);
+    assert (first_line_void != NULL);
+    assert (second_line_void != NULL);
 
-    beg_end_ptr* first_ptr = (beg_end_ptr*) first_ptr_void;
-    beg_end_ptr* second_ptr = (beg_end_ptr*) second_ptr_void;
+    line_buf* first_line = (line_buf*) first_line_void;
+    line_buf* second_line = (line_buf*) second_line_void;
 
-    assert (first_ptr->beg_ptr != NULL);
-    assert (second_ptr->beg_ptr != NULL);
+    assert (first_line->beg_ptr != NULL);
+    assert (second_line->beg_ptr != NULL);
+    assert (first_line->end_ptr != NULL);
+    assert (second_line->end_ptr != NULL);
 
-    char* first = first_ptr->beg_ptr;
-    char* second = second_ptr->beg_ptr;
-
-    return string_cmp (first, second);
-    }
-
-int struct_cmp_reversed_line (const void* first_ptr_void, const void* second_ptr_void)
-    {
-    assert (first_ptr_void != NULL);
-    assert (second_ptr_void != NULL);
-
-    beg_end_ptr* first_ptr = (beg_end_ptr*) first_ptr_void;
-    beg_end_ptr* second_ptr = (beg_end_ptr*) second_ptr_void;
-
-    assert (first_ptr->beg_ptr != NULL);
-    assert (first_ptr->end_ptr != NULL);
-    assert (second_ptr->beg_ptr != NULL);
-    assert (second_ptr->end_ptr != NULL);
-
-    char* first_beg = first_ptr->beg_ptr;
-    char* first_end = first_ptr->end_ptr;
-
-    char* second_beg = second_ptr->beg_ptr;
-    char* second_end = second_ptr->end_ptr;
-
-
-    int shift_from_end = 0;
-
-    while (LOOP)
-        {
-        // Get begin of second string
-        if ((second_end - shift_from_end) < second_beg)
-            {
-            break;
-            }
-        // Get begin of first string
-        else if ((first_end - shift_from_end) < first_beg)
-            {
-            break;
-            }
-        // Chars are not equal and can be compared
-        else if(*(second_end - shift_from_end) != *(first_end - shift_from_end))
-            {
-            break;
-            }
-
-        shift_from_end++;
-        }
-
-    return *(first_end - shift_from_end) - *(second_end - shift_from_end);
+    return string_compare (first_line->beg_ptr, first_line->end_ptr,
+                           second_line->beg_ptr, second_line->end_ptr, 1);
     }
 
 
-char* format_line (char* line, beg_end_ptr* line_ptrs)
+int compare_line_reverse (const void* first_line_void, const void* second_line_void)
+    {
+    assert (first_line_void != NULL);
+    assert (second_line_void != NULL);
+
+    line_buf* first_line = (line_buf*) first_line_void;
+    line_buf* second_line = (line_buf*) second_line_void;
+
+    assert (first_line->beg_ptr != NULL);
+    assert (second_line->beg_ptr != NULL);
+    // Exist end of string
+    assert (first_line->end_ptr != NULL);
+    assert (second_line->end_ptr != NULL);
+
+    return string_compare (first_line->end_ptr, first_line->beg_ptr,
+                           second_line->end_ptr, second_line->beg_ptr, -1);
+    }
+
+
+char* format_line (char* line, line_buf* line_ptrs)
     {
     assert (line != NULL);
     assert (line_ptrs != NULL);
@@ -124,8 +100,6 @@ char* format_line (char* line, beg_end_ptr* line_ptrs)
 
     // beg_ptr points to the first char in line
     line_ptrs->beg_ptr = &line[sym_id];
-
-
 
     // Stops when find zero or end of line
     char* last_alnum = &line[sym_id];
@@ -163,11 +137,13 @@ int is_empty_line (const char* str)
     {
     assert (str != NULL);
 
-    // Line that is above makes code more readable?
-    // char* str_max = find_char (str, '\0');
-
-    while (!isalnum (*str) && *str)
+    while (!isalnum (*str))
         {
+        if (*str == '\0')
+            {
+            break;
+            }
+
         str++;
         }
 
@@ -178,21 +154,24 @@ int is_empty_line (const char* str)
 
 char* read_to_buffer (const char* file_name, size_t* file_size)
     {
+    assert (file_name != NULL);
+    assert (file_size > 0);
+
     FILE* file_pointer = fopen (file_name, "r");
 
     // Allocate empty buffer
     char* buffer = NULL;
-    *file_size = get_size (file_pointer);
+    // +1 byte for '\0' in the end
+    *file_size = get_size (file_pointer) + 1;
 
-    buffer = (char*)calloc (*file_size, sizeof (char));
+    buffer = (char*)elephant_calloc (*file_size, sizeof (*buffer));
 
     // Fill the buffer
-    size_t fread_return = fread (buffer, sizeof (char), *file_size, file_pointer);
+    size_t fread_return = fread (buffer, sizeof (*buffer), *file_size, file_pointer);
 
     fclose (file_pointer);
 
     // In case of 'r' in fopen function argument on Windows
-    // Only?
     if (fread_return != *file_size)
         {
         *file_size = fread_return;
@@ -202,11 +181,15 @@ char* read_to_buffer (const char* file_name, size_t* file_size)
     return buffer;
     }
 
-void write_sort_to_file (const char* file_name, int correct_lines, const beg_end_ptr* line_ptrs)
+void write_line_buf_to_file (const char* file_name, int lines_num, const line_buf* line_ptrs)
     {
+    assert (file_name != NULL);
+    assert (lines_num > 0);
+    assert (line_ptrs != NULL);
+
     FILE* file_writer = fopen (file_name, "w");
 
-    for (int cur_line = 0; cur_line < correct_lines; cur_line++)
+    for (int cur_line = 0; cur_line < lines_num; cur_line++)
         {
         fputs ((line_ptrs + cur_line)->beg_ptr, file_writer);
         putc ('\n', file_writer);
@@ -215,25 +198,28 @@ void write_sort_to_file (const char* file_name, int correct_lines, const beg_end
     fclose (file_writer);
     }
 
-void write_buffer_to_file (const char* const file_name, char* const buffer, size_t file_size)
+line_buf* copy_line_buf (line_buf* origin, size_t lines_num)
     {
-    FILE* file_writer = fopen (file_name, "w");
+    assert (origin != NULL);
+    assert (lines_num > 0); // no sense to copy nothing
 
-    char* cur_pos = (char*) buffer;
-    while (cur_pos < buffer + file_size)
+    line_buf* replica = NULL;
+    replica = (line_buf*) elephant_calloc (lines_num, sizeof (line_buf) );
+
+    for (size_t line_id = 0; line_id < lines_num; line_id++)
         {
-        char* str_end = find_char (cur_pos, '\0');
-
-        fputs (cur_pos, file_writer);
-        fputc ('\n', file_writer);
-
-        cur_pos = str_end + 1;
+        replica[line_id].beg_ptr = origin[line_id].beg_ptr;
+        replica[line_id].end_ptr = origin[line_id].end_ptr;
         }
-    fclose (file_writer);
+
+    return replica;
     }
 
 void put_zeros (char* const buffer, size_t file_size)
     {
+    assert (buffer != NULL);
+    assert (file_size > 0);
+
     char* cur_pos = buffer;
     while (cur_pos < buffer + file_size)
         {
@@ -243,10 +229,15 @@ void put_zeros (char* const buffer, size_t file_size)
             }
         cur_pos++;
         }
+
+    *(buffer + file_size - 1) = '\0';
     }
 
 int count_correct_lines (char* const buffer, size_t file_size)
     {
+    assert (buffer != NULL);
+    assert (file_size > 0);
+
     char* cur_pos = buffer;
     size_t correct_lines = 0;
 
@@ -265,23 +256,80 @@ int count_correct_lines (char* const buffer, size_t file_size)
     return correct_lines;
     }
 
-struct beg_end_ptr* prepare_data (char* const buffer, size_t file_size, size_t* correct_lines)
+line_buf* prepare_data (line_buf* line_ptrs, size_t lines_num)
     {
+    assert (line_ptrs != NULL);
+    assert (lines_num > 0);
+
+    for (size_t line_id = 0; line_id < lines_num; line_id++)
+        {
+        format_line (line_ptrs[line_id].beg_ptr, &line_ptrs[line_id]);
+        }
+
+    return line_ptrs;
+    }
+
+void byte_swap (void* first, void* second, size_t element_size)
+    {
+    assert (first != NULL);
+    assert (second != NULL);
+    assert (element_size > 0);
+
+    for (int byte_id = 0; byte_id < element_size; byte_id++)
+        {
+        char temp = *(char*) (first + byte_id);
+        *(char*)(first + byte_id) = *(char*) (second + byte_id);
+        *(char*) (second + byte_id) = temp;
+        }
+    }
+
+void bubble_sort (void* arr, size_t arr_size, size_t elem_size,
+                  int (*compar)(const void *, const void*))
+    {
+    assert (arr != NULL);
+    assert (arr_size > 0);
+    assert (elem_size > 0);
+    assert (&compar != NULL);
+
+    for (int prohod_limit = arr_size - 1; prohod_limit > 0; prohod_limit--)
+        {
+        // Bubble up in sub_array
+        for (int pair_id = 0; pair_id < prohod_limit; pair_id++)
+            {
+            int cmp_result = compar (arr + pair_id * elem_size, arr + pair_id * elem_size + elem_size);
+            if (cmp_result > 0)
+                {
+                byte_swap (arr + pair_id * elem_size, arr + (pair_id + 1) * elem_size, elem_size);
+                }
+            }
+        }
+    }
+
+line_buf* get_strings (char* file_name, size_t* lines_num)
+    {
+    assert (file_name != NULL);
+    assert (lines_num != NULL);
+
+    size_t file_size = -1;
+
+    char* buffer = read_to_buffer (file_name, &file_size);
+
     put_zeros (buffer, file_size);
 
-    *correct_lines = count_correct_lines (buffer, file_size);
+    *lines_num = count_correct_lines (buffer, file_size);
 
-    struct beg_end_ptr* line_ptrs = (beg_end_ptr*) calloc (*correct_lines, sizeof (beg_end_ptr));
+    line_buf* line_ptrs = (line_buf*) elephant_calloc (*lines_num, sizeof (line_buf));
 
     char* cur_pos = buffer;
     size_t cur_line = 0;
 
-    while (cur_line < *correct_lines)
+    while (cur_line < *lines_num)
         {
         char* str_end = find_char (cur_pos, '\0');
         if (!is_empty_line (cur_pos))
             {
-            format_line (cur_pos, &line_ptrs[cur_line]);
+            line_ptrs[cur_line].beg_ptr = cur_pos;
+            line_ptrs[cur_line].end_ptr = str_end;
 
             cur_line++;
             }
@@ -291,4 +339,3 @@ struct beg_end_ptr* prepare_data (char* const buffer, size_t file_size, size_t* 
 
     return line_ptrs;
     }
-

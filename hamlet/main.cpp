@@ -2,42 +2,40 @@
 #include <stdlib.h>
 #include "..\hamlet_dynamic_proc\string_funk.h"
 #include "..\hamlet_dynamic_proc\d_hamlet_functions.h"
+#include "..\..\..\memory_free\elephant_calloc_extern.h"
 
 int main()
     {
-    // Read raw data to buffer
-    char* buffer = NULL;
-    size_t file_size = -1;
-    char file_name[] = "hamlet.txt";
+    struct line_buf* line_ptrs = NULL;
+    size_t lines_num = 0;
+    char* file_name = "hamlet.txt";
 
-    buffer = read_to_buffer (file_name, &file_size);
+    line_ptrs = get_strings (file_name, &lines_num);
 
-    // Fill structure with pointers to formatted data
-    size_t correct_lines = -1;
-    struct beg_end_ptr* line_ptrs = NULL;
+    prepare_data (line_ptrs, lines_num);
 
-    line_ptrs = prepare_data (buffer, file_size, &correct_lines);
-
-
-    // Sort straightly and write
-    qsort (line_ptrs, correct_lines, sizeof (beg_end_ptr), &struct_cmp_reversed_line);
-
-    write_sort_to_file ("pit/reversed_sorted_hamlet.txt", correct_lines, line_ptrs);
-
+    line_buf* origin_lines = copy_line_buf (line_ptrs, lines_num);
 
     // Sort reversely and write
-    qsort (line_ptrs, correct_lines, sizeof (beg_end_ptr), &struct_cmp_beg_ptr);
+    qsort (line_ptrs, lines_num, sizeof (line_buf), &compare_line_reverse);
 
-    write_sort_to_file ("pit/straight_sorted_hamlet.txt", correct_lines, line_ptrs);
+    write_line_buf_to_file ("pit/reversed_sorted_hamlet.txt", lines_num, line_ptrs);
 
+    // Sort "zato svoe"
+    bubble_sort (line_ptrs,  lines_num, sizeof (line_buf), &compare_line_straight);
+
+    write_line_buf_to_file ("pit/rukami.txt", lines_num, line_ptrs);
+
+    // Sort straightly and write
+    qsort (line_ptrs, lines_num, sizeof (line_buf), &compare_line_straight);
+
+    write_line_buf_to_file ("pit/straight_sorted_hamlet.txt", lines_num, line_ptrs);
 
     // Origin text write
-    write_buffer_to_file ("pit/true_hamlet.txt", buffer, file_size);
-
+    write_line_buf_to_file ("pit/origin.txt", lines_num, origin_lines);
 
     // Free memory
-    free (buffer);
-    free (line_ptrs);
+    memory_free ();
 
     return 0;
     }

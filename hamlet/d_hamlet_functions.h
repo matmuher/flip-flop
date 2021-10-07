@@ -14,11 +14,10 @@ enum LOGIC
     TRUE = 1
     };
 
-
 /*!
 @brief struct that should contain pointers to begin and end of line
 */
-struct beg_end_ptr
+struct line_buf
         {
         char* beg_ptr;
         char* end_ptr;
@@ -69,22 +68,22 @@ int is_empty_line (const char* str);
 
 /*!
 @brief Compares strings (which addresses are stored in\n
-       beg_ptr elements of structure) in lexicographical order from begin
+       elements of line structure) from begin in lexicographical order
 */
-int struct_cmp_beg_ptr (const void* first_ptr_void,const void* second_ptr_void);
+int compare_line_straight (const void* first_line_void,const void* second_line_void);
 
 
 /*!
 @brief Compares strings (which addresses are stored in\n
-       beg_ptr elements of structure) in lexicographical order from end
+    elements of line structure) from end in lexicographical order
 */
-int struct_cmp_reversed_line (const void* first_ptr_void, const void* second_ptr_void);
+int compare_line_reverse (const void* first_line_void, const void* second_line_void);
 
 
 /*!
 @brief Prepares line for correct sorting
 */
-char* format_line (char* line, beg_end_ptr* line_ptrs);
+char* format_line (char* line, line_buf* line_ptrs);
 
 
 /*!
@@ -92,16 +91,55 @@ char* format_line (char* line, beg_end_ptr* line_ptrs);
 */
 void print_s_in_digs (char* str);
 
+/*!
+@brief Silly byte swap
+*/
+void byte_swap (void* first, void* second, size_t element_size);
 
-// One-project functions
-struct beg_end_ptr* prepare_data (char* const buffer, size_t file_size, size_t* correct_lines);
+/*!
+@brief Formats lines from line_buf structure object
+       to ignore punctuation in the begin and in the end
+*/
+line_buf* prepare_data (line_buf* line_ptrs, size_t lines_num);
 
-void write_sort_to_file (const char* file_name, int correct_lines, const beg_end_ptr* line_ptrs);
+/*!
+@brief Get lines_num lines from file, package it in line_buf structure object
+@details get_strings calls elephant_calloc for better memory allocation,\n
+         elephant_calloc_extert.h must be included
+         and elephant_calloc.cpp must be included to the project.\n\n
+         As memory was allocated:\n
+         [YOU SHOULD USE MEMORY_FREE FUNCTION WHEN FINISH USING LINES]
+@params[in] *lines_num pointer to variable where number of lines will be written
+@params[out] lines_num number_of_lines
+@return pointer to line_buf structure object with with written lines
+*/
+line_buf* get_strings (char* file_name, size_t* lines_num);
 
-void write_buffer_to_file (const char* const file_name, char* const buffer, size_t file_size);
+/*!
+@brief Write line_buf to file
+*/
+void write_line_buf_to_file (const char* file_name, int correct_lines, const line_buf* line_ptrs);
 
+/*!
+@brief Copies line_buf structure object
+*/
+line_buf* copy_line_buf (line_buf* origin, size_t lines_num);
+
+/*!
+@brief Replace '\n' with '\0' in buffer
+       Adds '\0' in the end
+*/
 void put_zeros (char* const buffer, size_t file_size);
 
+/*!
+@brief Count not empty lines
+*/
 int count_correct_lines (char* const buffer, size_t file_size);
+
+/*!
+@brief Literally bubble sort. My first sorting algorithm!
+*/
+void bubble_sort (void* arr,  size_t arr_size, size_t elem_size, int (*compar)(const void *, const void*));
+
 
 #endif // D_HAMLET_FUNCTIONS_H_INCLUDED

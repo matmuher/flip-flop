@@ -1,21 +1,42 @@
 #include "string_funk.h"
 
 
-int string_cmp (char left_str[], char right_str[])
+int string_compare (char* left_start, char* left_end,
+                    char* right_start, char* right_end, const int shift)
     {
-    assert (left_str != NULL);
-    assert (right_str != NULL);
-
-    while ((*left_str == *right_str) &&
-           (*left_str != '\0') && (*right_str != '\0'))
+    // make function for pointer several pointers null check
+    // with variable num of args
+    assert (left_start != NULL);
+    assert (left_end != NULL);
+    assert (right_start != NULL);
+    assert (right_end != NULL);
+    assert (shift * shift == 1);
+    if (shift == -1)
         {
-        left_str++;
-        right_str++;
+        // make function assert + print
+        assert ("If shift = 1 must be" && left_start >= left_end);
+        assert ("If shift = 1 must be" && right_start >= right_end);
+        }
+    else if (shift == 1)
+        {
+        assert ("If shift = -1 must be" && left_start <= left_end);
+        assert ("If shift = -1 must be" && right_start <= right_end);
         }
 
-    return *left_str - *right_str;
-    }
 
+    while (*left_start == *right_start)
+        {
+        if (left_start == left_end || right_start == right_end)
+            {
+            break;
+            }
+
+        left_start = left_start + shift;
+        right_start = right_start + shift;
+        }
+
+    return *left_start - *right_start;
+    }
 
 int say (const char str[])
     {
@@ -37,23 +58,16 @@ char* find_char (const char str[], char chr)
     {
     assert (str != NULL);
 
-    while (*str != '\0')
+    while (*str != chr)
         {
-        if (*str == chr)
+        if (*str == '\0')
             {
-            return (char*) str;
+            return NULL;
             }
         str++;
         }
-    // After "while" execution, str will contain
-    // adress of '\0' i.e. end of string
-    if (chr == '\0')
-        {
-        return (char*) str;
-        }
 
-    // There is no symbol in line:(
-    return NULL;
+    return (char*) str;
     }
 
 
@@ -69,17 +83,13 @@ char* fget_string (char str[], int n, FILE* file_pointer)
 
     char* str_beggining = str;
 
-    while (LOOP)
+    for (int char_id = 0; char_id < n; char_id++)
         {
-        if (( (*str  = getc (file_pointer)) == '\n' ))
+        if ((*str  = getc (file_pointer)) == '\n')
             {
             break;
             }
-        else if ((*str != EOF) && *str)
-            {
-            break;
-            }
-        else if (!--n)
+        else if ((*str == EOF) || (*str == '\0'))
             {
             break;
             }
@@ -138,7 +148,7 @@ int string_len (const char str[])
 
     int len = 0;
 
-    len = (int)(find_char (str, '\0') - str);
+    len = (int) (find_char (str, '\0') - str);
 
     return len;
     }
@@ -155,64 +165,4 @@ char* string_stick (char destination[], char source[])
     string_copy (destination_end, source);
 
     return destination;
-    }
-
-int string_cmp_ext (const char* str_1, const char* str_2, int shift)
-    {
-    assert (str_1 != NULL);
-    assert (str_2 != NULL);
-    assert (shift != ZERO_SHIFT);
-    // Works only with shift = {-1, 1}
-    assert (shift * shift == 1);
-
-    if (shift > 0)
-        {
-        while (LOOP)
-            {
-            // str_1 end
-            if (*str_1)
-                {
-                break;
-                }
-            // str_2 end
-            else if (*str_2)
-                {
-                break;
-                }
-            // chars are not equal
-            else if (*str_1 != *str_2)
-                {
-                break;
-                }
-
-            str_1++;
-            str_2++;
-            }
-
-        return *str_1 - *str_2;
-        }
-
-    char* str_1_end = find_char (str_1, '\0');
-    char* str_2_end = find_char (str_2, '\0');
-
-    while (LOOP)
-        {
-        if (str_1_end == str_1)
-            {
-            break;
-            }
-        else if (str_2_end == str_2)
-            {
-            break;
-            }
-        else if (*str_2_end != *str_1_end)
-            {
-            break;
-            }
-
-        str_1_end--;
-        str_2_end--;
-        }
-
-    return *str_1_end - *str_2_end;
     }
