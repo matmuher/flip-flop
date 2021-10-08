@@ -81,15 +81,12 @@ int find_stock (int cur_size);
 @brief Adds element to stk
 @details stk dynamically expands due to find_stock function:\n
         [grosse] [capacity]\n
-            1       1\n
+            1       2\n
             2       4\n
-            3       8\n
-            4       8\n
+            3       4\n
+            4       4\n
             5       8\n
             6       8\n
-                ...  \n
-            9       16\n
-                etc\n
 */
 void stack_push (stack* stk, int value, FILE* log);
 
@@ -101,10 +98,10 @@ void stack_push (stack* stk, int value, FILE* log);
             [grosse] [capacity]\n
                 6       8\n
                 5       8\n
-                4       4\n
-                3       4\n
+                4       8\n
+                3       8\n
                 2       4\n
-                1       2\n
+                1       1\n
 */
 int stack_pop (stack* stk, FILE* log);
 
