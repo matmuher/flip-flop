@@ -162,7 +162,7 @@ int find_stock (int cur_size)
 
     while (cur_size != 0)
         {
-        stock = stock*2;
+        stock = stock * 2;
         cur_size = cur_size / 2;
         }
 
@@ -182,14 +182,15 @@ void stack_push (stack* stk, int value, FILE* log)
         {
         stk->capacity = find_stock (stk->grosse);
         stk->data = (int*) realloc (stk->data, stk->capacity * sizeof (int));
-        event.is_capacity_change = 1;
-
+        event.is_capacity_change = HAPPENED;
+        
+        // Clear tales (chistim hvosty)
         for (size_t element_id = stk->grosse; element_id < stk->capacity; element_id++)
             {
             stk->data[element_id] = POISON;
             }
-        // clear tales (chistim hvosty)
         }
+    
     // Push value
     stk->data[stk->grosse - 1] = value;
 
@@ -225,7 +226,6 @@ void stack_dtor (stack* stk, FILE* log)
 
     event.dctor = HAPPENED;
     stack_verify (stk, log);
-    puts ("BUNT!");
 
     // Poison stack
     for (size_t element_id = 0; element_id < stk->capacity; element_id++)
