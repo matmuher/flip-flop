@@ -1,0 +1,7 @@
+*.save
+*.cbp
+*.depend
+*.layout
+*.html
+/bin
+/obj
