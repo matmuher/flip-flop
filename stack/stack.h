@@ -11,8 +11,14 @@ struct
         nothing_to_pop : 1,
         invalid_size : 1,
         invalid_capacity : 1,
-        bad_data_ptr : 1,
-        bad_stack_ptr : 1;
+        bad_capacity_ptr : 1,
+        bad_stack_ptr : 1,
+        stack_is_destroyed : 1,
+        bad_struc_left_canary : 1,
+        bad_struc_right_canary : 1,
+        bad_values_left_canary : 1,
+        bad_values_right_canary : 1,
+        bad_hash : 1;
     } ERROR_ID = {};
 
 /*!
@@ -30,6 +36,7 @@ enum EVENT
 struct
     {
     unsigned int
+        ctor : 1,
         push : 1,
         pop : 1,
         is_capacity_change : 1,
@@ -44,9 +51,13 @@ struct
 */
 struct stack
     {
+    double left_struct_canary;
     int* data;
+    int* capacity_ptr;
+    int stack_hash;
     int grosse;
     int capacity;
+    double right_struct_canary;
     };
 
 const int POISON = 0xDEADDEAD; ///< Value that marks non-valid elements
@@ -66,6 +77,8 @@ void stack_ctor (stack* stk);
 @brief Check is stk a valid stack
 */
 void stack_verify (stack* stk, FILE* log);
+
+int get_stack_hash (stack* stk);
 
 /*!
 @brief Prints information about stack and current operation in log file
@@ -109,5 +122,7 @@ int stack_pop (stack* stk, FILE* log);
 @brief Poisons stk and free allocated memory
 */
 void stack_dtor (stack* stk, FILE* log);
+
+void proniknovenie_v_stack ();
 
 #endif // STACK_H_INCLUDED

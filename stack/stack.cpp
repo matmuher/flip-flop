@@ -2,8 +2,12 @@
 #include <assert.h>
 #include <windows.h>
 #include <winbase.h>
-#include "..\encyclopedia of dutch life\Encyclopedia\hamlet_dynamic_proc\string_funk.h"
+#include "..\strings\string_funk.h"
 #include "stack.h"
+
+typedef double canary_type;
+
+canary_type CANARY = 0xBAADF00D;
 
 
 void stack_ctor (stack* stk)
@@ -11,14 +15,22 @@ void stack_ctor (stack* stk)
     assert (!IsBadReadPtr (stk, sizeof (stack)));
     // provide stack's innocence
     stk->data = NULL;
+    stk->capacity_ptr = NULL;
     stk->grosse = 0;
     stk->capacity = 0;
+    stk->left_struct_canary = CANARY;
+    stk->right_struct_canary = CANARY;
+    stk->stack_hash = get_stack_hash (stk);
+
+    event.ctor = TRUE;
     }
 
 
 void stack_verify (stack* stk, FILE* log)
     {
     assert (!IsBadReadPtr (log, TRY_LOG));
+    assert (event.ctor == TRUE);
+    assert (ERROR_ID.stack_is_destroyed == FALSE);
 
     if (IsBadReadPtr (stk, sizeof (stack)))
         {
@@ -43,13 +55,50 @@ void stack_verify (stack* stk, FILE* log)
             ERROR_ID.invalid_capacity = TRUE;
             }
 
-        if (IsBadReadPtr (stk->data, stk->capacity * sizeof (int)))
+        // Structure: canary check
+        if (stk->left_struct_canary != CANARY)
             {
-            ERROR_ID.bad_data_ptr = TRUE;
+            ERROR_ID.bad_struc_left_canary = TRUE;
+            }
+        if (stk->right_struct_canary != CANARY)
+            {
+            ERROR_ID.bad_struc_right_canary = TRUE;
+            }
+
+        // Values array check
+        if (IsBadReadPtr (stk->capacity_ptr,
+                         stk->capacity * sizeof (int) + 2 * sizeof (canary_type)))
+            {
+            ERROR_ID.bad_capacity_ptr = TRUE;
             }
         else
             {
-            ERROR_ID.bad_data_ptr = FALSE;
+            ERROR_ID.bad_capacity_ptr = FALSE;
+
+            // Values array: canary check
+            if (*((canary_type*) stk->capacity_ptr) != CANARY)
+                {
+                ERROR_ID.bad_values_left_canary = TRUE;
+                }
+            if (*((canary_type*)((char*) stk->data + stk->capacity * sizeof (int))) != CANARY)
+                {
+                ERROR_ID.bad_values_right_canary = TRUE;
+                }
+
+            // Check hash
+            if (event.push || event.pop || event.dctor)
+                {
+                int cur_hash = get_stack_hash (stk);
+
+                if (cur_hash != stk->stack_hash)
+                    {
+                    ERROR_ID.bad_hash = TRUE;
+                    }
+                }
+            else
+                {
+                stk->stack_hash = get_stack_hash (stk);
+                }
             }
         }
 
@@ -67,12 +116,12 @@ void stack_dump (stack* stk, FILE* log)
     // Is stack readable?
     if (ERROR_ID.bad_stack_ptr == FALSE)
         {
-        // Type info about stk elements
-        fprintf (log, " size: %d, capacity: %d, data [%p]:\n",
-                 stk->grosse, stk->capacity, stk->data);
+        // Type info about stk structure elements
+        fprintf (log, " size: %d, capacity [%p]: %d, data [%p]:\n",
+                 stk->grosse, stk->capacity_ptr, stk->capacity, stk->data);
 
-        // Type data content
-        if (ERROR_ID.bad_data_ptr == FALSE)
+        // Type values array content
+        if (ERROR_ID.bad_capacity_ptr == FALSE)
             {
             fputs ("\t{\n", log);
             for (int element_id = 0; element_id < stk->capacity; element_id++)
@@ -88,7 +137,6 @@ void stack_dump (stack* stk, FILE* log)
                 }
             fputs ("\t}\n", log);
             }
-
         // What function was called?:
         if (event.push == HAPPENED)
             {
@@ -112,9 +160,34 @@ void stack_dump (stack* stk, FILE* log)
             fprintf (log, " // Capacity changed to %d //\n", stk->capacity);
             event.is_capacity_change = 0;
             }
+
+        // Canaries are ok?
+        if (ERROR_ID.bad_struc_left_canary == TRUE)
+            {
+            fputs ("@ Structure: LEFT ATTACK! (ptichku jalko) @\n", log);
+            }
+        if (ERROR_ID.bad_struc_right_canary == TRUE)
+            {
+            fputs ("@ Structure: RIGHT ATTACK! (ptichku jalko) @\n", log);
+            }
+
+        if (ERROR_ID.bad_values_left_canary == TRUE)
+            {
+            fputs ("@@ Values array: LEFT ATTACK! (ptichku jalko) @@\n", log);
+            }
+        if (ERROR_ID.bad_values_right_canary == TRUE)
+            {
+            fputs ("@@ Values array: RIGHT ATTACK! (ptichku jalko) @@\n", log);
+            }
+
+        // Hash is ok?
+        if (ERROR_ID.bad_hash == TRUE)
+            {
+            fputs ("# Hash is broken #\n", log);
+            }
         }
 
-    fputs ("__Erros__:\n", log);
+    fputs ("\tErros:\n", log);
 
     if (ERROR_ID.bad_stack_ptr == TRUE)
         {
@@ -131,9 +204,9 @@ void stack_dump (stack* stk, FILE* log)
             {
             fputs ("[ERROR] INVALID STACK CAPACITY\n", log);
             }
-        if (ERROR_ID.bad_data_ptr == TRUE)
+        if (ERROR_ID.bad_capacity_ptr == TRUE)
             {
-            fputs ("[WARNING] DATA POINTER IS LOCKED\n", log);
+            fputs ("[WARNING] CAPACITY POINTER IS LOCKED\n", log);
             assert (!IsBadReadPtr (stk->data, stk->capacity * sizeof (int)));
             }
         if (ERROR_ID.overflow == TRUE)
@@ -148,6 +221,8 @@ void stack_dump (stack* stk, FILE* log)
 
     fprint_line (log, '-', DELIMITER_LEN);
     fputc ('\n', log);
+
+    fflush (log);
     }
 
 
@@ -181,16 +256,27 @@ void stack_push (stack* stk, int value, FILE* log)
     if (stk->grosse > stk->capacity)
         {
         stk->capacity = find_stock (stk->grosse);
-        stk->data = (int*) realloc (stk->data, stk->capacity * sizeof (int));
+
+
+        stk->capacity_ptr = (int*) realloc (stk->capacity_ptr,
+                                            stk->capacity * sizeof (int) + 2 * sizeof (canary_type));
+
+        stk->data = (int*) ((char*) stk->capacity_ptr + sizeof (canary_type));
+
         event.is_capacity_change = HAPPENED;
-        
-        // Clear tales (chistim hvosty)
+
+        // Set first canary
+        *((canary_type*) stk->capacity_ptr) = CANARY;
+        // Set second canary
+        *((canary_type*) (stk->data + stk->capacity)) = CANARY;
+
+        // Clear tales (chistim hvosty (poison trash-memory))
         for (size_t element_id = stk->grosse; element_id < stk->capacity; element_id++)
             {
             stk->data[element_id] = POISON;
             }
         }
-    
+
     // Push value
     stk->data[stk->grosse - 1] = value;
 
@@ -210,8 +296,17 @@ int stack_pop (stack* stk, FILE* log)
     if (stk->grosse <= stk->capacity / 4) // shifted decrease
         {
         stk->capacity = stk->capacity / 2;
-        stk->data = (int*) realloc (stk->data, (stk->capacity) * sizeof (int));
+        stk->capacity_ptr = (int*) realloc (stk->capacity_ptr,
+                                            stk->capacity * sizeof (int) + 2 * sizeof (canary_type));
+
+        stk->data = (int*) ((char*) stk->capacity_ptr + sizeof (canary_type));
+
         event.is_capacity_change = 1;
+
+        // Set first canary
+        *((canary_type*) stk->capacity_ptr) = CANARY;
+        // Set second canary
+        *((canary_type*) ((char*) stk->data + stk->capacity * sizeof (int))) = CANARY;
         }
 
     stack_verify (stk, log);
@@ -232,8 +327,27 @@ void stack_dtor (stack* stk, FILE* log)
         {
         stk->data[element_id] = POISON;
         }
+
+    free (stk->capacity_ptr);
+
     stk->grosse = 0;
-    free (stk->data);
     stk->data = (int*) POISON;
+    stk->capacity_ptr = (int*) POISON;
     stk = (stack*) POISON;
+
+    ERROR_ID.stack_is_destroyed = TRUE;
+    // Kak obnulit ERROR_IDS structure?
+    }
+
+int get_stack_hash (stack* stk)
+    {
+    int stack_hash = 0;
+    int seed = 1799;
+
+    for (int element_id = 0; element_id < stk->grosse; element_id ++)
+        {
+        stack_hash = stk->data[element_id] * seed + stack_hash + element_id + stk->grosse + stk->capacity;
+        }
+
+    return stack_hash;
     }
