@@ -3,5 +3,3 @@
 *.depend
 *.layout
 *.html
-/bin
-/obj
