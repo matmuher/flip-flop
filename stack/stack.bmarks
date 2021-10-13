@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <BrowseTracker_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="main.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="5836" topLine="181" />
+	<File name="stack.h" open="1" top="0" tabpos="2">
+		<Cursor position="76" topLine="0" />
+		<BrowseMarks positions="1487" />
+		<Book_Marks positions="" />
+	</File>
+	<File name="torture_room.cpp" open="1" top="0" tabpos="4">
+		<Cursor position="701" topLine="22" />
 		<BrowseMarks positions="" />
 		<Book_Marks positions="" />
 	</File>
-	<File name="stack.cpp" open="1" top="0" tabpos="0">
-		<Cursor position="0" topLine="0" />
-		<BrowseMarks positions="1814,6091,8175" />
+	<File name="main.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="43" topLine="0" />
+		<BrowseMarks positions="" />
 		<Book_Marks positions="" />
 	</File>
-	<File name="stack.h" open="1" top="0" tabpos="2">
-		<Cursor position="429" topLine="8" />
+	<File name="stack.cpp" open="1" top="1" tabpos="3">
+		<Cursor position="868" topLine="93" />
 		<BrowseMarks positions="" />
 		<Book_Marks positions="" />
 	</File>

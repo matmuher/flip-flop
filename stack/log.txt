@@ -1,57 +1,58 @@
 ------------------------------
-stack <int> [0064FE80]
+stack <int> [0064FE88]
  size: 0, capacity [00000000]: 0, data [00000000]:
+	{
+	}
 *Start push*
-	Erros:
-[WARNING] CAPACITY POINTER IS LOCKED
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 1, capacity [00930D70]: 2, data [00930D78]:
+stack <int> [0064FE88]
+ size: 1, capacity [00712C98]: 2, data [00712C98]:
 	{
 	data[0] = 1;
 	data[1] = POISONED;
 	}
  // Capacity changed to 2 //
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 1, capacity [00930D70]: 2, data [00930D78]:
+stack <int> [0064FE88]
+ size: 1, capacity [00712C98]: 2, data [00712C98]:
 	{
 	data[0] = 1;
 	data[1] = POISONED;
 	}
 *Start push*
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 2, capacity [00930D70]: 2, data [00930D78]:
+stack <int> [0064FE88]
+ size: 2, capacity [00712C98]: 2, data [00712C98]:
 	{
 	data[0] = 1;
 	data[1] = 2;
 	}
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 2, capacity [00930D70]: 2, data [00930D78]:
+stack <int> [0064FE88]
+ size: 2, capacity [00712C98]: 2, data [00712C98]:
 	{
 	data[0] = 1;
 	data[1] = 2;
 	}
 *Start push*
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 3, capacity [00930D70]: 4, data [00930D78]:
+stack <int> [0064FE88]
+ size: 3, capacity [00710D70]: 4, data [00710D70]:
 	{
 	data[0] = 1;
 	data[1] = 2;
@@ -59,12 +60,12 @@ stack <int> [0064FE80]
 	data[3] = POISONED;
 	}
  // Capacity changed to 4 //
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 3, capacity [00930D70]: 4, data [00930D78]:
+stack <int> [0064FE88]
+ size: 3, capacity [00710D70]: 4, data [00710D70]:
 	{
 	data[0] = 1;
 	data[1] = 2;
@@ -72,24 +73,24 @@ stack <int> [0064FE80]
 	data[3] = POISONED;
 	}
 *Start push*
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 4, capacity [00930D70]: 4, data [00930D78]:
+stack <int> [0064FE88]
+ size: 4, capacity [00710D70]: 4, data [00710D70]:
 	{
 	data[0] = 1;
 	data[1] = 2;
 	data[2] = 3;
 	data[3] = 4;
 	}
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 4, capacity [00930D70]: 4, data [00930D78]:
+stack <int> [0064FE88]
+ size: 4, capacity [00710D70]: 4, data [00710D70]:
 	{
 	data[0] = 1;
 	data[1] = 2;
@@ -97,12 +98,12 @@ stack <int> [0064FE80]
 	data[3] = 4;
 	}
 *Start push*
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 5, capacity [00930D70]: 8, data [00930D78]:
+stack <int> [0064FE88]
+ size: 5, capacity [00710D70]: 8, data [00710D70]:
 	{
 	data[0] = 1;
 	data[1] = 2;
@@ -114,12 +115,12 @@ stack <int> [0064FE80]
 	data[7] = POISONED;
 	}
  // Capacity changed to 8 //
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 5, capacity [00930D70]: 8, data [00930D78]:
+stack <int> [0064FE88]
+ size: 5, capacity [00710D70]: 8, data [00710D70]:
 	{
 	data[0] = 1;
 	data[1] = 2;
@@ -131,12 +132,12 @@ stack <int> [0064FE80]
 	data[7] = POISONED;
 	}
 *Start push*
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 6, capacity [00930D70]: 8, data [00930D78]:
+stack <int> [0064FE88]
+ size: 6, capacity [00710D70]: 8, data [00710D70]:
 	{
 	data[0] = 1;
 	data[1] = 2;
@@ -147,12 +148,12 @@ stack <int> [0064FE80]
 	data[6] = POISONED;
 	data[7] = POISONED;
 	}
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 6, capacity [00930D70]: 8, data [00930D78]:
+stack <int> [0064FE88]
+ size: 6, capacity [00710D70]: 8, data [00710D70]:
 	{
 	data[0] = 1;
 	data[1] = 2;
@@ -164,12 +165,12 @@ stack <int> [0064FE80]
 	data[7] = POISONED;
 	}
 *Start push*
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 7, capacity [00930D70]: 8, data [00930D78]:
+stack <int> [0064FE88]
+ size: 7, capacity [00710D70]: 8, data [00710D70]:
 	{
 	data[0] = 1;
 	data[1] = 2;
@@ -180,216 +181,14 @@ stack <int> [0064FE80]
 	data[6] = 7;
 	data[7] = POISONED;
 	}
-	Erros:
+[Erros-Bip-Bop]
 ------------------------------
 
 ------------------------------
-stack <int> [0064FE80]
- size: 7, capacity [00930D70]: 8, data [00930D78]:
-	{
-	data[0] = 1;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	data[4] = 5;
-	data[5] = 6;
-	data[6] = 7;
-	data[7] = POISONED;
-	}
+stack <int> [0064FE88]
+ size: 7, capacity [00710D70]: 8, data [00000004]:
 *Start pop*
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-	Erros:
-------------------------------
-
-------------------------------
-stack <int> [0064FE80]
- size: 6, capacity [00930D70]: 8, data [00930D78]:
-	{
-	data[0] = 1;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	data[4] = 5;
-	data[5] = 6;
-	data[6] = 7;
-	data[7] = POISONED;
-	}
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-	Erros:
-------------------------------
-
-------------------------------
-stack <int> [0064FE80]
- size: 6, capacity [00930D70]: 8, data [00930D78]:
-	{
-	data[0] = 1;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	data[4] = 5;
-	data[5] = 6;
-	data[6] = 7;
-	data[7] = POISONED;
-	}
-*Start pop*
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-@ Structure: RIGHT ATTACK! (ptichku jalko) @
-	Erros:
-------------------------------
-
-------------------------------
-stack <int> [0064FE80]
- size: 5, capacity [00930D70]: 8, data [00930D78]:
-	{
-	data[0] = 1;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	data[4] = 5;
-	data[5] = 6;
-	data[6] = 7;
-	data[7] = POISONED;
-	}
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-@ Structure: RIGHT ATTACK! (ptichku jalko) @
-	Erros:
-------------------------------
-
-------------------------------
-stack <int> [0064FE80]
- size: 5, capacity [00930D70]: 8, data [00930D78]:
-	{
-	data[0] = 1;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	data[4] = 5;
-	data[5] = 6;
-	data[6] = 7;
-	data[7] = POISONED;
-	}
-*Start pop*
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-@ Structure: RIGHT ATTACK! (ptichku jalko) @
-@@ Values array: LEFT ATTACK! (ptichku jalko) @@
-	Erros:
-------------------------------
-
-------------------------------
-stack <int> [0064FE80]
- size: 4, capacity [00930D70]: 8, data [00930D78]:
-	{
-	data[0] = 1;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	data[4] = 5;
-	data[5] = 6;
-	data[6] = 7;
-	data[7] = POISONED;
-	}
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-@ Structure: RIGHT ATTACK! (ptichku jalko) @
-@@ Values array: LEFT ATTACK! (ptichku jalko) @@
-	Erros:
-------------------------------
-
-------------------------------
-stack <int> [0064FE80]
- size: 4, capacity [00930D70]: 8, data [00930D78]:
-	{
-	data[0] = 1;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	data[4] = 5;
-	data[5] = 6;
-	data[6] = 7;
-	data[7] = POISONED;
-	}
-*Start pop*
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-@ Structure: RIGHT ATTACK! (ptichku jalko) @
-@@ Values array: LEFT ATTACK! (ptichku jalko) @@
-@@ Values array: RIGHT ATTACK! (ptichku jalko) @@
-	Erros:
-------------------------------
-
-------------------------------
-stack <int> [0064FE80]
- size: 3, capacity [00930D70]: 8, data [00930D78]:
-	{
-	data[0] = 1;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	data[4] = 5;
-	data[5] = 6;
-	data[6] = 7;
-	data[7] = POISONED;
-	}
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-@ Structure: RIGHT ATTACK! (ptichku jalko) @
-@@ Values array: LEFT ATTACK! (ptichku jalko) @@
-@@ Values array: RIGHT ATTACK! (ptichku jalko) @@
-	Erros:
-------------------------------
-
-------------------------------
-stack <int> [0064FE80]
- size: 3, capacity [00930D70]: 8, data [00930D78]:
-	{
-	data[0] = 1441793;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	data[4] = 5;
-	data[5] = 6;
-	data[6] = 7;
-	data[7] = POISONED;
-	}
-*Start pop*
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-@ Structure: RIGHT ATTACK! (ptichku jalko) @
-@@ Values array: LEFT ATTACK! (ptichku jalko) @@
-@@ Values array: RIGHT ATTACK! (ptichku jalko) @@
-# Hash is broken #
-	Erros:
-------------------------------
-
-------------------------------
-stack <int> [0064FE80]
- size: 2, capacity [00930D70]: 4, data [00930D78]:
-	{
-	data[0] = 1441793;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	}
- // Capacity changed to 4 //
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-@ Structure: RIGHT ATTACK! (ptichku jalko) @
-@@ Values array: LEFT ATTACK! (ptichku jalko) @@
-@@ Values array: RIGHT ATTACK! (ptichku jalko) @@
-# Hash is broken #
-	Erros:
-------------------------------
-
-------------------------------
-stack <int> [0064FE80]
- size: 2, capacity [00930D70]: 4, data [00930D78]:
-	{
-	data[0] = 1441793;
-	data[1] = 2;
-	data[2] = 3;
-	data[3] = 4;
-	}
-*Destructor happened*
-@ Structure: LEFT ATTACK! (ptichku jalko) @
-@ Structure: RIGHT ATTACK! (ptichku jalko) @
-@@ Values array: LEFT ATTACK! (ptichku jalko) @@
-@@ Values array: RIGHT ATTACK! (ptichku jalko) @@
-# Hash is broken #
-	Erros:
+[Erros-Bip-Bop]
+[WARNING] DATA POINTER IS LOCKED
 ------------------------------
 

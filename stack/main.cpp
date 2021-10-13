@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "stack.h"
+#include "stack_torture.h"
 
 int main()
     {
