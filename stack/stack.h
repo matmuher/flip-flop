@@ -141,7 +141,7 @@ void stack_push (stack* stk, int value);
 
 /*!
 @brief Adds element to stk
-@details stk dynamically expands due to find_stock function with shift
+@details stk dynamically decreases due to find_stock function with shift
          to prevent frequent memory reallocation:
             [grosse] [capacity]\n
                 6       8\n
