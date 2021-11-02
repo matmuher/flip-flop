@@ -1,0 +1,158 @@
+#ifndef PROCESSOR_H_INCLUDED
+#define PROCESSOR_H_INCLUDED
+
+
+#include "..\strings\string_funk.h"
+#include "..\stack\stack.h"
+#include "..\hamlet\d_hamlet_functions.h"
+#include "..\square_solver\beer_equation.h"
+
+
+// Undefined behavior if both 0, or both 1
+#define RUCHNIK 1 //-> switch ASM value below, if all files in codeblocks project
+#define AVTOMAT 0 //-> use maker.bat
+
+
+#if RUCHNIK
+#define ASM 0    // 1 to compile asma.cpp, 0 to compile proc.cpp
+#define PROC
+
+
+#if ASM
+#undef PROC
+#else
+#undef ASM
+#endif
+#endif
+
+
+#define DEF_CMD(name, id, args_num, code) cmd_##name = id,
+
+
+const int MAX_ARGS_NUM = 1;
+
+
+const int MY_SIGN = 'MM';
+
+
+const int CMD_MASK = 0x1F; // Is used to extract first 5 bytes of command code
+
+
+struct bin_info
+    {
+    size_t signature;
+    size_t bin_size;
+    size_t version;
+    };
+
+
+struct proc
+    {
+    stack stk;
+    size_t bin_size;
+    int* recipe;
+    int ip;
+    unsigned int hlt : 1;
+    FILE* prc_log;
+    int reg[4];
+    };
+
+
+enum cmd_enum
+    {
+    unknow_cmd = -1,
+    #include "cmd.h"
+    version,
+    };
+
+
+enum ARGS_NUM
+    {
+    ZERO_ARGS = 0,
+    ONE_ARG = 1,
+    TWO_ARGS = 2,
+    };
+
+
+// ASMA' FUNCTIONS
+
+
+/*!
+@brief Analyzes C-string and return command id
+*/
+int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers);
+
+
+/*!
+@brief Reads code into line_buf object
+*/
+line_buf* get_code (char* file_name, size_t* lines_num);
+
+
+/*!
+@brief Creates binary from code text file
+*/
+int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size);
+
+
+/*!
+@brief Write integer array to file
+*/
+void write_binary (int* binary, size_t bin_size);
+
+
+// PROC' COMMANDS
+
+
+void push (proc* prc, int val);
+
+
+int pop (proc* prc);
+
+
+void pop_arg (proc* prc, int arg);
+
+
+void add (proc* prc);
+
+
+void out (proc* prc);
+
+
+void hlt (proc* prc);
+
+
+void jump (proc* prc, size_t jump_to);
+
+
+void in (proc* prc);
+
+
+// PROC' SERVICE FUNCTIONS
+
+
+/*!
+@brief Establishes values for correct code execution
+*/
+void proc_ctor (proc* prc, size_t bin_size, int* cooking_list, FILE* log, FILE* prc_log);
+
+
+/*!
+@brief Dump proc to "proc_log.txt"
+*/
+void proc_dmp (proc* prc);
+
+
+/*!
+@brief Execute code from "code.txt"
+*/
+void doer (proc* prc);
+
+
+/*!
+@brief Execute exact command. Is called from doer ()
+*/
+void do_cmd (proc* prc, cmd_enum cmd);
+
+
+#endif // PROCESSOR_H_INCLUDED
