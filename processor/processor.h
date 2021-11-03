@@ -29,13 +29,19 @@
 #define DEF_CMD(name, id, args_num, code) cmd_##name = id,
 
 
-const int MAX_ARGS_NUM = 1;
-
-
 const int MY_SIGN = 'MM';
 
 
 const int CMD_MASK = 0x1F; // Is used to extract first 5 bytes of command code
+
+
+const int MAX_ARGS_NUM = 1, MAX_REG_NUM = 4, NON_VIDEO_RAM_SIZE = 10;
+
+
+const size_t VIDEO_WEEDTH = 7, VIDEO_HEIGHT = 7;
+
+
+const int RAM_SIZE = NON_VIDEO_RAM_SIZE + VIDEO_WEEDTH * VIDEO_HEIGHT;
 
 
 struct bin_info
@@ -54,7 +60,8 @@ struct proc
     int ip;
     unsigned int hlt : 1;
     FILE* prc_log;
-    int reg[4];
+    int reg[MAX_REG_NUM];
+    int ram[RAM_SIZE];
     };
 
 
@@ -110,9 +117,6 @@ void push (proc* prc, int val);
 int pop (proc* prc);
 
 
-void pop_arg (proc* prc, int arg);
-
-
 void add (proc* prc);
 
 
@@ -126,6 +130,9 @@ void jump (proc* prc, size_t jump_to);
 
 
 void in (proc* prc);
+
+
+void vm_show (proc* prc);
 
 
 // PROC' SERVICE FUNCTIONS

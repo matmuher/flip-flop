@@ -39,7 +39,5 @@ int main ()
     fclose (bin);
     fclose (log);
     fclose (prc_log);
-
-    stop_inst_console_close ();
     }
 #endif

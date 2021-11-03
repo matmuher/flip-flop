@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "processor.h"
-#include "proc_defines.cpp"
 #include <math.h>
 #undef NDEBUG
 #include <assert.h>
@@ -12,26 +11,42 @@
             prc->ip = prc->ip + args_num;\
             break;}
 
+/* karg definition is needed to avoid UB */
+/* with f.ex. ARG == POP + POP            */
 
-#define PUSH(ARG)                    \
-    int karg = ARG;                  \
-    if ((cmd & CMD_MASK) == cmd_push)\
-    {                                \
-    if (cmd & 0x20)                  \
-        {                            \
-        push (prc, karg);            \
-        }                            \
-    else if (cmd & 0x40)             \
-        {                            \
-        push (prc, prc->reg[karg]);  \
-        }                            \
-    }                                \
+
+#define PUSH(ARG)                     \
+    int karg = ARG;                   \
+    if ((cmd & CMD_MASK) == cmd_push)   \
+        {                                \
+        if (cmd & 0x20)                  \
+            {                            \
+            push (prc, karg);            \
+            }                            \
+        else if (cmd & 0x40)             \
+            {                            \
+            push (prc, prc->reg[karg]);  \
+            }                            \
+        else if (cmd & 0x80)             \
+            {                            \
+            push (prc, prc->ram[karg]);\
+            }                                                          \
+        }                                \
     else                             \
         {                            \
         push (prc, karg);            \
         }
 
-#define POPR(ARG) (pop_arg (prc, ARG))
+#define POPR(ARG)                                \
+    int warg = ARG;                              \
+    if (cmd & 0x40)                              \
+        {                                        \
+        prc->reg[warg] = POP;                     \
+        }                                        \
+    else if (cmd & 0x80)                         \
+        {                                        \
+        prc->ram[warg] = POP;\
+        }
 
 #define POP pop (prc)
 
@@ -48,6 +63,8 @@
 #define ARG1 prc->recipe[prc->ip]
 
 #define HLT hlt (prc)
+
+#define VM_SHOW vm_show (prc)
 
 
 #define LOG_NEW_LINE putc ('\n', prc->prc_log)
@@ -70,6 +87,11 @@ void proc_ctor (proc* prc, size_t bin_size, int* cooking_list, FILE* log, FILE* 
     for (int reg_id = 0; reg_id < 4; reg_id++)
         {
         prc->reg[reg_id] = 0;
+        }
+
+    for (size_t ram_id = 0; ram_id < RAM_SIZE; ram_id++)
+        {
+        prc->ram[ram_id] = 0;
         }
 
     puts ("START MASHINA!");
@@ -134,7 +156,22 @@ void hlt (proc* prc)
     {
     puts ("STOP MASHINA!");
 
+    stop_inst_console_close ();
+
     exit (EXIT_SUCCESS);
+    }
+
+void vm_show (proc* prc)
+    {
+    for (size_t y = 0; y < VIDEO_HEIGHT; y++)
+        {
+        for (size_t x = 0; x < VIDEO_WEEDTH; x++)
+            {
+            printf ("%d ", prc->ram[NON_VIDEO_RAM_SIZE + y * VIDEO_WEEDTH + x]);
+            }
+
+        putchar ('\n');
+        }
     }
 
 
@@ -185,8 +222,3 @@ void proc_dmp (proc* prc)
     LOG_NEW_LINE;
     }
 
-
-void pop_arg (proc* prc, int arg)
-    {
-    prc->reg[arg] = pop (prc);
-    }

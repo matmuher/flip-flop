@@ -24,6 +24,17 @@
                                                                              \
                     *begunok++ = markers[marker_id];                         \
                     }                                                        \
+                else if (str_arg[0] == '[')                                  \
+                    {                                                        \
+                    size_t ram_id = 0;                                       \
+                    if (!sscanf (str_arg, "[%d]", &ram_id))                  \
+                        {                                                    \
+                        printf ("%s is bad ram_id\n", str_arg);              \
+                        }                                                    \
+                                                                             \
+                    *(begunok - 1) = cmd_id | 0x80;                          \
+                    *begunok++ = ram_id;                                     \
+                    }                                                        \
                 else if (sscanf (str_arg, "%d", &arg))                       \
                     {                                                        \
                     *(begunok - 1) = cmd_id | 0x20;                          \
