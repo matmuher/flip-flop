@@ -11,13 +11,12 @@ typedef double canary_type;
 canary_type CANARY = 0xBAADF00D;
 #endif
 
-#define is(condition) condition ? TRUE : FALSE
-#define mark_error(condition, error_storage) error_storage = (condition ? TRUE : FALSE)
+#define mark_error(condition, error_storage) error_storage = (condition ? true : false)
 
 void stack_ctor (stack* stk, FILE* log)
     {
     assert (!IsBadReadPtr (stk, sizeof (stack)));
-    assert (!IsBadReadPtr (log, TRY_LOG));
+    assert (!IsBadReadPtr (log, TRY_LOG)); // ? тыком и чек сколько вернула
 
     // Provide stack's innocence
     stk->data = NULL;
@@ -35,19 +34,19 @@ void stack_ctor (stack* stk, FILE* log)
     stk->stack_hash = get_stack_hash (stk);
     #endif
 
-    stk->stk_event.ctor = TRUE;
+    stk->stk_event.ctor = true;
     }
 
 
 void stack_verify (stack* stk)
     {
     assert (!IsBadReadPtr (stk->stk_debug.log, TRY_LOG));
-    assert (stk->stk_event.ctor == TRUE);
-    assert (stk->stk_debug.error_id.stack_is_destroyed == FALSE);
+    assert (stk->stk_event.ctor == true);
+    assert (stk->stk_debug.error_id.stack_is_destroyed == false);
 
     if (IsBadReadPtr (stk, sizeof (stack)))
         {
-        stk->stk_debug.error_id.bad_stack_ptr = TRUE;
+        stk->stk_debug.error_id.bad_stack_ptr = true;
         }
     else
         {
@@ -103,7 +102,7 @@ void stack_verify (stack* stk)
                 int cur_hash = get_stack_hash (stk);
 
                 mark_error(cur_hash != stk->stack_hash,
-                           stk->stk_debug.error_id.bad_hash)
+                           stk->stk_debug.error_id.bad_hash);
                 }
             else
                 {
@@ -125,7 +124,7 @@ void stack_dump (stack* stk)
     fprintf (stk->stk_debug.log, "stack <int> [%p]\n", stk);
 
     // Is stack readable?
-    if (stk->stk_debug.error_id.bad_stack_ptr == FALSE)
+    if (stk->stk_debug.error_id.bad_stack_ptr == false)
         {
         // Type info about stk structure elements
         fprintf (stk->stk_debug.log, " size: %d, capacity [%p]: %d, data [%p]:\n",
@@ -174,20 +173,20 @@ void stack_dump (stack* stk)
 
         #ifdef CANARY_DEFENCE
         // Canaries are ok?
-        if (stk->stk_debug.error_id.bad_struc_left_canary == TRUE)
+        if (stk->stk_debug.error_id.bad_struc_left_canary == true)
             {
             fputs ("@ Structure: LEFT ATTACK! (ptichku jalko) @\n", stk->stk_debug.log);
             }
-        if (stk->stk_debug.error_id.bad_struc_right_canary == TRUE)
+        if (stk->stk_debug.error_id.bad_struc_right_canary == true)
             {
             fputs ("@ Structure: RIGHT ATTACK! (ptichku jalko) @\n", stk->stk_debug.log);
             }
 
-        if (stk->stk_debug.error_id.bad_values_left_canary == TRUE)
+        if (stk->stk_debug.error_id.bad_values_left_canary == true)
             {
             fputs ("@@ Values array: LEFT ATTACK! (ptichku jalko) @@\n", stk->stk_debug.log);
             }
-        if (stk->stk_debug.error_id.bad_values_right_canary == TRUE)
+        if (stk->stk_debug.error_id.bad_values_right_canary == true)
             {
             fputs ("@@ Values array: RIGHT ATTACK! (ptichku jalko) @@\n", stk->stk_debug.log);
             }
@@ -195,7 +194,7 @@ void stack_dump (stack* stk)
 
         #ifdef HASH_DEFENCE
         // Hash is ok?
-        if (stk->stk_debug.error_id.bad_hash == TRUE)
+        if (stk->stk_debug.error_id.bad_hash == true)
             {
             fputs ("# Hash is broken #\n", stk->stk_debug.log);
             }
@@ -204,36 +203,36 @@ void stack_dump (stack* stk)
 
     fputs ("[Erros-Bip-Bop]\n", stk->stk_debug.log);
 
-    if (stk->stk_debug.error_id.bad_stack_ptr == TRUE)
+    if (stk->stk_debug.error_id.bad_stack_ptr == true)
         {
         fputs ("[ERROR] STACK POINTER IS LOCKED\n", stk->stk_debug.log);
         assert (!IsBadReadPtr (stk, sizeof (stack)));
         }
     else
         {
-        if (stk->stk_debug.error_id.invalid_size == TRUE)
+        if (stk->stk_debug.error_id.invalid_size == true)
             {
             fputs ("[ERROR] INVALID STACK SIZE\n", stk->stk_debug.log);
             }
-        if (stk->stk_debug.error_id.invalid_capacity == TRUE)
+        if (stk->stk_debug.error_id.invalid_capacity == true)
             {
             fputs ("[ERROR] INVALID STACK CAPACITY\n", stk->stk_debug.log);
             }
-        if (stk->stk_debug.error_id.bad_capacity_ptr == TRUE)
+        if (stk->stk_debug.error_id.bad_capacity_ptr == true)
             {
             fputs ("[WARNING] CAPACITY POINTER IS LOCKED\n", stk->stk_debug.log);
             assert (!stk->stk_debug.error_id.bad_capacity_ptr);
             }
-        if (stk->stk_debug.error_id.bad_data_ptr == TRUE)
+        if (stk->stk_debug.error_id.bad_data_ptr == true)
             {
             fputs ("[WARNING] DATA POINTER IS LOCKED\n", stk->stk_debug.log);
             assert (!stk->stk_debug.error_id.bad_data_ptr);
             }
-        if (stk->stk_debug.error_id.overflow == TRUE)
+        if (stk->stk_debug.error_id.overflow == true)
             {
             fputs ("[ERROR] STACK OVERFLOW\n", stk->stk_debug.log);
             }
-        if (stk->stk_debug.error_id.nothing_to_pop == TRUE)
+        if (stk->stk_debug.error_id.nothing_to_pop == true)
             {
             fputs ("[ERROR] NOTHING TO POP\n", stk->stk_debug.log);
             }
@@ -331,7 +330,7 @@ void stack_dtor (stack* stk)
     stk->data = (int*) POISON;
     stk->capacity_ptr = (int*) POISON;
     stk->stk_debug.log = (FILE*) POISON;
-    stk->stk_debug.error_id.stack_is_destroyed = TRUE;
+    stk->stk_debug.error_id.stack_is_destroyed = true;
     }
 
 int get_stack_hash (stack* stk)

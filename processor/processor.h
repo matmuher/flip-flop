@@ -135,6 +135,12 @@ void in (proc* prc);
 void vm_show (proc* prc);
 
 
+void circle (proc* prc);
+
+
+void make_dot (proc* prc, int x, int y);
+
+
 // PROC' SERVICE FUNCTIONS
 
 

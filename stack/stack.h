@@ -8,7 +8,6 @@
 
 #define NDEBUG
 
-
 /*!
 @brief Contains codes of errors
 */
@@ -77,6 +76,7 @@ struct stack
 
     int* data;
     int* capacity_ptr;
+
     debug_info stk_debug;
     event stk_event;
 
@@ -167,8 +167,6 @@ void stack_dtor (stack* stk);
 void clear_tales (stack* stk, size_t start_element);
 
 void update_capacity (stack* stk);
-
-int stack_realloc_default (stack* stk);
 
 int stack_realloc_default (stack* stk);
 

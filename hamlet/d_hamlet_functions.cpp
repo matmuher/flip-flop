@@ -1,5 +1,6 @@
 #include "d_hamlet_functions.h"
-#include "..\..\..\memory_free\elephant_calloc_extern.h"
+#include "..\memory_free\elephant_calloc_extern.h"
+
 
 int get_size (FILE* file_pointer)
     {
@@ -17,6 +18,7 @@ int get_size (FILE* file_pointer)
     return file_size;
     }
 
+
 int is_eof (FILE* file_pointer)
     {
     assert (file_pointer != NULL);
@@ -27,15 +29,6 @@ int is_eof (FILE* file_pointer)
     return cur_pos == file_size;
     }
 
-void print_line (const char symbol, size_t line_len)
-    {
-    assert (line_len > 0);
-
-    for (size_t sym_id = 0; sym_id < line_len; sym_id++)
-        {
-        putchar (symbol);
-        }
-    }
 
 void say_delimiter()
     {
@@ -152,7 +145,8 @@ int is_empty_line (const char* str)
     return !*str;
     }
 
-char* read_to_buffer (const char* file_name, size_t* file_size)
+
+char* read_to_buffer (const char* file_name, size_t* file_size, int smart_mode)
     {
     assert (file_name != NULL);
     assert (file_size > 0);
@@ -164,7 +158,14 @@ char* read_to_buffer (const char* file_name, size_t* file_size)
     // +1 byte for '\0' in the end
     *file_size = get_size (file_pointer) + 1;
 
-    buffer = (char*)elephant_calloc (*file_size, sizeof (*buffer));
+    if (smart_mode == true)
+        {
+        buffer = (char*) elephant_calloc (*file_size, sizeof (*buffer));
+        }
+    else
+        {
+        buffer = (char*) calloc (*file_size, sizeof (*buffer));
+        }
 
     // Fill the buffer
     size_t fread_return = fread (buffer, sizeof (*buffer), *file_size, file_pointer);
@@ -175,11 +176,20 @@ char* read_to_buffer (const char* file_name, size_t* file_size)
     if (fread_return != *file_size)
         {
         *file_size = fread_return;
-        buffer = (char*) realloc (buffer, *file_size);
+
+        if (smart_mode == true)
+            {
+            buffer = (char*) elephant_realloc (buffer, *file_size, sizeof (*buffer));
+            }
+        else
+            {
+            buffer = (char*) realloc (buffer, *file_size);
+            }
         }
 
     return buffer;
     }
+
 
 void write_line_buf_to_file (const char* file_name, int lines_num, const line_buf* line_ptrs)
     {
@@ -198,6 +208,7 @@ void write_line_buf_to_file (const char* file_name, int lines_num, const line_bu
     fclose (file_writer);
     }
 
+
 line_buf* copy_line_buf (line_buf* origin, size_t lines_num)
     {
     assert (origin != NULL);
@@ -215,6 +226,7 @@ line_buf* copy_line_buf (line_buf* origin, size_t lines_num)
     return replica;
     }
 
+
 void put_zeros (char* const buffer, size_t file_size)
     {
     assert (buffer != NULL);
@@ -230,8 +242,9 @@ void put_zeros (char* const buffer, size_t file_size)
         cur_pos++;
         }
 
-    *(buffer + file_size - 1) = '\0';
+    *(buffer + file_size) = '\0';
     }
+
 
 int count_correct_lines (char* const buffer, size_t file_size)
     {
@@ -256,6 +269,7 @@ int count_correct_lines (char* const buffer, size_t file_size)
     return correct_lines;
     }
 
+
 line_buf* prepare_data (line_buf* line_ptrs, size_t lines_num)
     {
     assert (line_ptrs != NULL);
@@ -268,6 +282,7 @@ line_buf* prepare_data (line_buf* line_ptrs, size_t lines_num)
 
     return line_ptrs;
     }
+
 
 void byte_swap (void* first, void* second, size_t element_size)
     {
@@ -282,6 +297,7 @@ void byte_swap (void* first, void* second, size_t element_size)
         *(char*) (second + byte_id) = temp;
         }
     }
+
 
 void bubble_sort (void* arr, size_t arr_size, size_t elem_size,
                   int (*compar)(const void *, const void*))
@@ -305,7 +321,8 @@ void bubble_sort (void* arr, size_t arr_size, size_t elem_size,
         }
     }
 
-line_buf* get_strings (char* file_name, size_t* lines_num)
+
+line_buf* get_strings (char* file_name, size_t* lines_num, int smart_mode)
     {
     assert (file_name != NULL);
     assert (lines_num != NULL);
@@ -318,7 +335,16 @@ line_buf* get_strings (char* file_name, size_t* lines_num)
 
     *lines_num = count_correct_lines (buffer, file_size);
 
-    line_buf* line_ptrs = (line_buf*) elephant_calloc (*lines_num, sizeof (line_buf));
+    line_buf* line_ptrs = NULL;
+
+    if (smart_mode == true)
+        {
+        line_ptrs = (line_buf*) elephant_calloc (*lines_num, sizeof (line_buf));
+        }
+    else
+        {
+        line_ptrs = (line_buf*) calloc (*lines_num, sizeof (line_buf));
+        }
 
     char* cur_pos = buffer;
     size_t cur_line = 0;
@@ -326,6 +352,7 @@ line_buf* get_strings (char* file_name, size_t* lines_num)
     while (cur_line < *lines_num)
         {
         char* str_end = find_char (cur_pos, '\0');
+
         if (!is_empty_line (cur_pos))
             {
             line_ptrs[cur_line].beg_ptr = cur_pos;
@@ -338,4 +365,12 @@ line_buf* get_strings (char* file_name, size_t* lines_num)
         }
 
     return line_ptrs;
+    }
+
+void print_line_buf (line_buf* text, size_t lines_num)
+    {
+    for (size_t line_id = 0; line_id < lines_num; line_id++)
+        {
+        printf ("%s\n", text[line_id].beg_ptr);
+        }
     }

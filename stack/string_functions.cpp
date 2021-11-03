@@ -38,17 +38,6 @@ int string_compare (char* left_start, char* left_end,
     return *left_start - *right_start;
     }
 
-
-int string_equal (char* left, char* right)
-    {
-    assert (left != NULL);
-    assert (right != NULL);
-
-    return !string_compare (left, find_char (left, '\0'),
-                           right, find_char (right, '\0'), 1);
-    }
-
-
 int say (const char str[])
     {
     assert (str != NULL);
@@ -178,14 +167,12 @@ char* string_stick (char destination[], char source[])
     return destination;
     }
 
-
 void print_line (const char symbol, size_t line_len)
     {
     assert (line_len > 0);
 
     fprint_line (stdout, symbol, line_len);
     }
-
 
 void fprint_line (FILE* file_ptr, const char symbol, size_t line_len)
     {
@@ -196,54 +183,4 @@ void fprint_line (FILE* file_ptr, const char symbol, size_t line_len)
         fputc (symbol, file_ptr);
         }
     fputc ('\n', file_ptr);
-    }
-
-
-parsed_line string_delimit (char* str, char delimiter)
-    {
-    assert (str != NULL);
-
-    parsed_line sentence;
-    sentence.words_ptr = str;
-
-    size_t chunks = 1;
-
-    while (*str)
-        {
-        if (*str == delimiter)
-            {
-            *str = '\0';
-            chunks++;
-            }
-        str++;
-        }
-
-    sentence.words_num = chunks;
-
-    return sentence;
-    }
-
-
-char* apply_to (parsed_line* sentence, size_t word_id)
-    {
-    char* symb_ptr = sentence->words_ptr;
-
-    // First word
-    if (word_id == 1)
-        {
-        return symb_ptr;
-        }
-
-    size_t words_to_pass = word_id - 1;
-
-    // Criterio: '\0' and needed amount of words had been passed
-    while (words_to_pass != 0)
-        {
-        if (*symb_ptr++ == '\0')
-            {
-            words_to_pass--;
-            }
-        }
-
-    return symb_ptr;
     }

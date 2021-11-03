@@ -37,3 +37,5 @@ DEF_CMD(sqrt, 17, ZERO_ARGS, PUSH(sqrt (POP)))
 DEF_CMD(sayi, 18, ZERO_ARGS, say ("Infinity roots"))
 
 DEF_CMD(vsh, 19, ZERO_ARGS, VM_SHOW)
+
+DEF_CMD(circ, 20, ZERO_ARGS, CIRC)

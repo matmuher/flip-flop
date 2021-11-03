@@ -8,13 +8,6 @@
 const int LOOP = 1;
 const int ZERO_SHIFT = 0;
 
-struct parsed_line
-    {
-    size_t words_num;
-    char* words_ptr;
-    };
-
-
 /*!
 @brief Outputs given C-type string to console
 @params[in] str string for output
@@ -80,7 +73,7 @@ char* string_stick (char destination[], char source[]);
 @details Calculates size of str by function string_len, allocates memory\n
          using calloc function from stdlib.h,\n
          if everything is alright copies str to allocated  memory.
-         if no — returns NULL-pointer\n\n
+         if no â€” returns NULL-pointer\n\n
 
          After using returned pointer MUST be passed to free to avoid a memory leak.
 @params[in] str C-string that is needed to be duplicated in dynamic memory
@@ -124,39 +117,15 @@ int string_compare (char* const left_start, char* const left_end,
 
 
 /*!
-@brief Specification of string_compare
-@return 1 if strings are equal,\n
-        0 if not
-*/
-int string_equal (char* left, char* right);
-
-
-/*!
 @brief Prints line with length equal to line_len
        that consists of symbol symbols
 */
 void print_line (const char symbol, size_t line_len);
-
 
 /*!
 @brief Prints line with length equal to line_len
        that consists of symbol symbols in file_ptr
 */
 void fprint_line (FILE* file_ptr, const char symbol, size_t line_len);
-
-
-/*!
-@brief Break string into chunks by delimiter and place them in parsed_line object
-@details Put zeros whenever meets delimiter symbol,
-         writes all created 'words' in structure
-*/
-parsed_line string_delimit (char* str, char delimiter);
-
-
-/*!
-@brief Allows you to apply to certain word in the sentence
-@details It go through all words before needed, so it is slow
-*/
-char* apply_to (parsed_line* sentence, size_t word_id);
 
 #endif

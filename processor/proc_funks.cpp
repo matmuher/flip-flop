@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "processor.h"
+#define _USE_MATH_DEFINES
 #include <math.h>
 #undef NDEBUG
 #include <assert.h>
@@ -66,6 +67,8 @@
 
 #define VM_SHOW vm_show (prc)
 
+#define CIRC circle (prc)
+
 
 #define LOG_NEW_LINE putc ('\n', prc->prc_log)
 
@@ -91,7 +94,7 @@ void proc_ctor (proc* prc, size_t bin_size, int* cooking_list, FILE* log, FILE* 
 
     for (size_t ram_id = 0; ram_id < RAM_SIZE; ram_id++)
         {
-        prc->ram[ram_id] = 0;
+        prc->ram[ram_id] = '+';
         }
 
     puts ("START MASHINA!");
@@ -161,17 +164,45 @@ void hlt (proc* prc)
     exit (EXIT_SUCCESS);
     }
 
+
 void vm_show (proc* prc)
     {
     for (size_t y = 0; y < VIDEO_HEIGHT; y++)
         {
         for (size_t x = 0; x < VIDEO_WEEDTH; x++)
             {
-            printf ("%d ", prc->ram[NON_VIDEO_RAM_SIZE + y * VIDEO_WEEDTH + x]);
+            printf ("%c ", prc->ram[NON_VIDEO_RAM_SIZE + y * VIDEO_WEEDTH + x]);
             }
 
         putchar ('\n');
         }
+    }
+
+
+void circle (proc* prc)
+    {
+    size_t R = 3;
+
+    double angels [] = {0, M_PI / 6, M_PI / 4, M_PI / 2.5, M_PI / 2};
+
+    size_t ANGELS_NUM = sizeof (angels) / sizeof (double);
+
+    for (size_t angel_id = 0; angel_id < ANGELS_NUM; angel_id++)
+        {
+        int x = (int) round (cos (angels[angel_id]) * R);
+        int y = (int) round (sin (angels[angel_id]) * R);
+
+        make_dot (prc, x + 3, y + 3);
+        make_dot (prc, x + 3, -y + 3);
+        make_dot (prc, -x + 3, y + 3);
+        make_dot (prc, -x + 3, -y + 3);
+        }
+    }
+
+
+void make_dot (proc* prc, int x, int y)
+    {
+    prc->ram[NON_VIDEO_RAM_SIZE + y * VIDEO_WEEDTH + x] = 'o';
     }
 
 
