@@ -5,7 +5,7 @@
 #define PROC
 #endif
 
-#ifdef PROC
+#if 1
 int main ()
     {
     size_t bin_size = 0;
@@ -17,7 +17,7 @@ int main ()
 
     // READ SERVICE STRUCTURE
     bin_info ma_bin = {0, 0, 0};
-    fread (&ma_bin, sizeof (char), sizeof (ma_bin), bin);
+    fread (&ma_bin, sizeof (char), sizeof (ma_bin), bin);  // *обработка ошибок
 
     // VERIFY SERVICE STRUCTURE
     assert (ma_bin.signature == MY_SIGN);
@@ -25,11 +25,11 @@ int main ()
 
     // READ ASSEMBLED CODE
     bin_size = ma_bin.bin_size;
-    int* cooking_list = (int*) calloc (bin_size, sizeof (int));
+    int* cooking_list = (int*) calloc (bin_size, sizeof (int)); // *
     fread (cooking_list, sizeof (int), bin_size, bin);
 
     // PROC CONSTRUCT
-    proc prc;
+    proc prc = {}; // *иниц.
     proc_ctor (&prc, bin_size, cooking_list, log, prc_log);
 
     // CODE EXECUTE

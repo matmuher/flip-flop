@@ -12,11 +12,10 @@
             prc->ip = prc->ip + args_num;\
             break;}
 
-/* karg definition is needed to avoid UB */
-/* with f.ex. ARG == POP + POP            */
 
-
-#define PUSH(ARG)                     \
+// karg definition is needed to avoid UB
+// with f.ex. ARG == POP + POP  {int arg} - пуш в, область вилимости+, констант маски
+#define PUSH(ARG)                      \
     int karg = ARG;                   \
     if ((cmd & CMD_MASK) == cmd_push)   \
         {                                \
@@ -157,7 +156,7 @@ void in (proc* prc)
 
 void hlt (proc* prc)
     {
-    puts ("STOP MASHINA!");
+    puts ("STOP MASHINA!"); // *вербосе левел, вывод в лог
 
     stop_inst_console_close ();
 
@@ -179,7 +178,7 @@ void vm_show (proc* prc)
     }
 
 
-void circle (proc* prc)
+void circle (proc* prc) // *в code.txt
     {
     size_t R = 3;
 
@@ -244,12 +243,12 @@ void proc_dmp (proc* prc)
         }
     LOG_NEW_LINE;
 
-    fprintf (prc->prc_log, "%*s", prc->ip * 3 + 2, "^");
+    fprintf (prc->prc_log, "%*s", prc->ip * 3 + 2, "^");  // *функция
 
     LOG_NEW_LINE;
 
-    fprintf (prc->prc_log, "Registers: ax = %d, bx = %d, cx = %d, dx = %d\n",
-             prc->reg[0], prc->reg[1], prc->reg[2], prc->reg[3]);
+    fprintf (prc->prc_log, "Registers: ax = %d, bx = %d, cx = %d, dx = %d\n",     // *fprintf + log_new_line = funct
+             prc->reg[0], prc->reg[1], prc->reg[2], prc->reg[3]);                 // *enum с именами регистров
     LOG_NEW_LINE;
     }
 

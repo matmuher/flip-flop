@@ -26,10 +26,10 @@
 #endif
 
 
-#define DEF_CMD(name, id, args_num, code) cmd_##name = id,
+#define DEF_CMD(name, id, args_num, code) cmd_##name = id,       // *ближе к использовнию + андеф
 
 
-const int MY_SIGN = 'MM';
+const int MY_SIGN = 'MM'; // *в чар, чар*
 
 
 const int CMD_MASK = 0x1F; // Is used to extract first 5 bytes of command code
