@@ -12,7 +12,7 @@
 int main ()
     {
     size_t lines_num = 0;
-    line_buf* code = get_code ("code.txt", &lines_num);
+    line_buf* code = get_code ("fib_code.txt", &lines_num);
 
     size_t bin_size = 0;
     int* binary = create_binary (code, lines_num, &bin_size);

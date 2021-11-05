@@ -9,8 +9,8 @@
 
 
 // Undefined behavior if both 0, or both 1
-#define RUCHNIK 1 //-> switch ASM value below, if all files in codeblocks project
-#define AVTOMAT 0 //-> use maker.bat
+#define RUCHNIK 0 //-> switch ASM value below, if all files in codeblocks project
+#define AVTOMAT 1 //-> use maker.bat
 
 
 #if RUCHNIK
@@ -26,13 +26,15 @@
 #endif
 
 
-#define DEF_CMD(name, id, args_num, code) cmd_##name = id,       // *ближе к использовнию + андеф
+#define DEF_CMD(name, id, args_num, code) cmd_##name = id,
 
 
-const int MY_SIGN = 'MM'; // *в чар, чар*
+const int MY_SIGN = 'MM';
 
 
 const int CMD_MASK = 0x1F; // Is used to extract first 5 bytes of command code
+
+const int RAM_MASK = 0x80, REG_MASK = 0x40, IMM_MASK = 0x20;
 
 
 const int MAX_ARGS_NUM = 1, MAX_REG_NUM = 4, NON_VIDEO_RAM_SIZE = 10;
@@ -139,6 +141,12 @@ void circle (proc* prc);
 
 
 void make_dot (proc* prc, int x, int y);
+
+
+int get_close_katet (double angel, int R);
+
+
+int get_far_katet (double angel, int R);
 
 
 // PROC' SERVICE FUNCTIONS

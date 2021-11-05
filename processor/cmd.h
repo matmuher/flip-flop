@@ -32,10 +32,16 @@ DEF_CMD(je, 15, ONE_ARG, CONDITION_JUMP(POP == POP))
 
 DEF_CMD(sayn, 16, ZERO_ARGS, say ("No roots"))
 
-DEF_CMD(sqrt, 17, ZERO_ARGS, PUSH(sqrt (POP)))
+DEF_CMD(sqrt, 17, ZERO_ARGS, PUSH(SQRT(POP)))
 
 DEF_CMD(sayi, 18, ZERO_ARGS, say ("Infinity roots"))
 
 DEF_CMD(vsh, 19, ZERO_ARGS, VM_SHOW)
 
 DEF_CMD(circ, 20, ZERO_ARGS, CIRC)
+
+DEF_CMD(make_dot, 21, ZERO_ARGS, MAKE_DOT)
+
+DEF_CMD(r_cos, 22, ZERO_ARGS, PUSH(R_COS))
+
+DEF_CMD(r_sin, 23, ZERO_ARGS, PUSH(R_SIN))

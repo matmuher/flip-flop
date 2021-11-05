@@ -1,15 +1,31 @@
 #include <stdlib.h>
 
 
+struct OWList
+    {
+    int lst_size;
+
+    int* data;
+
+    int* next;
+
+    int tail, head;
+    };
+
+
 struct List
     {
     int lst_size;
 
-    int tail, head;
-
     double* data;
 
     int* next;
+
+    int tail, head;
+
+    int* prev;
+
+    OWList free;
     };
 
 
@@ -22,6 +38,9 @@ const size_t ACCURACY = 1, WIDTH = 3; //<- for dump format output
 
 
 void lst_ctor (List* lst, size_t lst_size);
+
+
+void owlist_ctor (List* lst);
 
 
 void lst_dmp (List* lst);
@@ -40,3 +59,9 @@ int find_prev (List* lst, int cell_id);
 
 
 void lst_delete_cell (List* lst, size_t delete_cell_id);
+
+
+void push_free (OWList* free, int free_cell);
+
+
+int pop_free (OWList* free);
