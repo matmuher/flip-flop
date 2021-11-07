@@ -2,73 +2,6 @@
 #include "processor.h"
 
 
-#define DEF_CMD(name, id, args_num, code)                                    \
-        if (string_equal (#name, code_line->words_ptr))                      \
-            {                                                                \
-            int cmd_id = cmd_##name;                                         \
-                                                                             \
-            *begunok++ = cmd_id;                                             \
-                                                                             \
-            for (int arg_id = 1; arg_id <= args_num; arg_id++)               \
-                {                                                            \
-                int arg = -1;                                                \
-                                                                             \
-                char* str_arg = apply_to (code_line, arg_id + 1);            \
-                if (str_arg[0] == ':')                                       \
-                    {                                                        \
-                    size_t marker_id = 0;                                    \
-                    if (!sscanf (str_arg, ":%d", &marker_id))                \
-                            {                                                \
-                            printf ("%s is bad mark\n", str_arg);            \
-                            }                                                \
-                                                                             \
-                    *begunok++ = markers[marker_id];                         \
-                    }                                                        \
-                else if (str_arg[0] == '[')                                  \
-                    {                                                        \
-                    size_t ram_id = 0;                                       \
-                    if (!sscanf (str_arg, "[%d]", &ram_id))                  \
-                        {                                                    \
-                        printf ("%s is bad ram_id\n", str_arg);              \
-                        }                                                    \
-                                                                             \
-                    *(begunok - 1) = cmd_id | RAM_MASK;                      \
-                    *begunok++ = ram_id;                                     \
-                    }                                                        \
-                else if (sscanf (str_arg, "%d", &arg))                       \
-                    {                                                        \
-                    *(begunok - 1) = cmd_id | IMM_MASK;                      \
-                    *begunok++ = arg;                                        \
-                    }                                                        \
-                else if (string_equal (str_arg, "ax"))                       \
-                    {                                                        \
-                    *(begunok - 1) = cmd_id | REG_MASK;                      \
-                    *begunok++ = 0;                                          \
-                    }                                                        \
-                else if (string_equal (str_arg, "bx"))                       \
-                    {                                                        \
-                    *(begunok - 1) = cmd_id | REG_MASK;                      \
-                    *begunok++ = 1;                                          \
-                    }                                                        \
-                else if (string_equal (str_arg, "cx"))                       \
-                    {                                                        \
-                    *(begunok - 1) = cmd_id | REG_MASK;                      \
-                    *begunok++ = 2;                                          \
-                    }                                                        \
-                else if (string_equal (str_arg, "dx"))                       \
-                    {                                                        \
-                    *(begunok - 1) = cmd_id | REG_MASK;                      \
-                    *begunok++ = 3;                                          \
-                    }                                                        \
-                else                                                         \
-                    {                                                        \
-                    printf ("[WARNING] %s is bad arg\n", str_arg);           \
-                    }                                                        \
-                }                                                            \
-            }                                                                \
-        else
-
-
 line_buf* get_code (char* file_name, size_t* lines_num)
     {
     assert (file_name != NULL);
@@ -101,6 +34,7 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size)
             {
             parsed_line code_line = string_delimit (code[line_id].beg_ptr, ' ');
 
+            // Marker process
             if (code_line.words_ptr[0] == ':')
                 {
                 size_t marker_id = 0;
@@ -114,6 +48,7 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size)
                 continue;
                 }
 
+            // Command process
             begunok = cmd_line_process (&code_line, begunok, markers);
             }
         }
@@ -124,6 +59,7 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size)
 
     return binary;
     }
+
 
 void write_binary (int* binary, size_t bin_size)
     {
@@ -147,6 +83,24 @@ void write_binary (int* binary, size_t bin_size)
     fclose (bin_file);
     }
 
+
+#define DEF_CMD(name, id, args_num, code)                                    \
+        if (string_equal (#name, code_line->words_ptr))                      \
+            {                                                                \
+            int cmd_id = cmd_##name;                                         \
+                                                                             \
+            *begunok++ = cmd_id;                                             \
+                                                                             \
+            for (int arg_id = 1; arg_id <= args_num; arg_id++)               \
+                {                                                            \
+                int arg = -1;                                                \
+                                                                             \
+                char* str_arg = apply_to (code_line, arg_id + 1);            \
+                                                                             \
+                begunok = arg_process (str_arg, begunok, markers);           \
+                }                                                            \
+            }                                                                \
+        else
 int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers)
     {
     #include "cmd.h"
@@ -158,10 +112,65 @@ int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers)
 
     return begunok;
     }
-
 #undef DEF_CMD(name, id, args_num, code)
-#define DEF_CMD(name, id, args_num, code) case cmd_##name:
 
+
+#define REG_PROC(REG_STR, REG_ID)            \
+    else if (string_equal (str_arg, REG_STR))\
+        {                                    \
+        *(begunok - 1) = cmd_id | RAM_MASK;  \
+        *begunok++ = REG_ID                  \
+        }
+int* arg_process (char* str_arg, int* begunok, int* markers)
+    {
+    if (str_arg[0] == ':') // For markers
+        {
+        size_t marker_id = 0;
+
+        if (!sscanf (str_arg, ":%d", &marker_id))
+            {
+            printf ("%s is bad mark\n", str_arg);
+            }
+
+        *begunok++ = markers[marker_id];
+        }
+    else if (str_arg[0] == '[') // For ram's arguments
+        {
+        size_t ram_id = 0;
+
+        if (!sscanf (str_arg, "[%d]", &ram_id))
+            {
+            printf ("%s is bad ram_id\n", str_arg);
+            }
+
+        *(begunok - 1) = cmd_id | RAM_MASK;
+        *begunok++ = ram_id;
+        }
+    else if (sscanf (str_arg, "%d", &arg)) // For immediate arguments
+        {
+        *(begunok - 1) = cmd_id | IMM_MASK;
+        *begunok++ = arg;
+        }
+
+    REG_PROC("ax", 0)
+
+    REG_PROC("bx", 1)
+
+    REG_PROC("cx", 2)
+
+    REG_PROC("dx", 3)
+
+    else // For bad arguments
+        {
+        printf ("[WARNING] %s is bad arg\n", str_arg);
+        }
+
+    return begunok;
+    }
+#undef REG_PROC
+
+
+#define DEF_CMD(name, id, args_num, code) case cmd_##name:
 void non_unique_cmd_ids ()
     {
     switch (1)
@@ -172,3 +181,4 @@ void non_unique_cmd_ids ()
                   "(c) Pennywise the Dancing Clown");
         }
     }
+#undef DEF_CMD

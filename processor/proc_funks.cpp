@@ -6,78 +6,6 @@
 #include <assert.h>
 
 
-#define DEF_CMD(name, id, args_num, code)\
-        case cmd_##name:                 \
-            {code;                       \
-            prc->ip = prc->ip + args_num;\
-            break;}
-
-
-#define PUSH(ARG)                       \
-    {int arg = ARG;\
-    if ((cmd & CMD_MASK) == cmd_push)   \
-        {                               \
-        if (cmd & IMM_MASK)             \
-            {                           \
-            push (prc, arg);            \
-            }                           \
-        else if (cmd & REG_MASK)        \
-            {                           \
-            push (prc, prc->reg[arg]);  \
-            }                           \
-        else if (cmd & RAM_MASK)        \
-            {                           \
-            push (prc, prc->ram[arg]);  \
-            }                           \
-        }                               \
-    else                                \
-        {                               \
-        push (prc, arg);                \
-        } }
-
-#define POPR(ARG)                                \
-    {int arg = ARG;                              \
-    if (cmd & REG_MASK)                          \
-        {                                        \
-        prc->reg[arg] = POP;                     \
-        }                                        \
-    else if (cmd & RAM_MASK)                     \
-        {                                        \
-        prc->ram[arg] = POP;                     \
-        }   }
-
-#define POP pop (prc)
-
-#define JUMP(ARG) jump (prc, ARG)
-
-#define CONDITION_JUMP(CONDITION)\
-    if (CONDITION)               \
-        JUMP(ARG1)
-
-#define OUT out (prc)
-
-#define IN in (prc)
-
-#define ARG1 prc->recipe[prc->ip]
-
-#define HLT hlt (prc)
-
-#define VM_SHOW vm_show (prc)
-
-#define CIRC circle (prc)
-
-#define MAKE_DOT {make_dot (prc, POP, POP);} // x, y
-
-#define R_COS (int) round (cos (POP * M_PI / 180) * POP)
-
-#define R_SIN (int) round (sin (POP * M_PI / 180) * POP)
-
-#define SQRT(ARG) (int) round (sqrt (ARG))
-
-
-#define LOG_NEW_LINE putc ('\n', prc->prc_log)
-
-
 void proc_ctor (proc* prc, size_t bin_size, int* cooking_list, FILE* log, FILE* prc_log)
     {
     stack_ctor (&prc->stk, log);
@@ -106,6 +34,70 @@ void proc_ctor (proc* prc, size_t bin_size, int* cooking_list, FILE* log, FILE* 
     }
 
 
+void doer (proc* prc)
+    {
+    while (prc->ip < prc->bin_size)
+        {
+        proc_dmp (prc);
+        cmd_enum cmd = (cmd_enum) prc->recipe[prc->ip++];
+        do_cmd (prc, cmd);
+        }
+    }
+
+
+#include "DSL.cpp"
+#define DEF_CMD(name, id, args_num, code)\
+        case cmd_##name:                 \
+            {code;                       \
+            prc->ip = prc->ip + args_num;\
+            break;}
+void do_cmd (proc* prc, cmd_enum cmd)
+    {
+    assert (prc);
+
+    switch (cmd & CMD_MASK)
+        {
+        #include "cmd.h"
+        default:
+            printf ("Undefined cmd: %d\n", cmd);
+        }
+    }
+#undef DEF_CMD
+
+
+#define LOG_NEW_LINE putc ('\n', prc->prc_log)
+void proc_dmp (proc* prc)
+    {
+    for (int byte_id = 0; byte_id < prc->bin_size; byte_id++)
+        {
+        fprintf (prc->prc_log, "%2d ", byte_id);
+        }
+    LOG_NEW_LINE;
+
+    for (int byte_id = 0; byte_id < prc->bin_size; byte_id++)
+        {
+        fprintf (prc->prc_log, "%2X ", prc->recipe[byte_id]);
+        }
+    LOG_NEW_LINE;
+
+    fprintf (prc->prc_log, "%*s", prc->ip * 3 + 2, "^");
+    LOG_NEW_LINE;
+
+    fprintf (prc->prc_log, "Registers: ax = %d, bx = %d, cx = %d, dx = %d\n",
+             prc->reg[0], prc->reg[1], prc->reg[2], prc->reg[3]);
+    LOG_NEW_LINE;
+
+    vm_print (prc);
+
+    LOG_NEW_LINE;
+    LOG_NEW_LINE;
+
+    fflush (prc->prc_log);
+    }
+#undef LOG_NEW_FILE
+
+
+// Commands
 void push (proc* prc, int val)
     {
     assert (prc);
@@ -124,6 +116,8 @@ int pop (proc* prc)
 
 void jump (proc* prc, size_t jump_to)
     {
+    assert (prc);
+
     prc->ip = jump_to;
     }
 
@@ -224,68 +218,4 @@ void make_dot (proc* prc, int x, int y)
     prc->ram[NON_VIDEO_RAM_SIZE + y * VIDEO_WEEDTH + x] = 'o';
     }
 
-
-int get_close_katet (int angel, int R)
-    {
-    return (int) round (cos (angel / 180.0 * M_PI) * R);
-    }
-
-int get_far_katet (int angel, int R)
-    {
-    return (int) round (sin (angel / 180.0 * M_PI) * R);
-    }
-
-
-void doer (proc* prc)
-    {
-    while (prc->ip < prc->bin_size)
-        {
-        proc_dmp (prc);
-        cmd_enum cmd = (cmd_enum) prc->recipe[prc->ip++];
-        do_cmd (prc, cmd);
-        }
-    }
-
-
-void do_cmd (proc* prc, cmd_enum cmd)
-    {
-    assert (prc);
-
-    switch (cmd & CMD_MASK)
-        {
-        #include "cmd.h"
-        default:
-            printf ("Undefined cmd: %d\n", cmd);
-        }
-    }
-
-
-void proc_dmp (proc* prc)
-    {
-    for (int byte_id = 0; byte_id < prc->bin_size; byte_id++)
-        {
-        fprintf (prc->prc_log, "%2d ", byte_id);
-        }
-    putc ('\n', prc->prc_log);
-
-    for (int byte_id = 0; byte_id < prc->bin_size; byte_id++)
-        {
-        fprintf (prc->prc_log, "%2X ", prc->recipe[byte_id]);
-        }
-    LOG_NEW_LINE;
-
-    fprintf (prc->prc_log, "%*s", prc->ip * 3 + 2, "^");
-
-    LOG_NEW_LINE;
-
-    fprintf (prc->prc_log, "Registers: ax = %d, bx = %d, cx = %d, dx = %d\n",
-             prc->reg[0], prc->reg[1], prc->reg[2], prc->reg[3]);
-    LOG_NEW_LINE;
-
-    vm_print (prc);
-
-    LOG_NEW_LINE;
-    LOG_NEW_LINE;
-    fflush (prc->prc_log);
-    }
 

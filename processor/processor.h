@@ -8,31 +8,33 @@
 #include "..\square_solver\beer_equation.h"
 
 
-// Undefined behavior if both 0, or both 1
-#define RUCHNIK 0 //-> switch ASM value below, if all files in codeblocks project
-#define AVTOMAT 1 //-> use maker.bat
+// Historical heritage
+#if 0
+    // Undefined behavior if both 0, or both 1
+    #define NON_DISASM 0 //-> switch ASM value below, if all files in codeblocks project
+    #define DISASM 1 //-> use maker.bat
 
 
-#if RUCHNIK
-#define ASM 0    // 1 to compile asma.cpp, 0 to compile proc.cpp
-#define PROC
+    #if NON_DISASM
+        #define ASM 0    // 1 to compile asma.cpp, 0 to compile proc.cpp
+        #define PROC
 
+        #if ASM
+            #undef PROC
+        #else
+            #undef ASM
+        #endif
 
-#if ASM
-#undef PROC
-#else
-#undef ASM
+    #endif
+
 #endif
-#endif
-
-
-#define DEF_CMD(name, id, args_num, code) cmd_##name = id,
 
 
 const int MY_SIGN = 'MM';
 
 
 const int CMD_MASK = 0x1F; // Is used to extract first 5 bytes of command code
+
 
 const int RAM_MASK = 0x80, REG_MASK = 0x40, IMM_MASK = 0x20;
 
@@ -60,19 +62,20 @@ struct proc
     size_t bin_size;
     int* recipe;
     int ip;
-    unsigned int hlt : 1;
     FILE* prc_log;
     int reg[MAX_REG_NUM];
     int ram[RAM_SIZE];
     };
 
 
+#define DEF_CMD(name, id, args_num, code) cmd_##name = id,
 enum cmd_enum
     {
     unknow_cmd = -1,
     #include "cmd.h"
     version,
     };
+#undef DEF_CMD
 
 
 enum ARGS_NUM
@@ -110,6 +113,12 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size);
 void write_binary (int* binary, size_t bin_size);
 
 
+// DISASM' FUNCTIONS
+
+
+void recogniser (int bin_size, int* cooking_list, FILE* disasm);
+
+
 // PROC' COMMANDS
 
 
@@ -141,12 +150,6 @@ void circle (proc* prc);
 
 
 void make_dot (proc* prc, int x, int y);
-
-
-int get_close_katet (double angel, int R);
-
-
-int get_far_katet (double angel, int R);
 
 
 // PROC' SERVICE FUNCTIONS
