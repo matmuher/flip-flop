@@ -64,8 +64,9 @@ static int lst_verify (List* lst)
 
                 printf ("Bad prev connection:\n"
                         "%d -> %d\n"
-                        "%d !<- %d\n\n", cell, lst->next[cell],
-                                         cell, lst->next[cell]);
+                        "%d !<- %d\n\n",
+                        cell, lst->next[cell],
+                        cell, lst->next[cell]);
 
             #endif
 
