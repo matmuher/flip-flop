@@ -20,7 +20,11 @@ int NO_ERRORS = 0x000, BAD_HEAD_MASK = 0x001,
 enum dump_level
     {
     ERRORS_LVL = -1,
+
+
     FIRST_LVL = 1,
+
+
     SECOND_LVL = 2,
     };
 
@@ -244,17 +248,24 @@ void lst_dtor (List* lst)
     {
     #if VERBOSE >= FIRST_LVL
 
+
         puts ("[DESTRUCTOR]");
+
 
         lst_dmp (lst);
 
+
         #ifdef SHOW_MODE
+
 
             cool_dmp (lst);
 
+
         #endif
 
+
     #endif
+
 
     assert (lst);
 
@@ -294,7 +305,6 @@ static void push_free (OWList* free, int free_cell)
 
 
         // Free cell becomes tail
-
 
         // Transfer tail pointer
 
@@ -392,13 +402,18 @@ static int lst_resize (List* lst)
     {
     #if VERBOSE >= SECOND_LVL
 
+
         puts ("[PRE-RESIZE]");
+
 
         lst_dmp (lst);
 
+
         #ifdef SHOW_MODE
 
+
             cool_dmp (lst);
+
 
         #endif
 
@@ -422,13 +437,14 @@ static int lst_resize (List* lst)
 
     // Replace trash with zeros
 
-    #if 1
-        size_t shift = new_elements_num - lst->lst_size;
-        for (size_t cell_id = 0; cell_id < shift; cell_id++)
-                {
-                lst->data[lst->lst_size + cell_id] = 0;
-                }
-    #endif
+
+    size_t shift = new_elements_num - lst->lst_size;
+
+
+    for (size_t cell_id = 0; cell_id < shift; cell_id++)
+            {
+            lst->data[lst->lst_size + cell_id] = 0;
+            }
 
 
     // Expand "prev" array
@@ -464,15 +480,21 @@ static int lst_resize (List* lst)
 
     #if VERBOSE >= FIRST_LVL
 
+
         puts ("[POST-RESIZE]");
+
 
         lst_dmp (lst);
 
+
         #ifdef SHOW_MODE
+
 
             cool_dmp (lst);
 
+
         #endif
+
 
     #endif
 
@@ -493,22 +515,31 @@ int lst_insert_after (List* lst, double value, size_t insert_after_this_cell_id)
     {
     #if VERBOSE >= SECOND_LVL
 
+
         puts ("[PRE-INSERT]");
+
 
         lst_dmp (lst);
 
+
         #ifdef SHOW_MODE
+
 
             cool_dmp (lst);
 
+
         #endif
+
 
     #endif
 
     // Find free place
 
     int free_cell_id = find_free (lst);
+
+
     printf ("free cell is %d\n", free_cell_id);
+
 
     // Resize
 
@@ -524,11 +555,13 @@ int lst_insert_after (List* lst, double value, size_t insert_after_this_cell_id)
         {
         bad_insert_print ("LIST IS FULL");
 
+
         return LST_IS_FULL;
         }
     else if (free_cell_id == LST_IS_EMPTY)
         {
         bad_insert_print ("LIST IS EMPTY");
+
 
         return LST_IS_EMPTY;
         }
@@ -577,15 +610,21 @@ int lst_insert_after (List* lst, double value, size_t insert_after_this_cell_id)
 
     #if VERBOSE >= FIRST_LVL
 
+
         puts ("[POST-INSERT]");
+
 
         lst_dmp (lst);
 
+
         #ifdef SHOW_MODE
+
 
             cool_dmp (lst);
 
+
         #endif
+
 
     #endif
 
@@ -598,15 +637,21 @@ int lst_insert_back (List* lst, double value)
     {
     #if VERBOSE  >= SECOND_LVL
 
+
         puts ("[PRE-INSERT-BACK]");
+
 
         lst_dmp (lst);
 
+
         #ifdef SHOW_MODE
+
 
             cool_dmp (lst);
 
+
         #endif
+
 
     #endif
 
@@ -616,15 +661,21 @@ int lst_insert_back (List* lst, double value)
 
     #if VERBOSE >= FIRST_LVL
 
+
         puts ("[POST-INSERT-BACK]");
+
 
         lst_dmp (lst);
 
+
         #ifdef SHOW_MODE
+
 
             cool_dmp (lst);
 
+
         #endif
+
 
     #endif
 
@@ -639,20 +690,27 @@ void lst_delete_cell (List* lst, size_t delete_cell_id)
     {
     #if VERBOSE >= SECOND_LVL
 
+
         puts ("[PRE-DELETE]");
+
 
         lst_dmp (lst);
 
+
         #ifdef SHOW_MODE
+
 
             cool_dmp (lst);
 
+
         #endif
+
 
     #endif
 
 
     int prev_cell = lst->prev[delete_cell_id];
+
 
     if (lst->prev[delete_cell_id] != FREE_CELL)
         {
@@ -692,15 +750,21 @@ void lst_delete_cell (List* lst, size_t delete_cell_id)
 
     #if VERBOSE >= FIRST_LVL
 
+
         puts ("[POST-DELETE]");
+
 
         lst_dmp (lst);
 
+
         #ifdef SHOW_MODE
+
 
             cool_dmp (lst);
 
+
         #endif
+
 
     #endif
     }
@@ -724,7 +788,6 @@ void cool_dmp (List* lst)
             {
             fprintf (lst->graph_log, "node_%d[shape = record, rank = %d, label = \" <id_%d> cell_id:\n %d |"
                                "{ <next_%d> next:\n%d | data:\n%.3f | prev:\n%d}\"];\n",
-
                     cell_id, cell_id, cell_id, cell_id,
                     cell_id, lst->next[cell_id], lst->data[cell_id], lst->prev[cell_id]);
             }
@@ -736,7 +799,7 @@ void cool_dmp (List* lst)
         if (lst->prev[cell_id] != FREE_CELL)
             {
             fprintf (lst->graph_log, "node_%d:<next_%d> -> node_%d:<id_%d> [color = \"red\"];\n",
-            cell_id, cell_id, lst->next[cell_id], lst->next[cell_id]);
+                     cell_id, cell_id, lst->next[cell_id], lst->next[cell_id]);
             }
         }
 
@@ -744,8 +807,9 @@ void cool_dmp (List* lst)
     for (size_t cell_id = 0; cell_id < lst->lst_size - 1; cell_id++)
         {
         // Place in physical order
+
         fprintf (lst->graph_log, "node_%d:<id_%d> -> node_%d:<id_%d> [color = \"white\"];\n",
-        cell_id, cell_id, cell_id + 1, cell_id + 1);
+                 cell_id, cell_id, cell_id + 1, cell_id + 1);
         }
 
 
@@ -768,8 +832,8 @@ void cool_dmp (List* lst)
 
 
     // Clean .dot file
-    lst->graph_log = fopen ("lst_log.dot", "w");
-    // Will be closed in destructor
+
+    lst->graph_log = fopen ("lst_log.dot", "w"); // Will be closed in destructor
     }
 
 
@@ -779,12 +843,16 @@ void cool_dmp_show ()
     {
     FILE* show_bat = fopen ("show.bat", "w");
 
+
     int cur_clock = clock ();
+
 
     fprintf (show_bat, "dot lst_log.dot -T png -o dump\\list_log_%d.png\n"
                        "start dump\\list_log_%d.png\n", cur_clock, cur_clock);
 
+
     fclose (show_bat);
+
 
     system ("show.bat");
     }
@@ -795,34 +863,50 @@ void cool_dmp_show ()
 void lst_dmp (List* lst)
     {
     printf ("cell_id: ");
+
+
     for (size_t cell_id = 0; cell_id < lst->lst_size; cell_id++)
         {
         printf ("[%*d] ", WIDTH, cell_id);
         }
+
+
     putchar ('\n');
 
 
     printf ("   data: ");
+
+
     for (size_t cell_id = 0; cell_id < lst->lst_size; cell_id++)
         {
         printf ("[%*.*f] ", WIDTH, ACCURACY, lst->data[cell_id]);
         }
+
+
     putchar ('\n');
 
 
     printf ("   next: ");
+
+
     for (size_t cell_id = 0; cell_id < lst->lst_size; cell_id++)
         {
         printf ("[%*d] ", WIDTH, lst->next[cell_id]);
         }
+
+
     putchar ('\n');
 
 
     printf ("   prev: ");
+
+
     for (size_t cell_id = 0; cell_id < lst->lst_size; cell_id++)
         {
         printf ("[%*d] ", WIDTH, lst->prev[cell_id]);
         }
+
+
     putchar ('\n');
 
 
@@ -842,15 +926,21 @@ void lst_linearize (List* lst)
     {
     #if VERBOSE >= SECOND_LVL
 
+
         puts ("[PRE-LINEARIZE]");
+
 
         lst_dmp (lst);
 
+
         #ifdef SHOW_MODE
+
 
             cool_dmp (lst);
 
+
         #endif
+
 
     #endif
 
@@ -986,6 +1076,7 @@ int find_free_out_of_date (List* lst)
             return cell_id;
             }
 
+
         cell_id++;
         }
 
@@ -1026,5 +1117,7 @@ void lst_delete_cell_out_of_date (List* lst, size_t delete_cell_id)
 
 
     lst->next[delete_cell_id] = FREE_CELL;
+
+
     lst->data[delete_cell_id] = (int) NULL;
     }
