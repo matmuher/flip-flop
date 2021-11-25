@@ -30,7 +30,7 @@ void proc_ctor (proc* prc, size_t bin_size, int* cooking_list, FILE* log, FILE* 
         prc->ram[ram_id] = '+';
         }
 
-    puts ("START MASHINA!");
+    puts ("START MASHINA!\n");
     }
 
 
@@ -39,7 +39,9 @@ void doer (proc* prc)
     while (prc->ip < prc->bin_size)
         {
         proc_dmp (prc);
+
         cmd_enum cmd = (cmd_enum) prc->recipe[prc->ip++];
+
         do_cmd (prc, cmd);
         }
     }
@@ -97,7 +99,7 @@ void proc_dmp (proc* prc)
 #undef LOG_NEW_FILE
 
 
-// Commands
+// Proc commands
 void push (proc* prc, int val)
     {
     assert (prc);

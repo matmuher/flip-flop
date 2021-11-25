@@ -21,7 +21,7 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size)
     assert (lines_num > 0);
     assert (bin_size);
 
-    // 1 for command code and MAX_ARGS_NUM for his argument-fellows  --\/--
+    // 1 for command code and MAX_ARGS_NUM for his argument-fellows   --\/--
     int* binary = (int*) calloc (lines_num, sizeof (int) *     (1 + MAX_ARGS_NUM));
     int* begunok = binary;
     int markers[9] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
@@ -55,35 +55,14 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size)
 
     *bin_size = begunok - binary;
 
+    // If there were commands without arguments
+    // less memory was used than calloc'ed
     binary = (int*) realloc (binary, *bin_size * sizeof (int));
 
     return binary;
     }
 
-
-void write_binary (int* binary, size_t bin_size)
-    {
-    assert (binary);
-    assert (bin_size > 0);
-
-    FILE* bin_file = fopen ("binary_my_binary", "wb");
-
-    bin_info ma_bin = {MY_SIGN, bin_size, version};
-
-    if (!fwrite (&ma_bin, sizeof (char), sizeof (ma_bin), bin_file))
-        {
-        puts ("Trouble during writing struct to file");
-        }
-
-    if (!fwrite (binary, sizeof (int), bin_size, bin_file))
-        {
-        puts ("Trouble during writing recipe to file");
-        }
-
-    fclose (bin_file);
-    }
-
-
+//-----------------------------------------------------------------------------
 #define DEF_CMD(name, id, args_num, code)                                    \
         if (string_equal (#name, code_line->words_ptr))                      \
             {                                                                \
@@ -97,10 +76,11 @@ void write_binary (int* binary, size_t bin_size)
                                                                              \
                 char* str_arg = apply_to (code_line, arg_id + 1);            \
                                                                              \
-                begunok = arg_process (str_arg, begunok, markers);           \
+                begunok = arg_process (str_arg, begunok, markers, cmd_id, arg);   \
                 }                                                            \
             }                                                                \
         else
+
 int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers)
     {
     #include "cmd.h"
@@ -112,16 +92,18 @@ int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers)
 
     return begunok;
     }
+
 #undef DEF_CMD(name, id, args_num, code)
+//-----------------------------------------------------------------------------
 
 
 #define REG_PROC(REG_STR, REG_ID)            \
     else if (string_equal (str_arg, REG_STR))\
         {                                    \
         *(begunok - 1) = cmd_id | RAM_MASK;  \
-        *begunok++ = REG_ID                  \
+        *begunok++ = REG_ID;                  \
         }
-int* arg_process (char* str_arg, int* begunok, int* markers)
+int* arg_process (char* str_arg, int* begunok, int* markers, int cmd_id, int arg)
     {
     if (str_arg[0] == ':') // For markers
         {
@@ -168,6 +150,29 @@ int* arg_process (char* str_arg, int* begunok, int* markers)
     return begunok;
     }
 #undef REG_PROC
+
+
+void write_binary (int* binary, size_t bin_size)
+    {
+    assert (binary);
+    assert (bin_size > 0);
+
+    FILE* bin_file = fopen ("binary_my_binary", "wb");
+
+    bin_info ma_bin = {MY_SIGN, bin_size, version};
+
+    if (!fwrite (&ma_bin, sizeof (char), sizeof (ma_bin), bin_file))
+        {
+        puts ("Trouble during writing struct to file");
+        }
+
+    if (!fwrite (binary, sizeof (int), bin_size, bin_file))
+        {
+        puts ("Trouble during writing recipe to file");
+        }
+
+    fclose (bin_file);
+    }
 
 
 #define DEF_CMD(name, id, args_num, code) case cmd_##name:

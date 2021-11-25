@@ -5,10 +5,16 @@
 #include "..\square_solver\beer_equation.h"
 
 
-int main ()
+int main (int, char* argv[])
     {
     size_t lines_num = 0;
-    line_buf* code = get_code ("square_code.txt", &lines_num);
+
+    char* file_name = argv[1] ? argv[1] : (char*) "asm.txt";
+
+    printf ("Assembling file is %s\n", file_name);
+    getchar ();
+
+    line_buf* code = get_code (file_name, &lines_num);
 
     size_t bin_size = 0;
     int* binary = create_binary (code, lines_num, &bin_size);

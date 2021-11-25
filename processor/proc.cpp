@@ -6,6 +6,7 @@ int main ()
     {
     size_t bin_size = 0;
 
+    // *имена файлов через args cmd
 
     // LOGS AND BINARY OPEN
     FILE* bin = fopen ("binary_my_binary", "rb");
@@ -36,7 +37,7 @@ int main ()
 
 
     // PROC CONSTRUCT
-    proc prc;
+    proc prc = {};
     proc_ctor (&prc, bin_size, cooking_list, log, prc_log);
 
 

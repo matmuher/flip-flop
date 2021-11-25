@@ -89,6 +89,9 @@ enum ARGS_NUM
 // ASMA' FUNCTIONS
 
 
+int* arg_process (char* str_arg, int* begunok, int* markers, int cmd_id, int arg);
+
+
 /*!
 @brief Analyzes C-string and return command id
 */
@@ -116,10 +119,13 @@ void write_binary (int* binary, size_t bin_size);
 // DISASM' FUNCTIONS
 
 
+/*!
+@brief Read binary and disassemble it to disasm.txt
+*/
 void recogniser (int bin_size, int* cooking_list, FILE* disasm);
 
 
-// PROC' COMMANDS
+// PROC' COMMANDS *?
 
 
 void push (proc* prc, int val);
