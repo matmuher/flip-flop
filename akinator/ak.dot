@@ -1,0 +1,7 @@
+digraph G {
+A006F2208 [label = "Sherst"];
+A006F2208 -> A006F3268;
+A006F2208 -> A006F3238;
+A006F3268 [label = "Nevedomaya dich"];
+A006F3238 [label = "Koshka"];
+}
