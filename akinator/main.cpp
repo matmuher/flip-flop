@@ -1,346 +1,166 @@
 #include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ak.h"
 
-
-
-enum VERBOSE_LVLS
+FILE* tree_writer_create (void)
     {
-    ZERO_LVL = 0,
-    FIRST_LVL = 1,
-    SECOND_LVL = 2,
-    };
+    FILE* tree_writer = fopen ("tree_writer.cpp", "w");
 
-
-#define VERBOSE SECOND_LVL
-
-
-struct node
-    {
-    const char* content; //<- C-type content string
-
-    node* left_child;
-    node* right_child;
-
-    unsigned int node_type : 1; //<- SIGN or OBJECT
-    };
-
-
-enum node_type
-    {
-    SIGN = 0,
-    OBJECT = 1,
-    };
-
-
-struct tree
-    {
-    node* root;
-    };
-
-
-node* create_node (const char* content_to_push)
-    {
-    char* node_content = (char*) calloc (1, (strlen (content_to_push) + 1) * sizeof (char));
-    strcpy (node_content, content_to_push);
-
-
-    node* new_node = (node*) calloc (1, sizeof (node));
-    new_node->content = node_content;
-
-
-    new_node->left_child = NULL;
-    new_node->right_child = NULL;
-
-
-    return new_node;
+    return tree_writer;
     }
 
 
-void print_node (node* node_to_print)
+void tree_writer_close (FILE* tree_writer)
     {
-    // printf ("node address: %p\n", node_to_print);
-    if (node_to_print != NULL)
+    fclose (tree_writer);
+    }
+
+
+// Write root to file
+void write_node_recursive (node* current_node, FILE* tree_writer)
+    {
+    assert (current_node);
+
+    if (current_node->node_type == OBJECT)
         {
-        printf (" %s \n", node_to_print->content);
+        fprintf (tree_writer, "{ %s; } ", current_node->content);
         }
-    else
+    else if (current_node->node_type == SIGN)
         {
-        printf (" empty \n");
+        fprintf (tree_writer, "{ (%s) ", current_node->content);
+
+        write_node_recursive (current_node->left_child, tree_writer);
+        write_node_recursive (current_node->right_child, tree_writer);
+
+        fputs ("} ", tree_writer);
         }
+
+    putc ('\n', tree_writer);
+    }
+
+node* create_sign_node (const char* content)
+    {
+    node* sign_node = create_node (content);
+
+    sign_node->node_type = SIGN;
+
+    return sign_node;
     }
 
 
-FILE* graph_dump_create ()
+node* create_object_node (const char* content)
     {
-    FILE* graph_dump = fopen ("ak.dot", "w");
+    node* object_node = create_node (content);
 
-    fputs ("digraph G {\n", graph_dump);
+    object_node->node_type = OBJECT;
 
-
-    return graph_dump;
+    return object_node;
     }
 
 
-void graph_dump_show ()
+node* read_node_recursive (char* tree_footprint_begunok)
     {
-    system ("dot ak.dot -Tpng -o ak.png");
-    system ("start ak.png");
-    }
-
-
-void graph_dump_close (FILE* graph_dump)
-    {
-    fputs ("}\n", graph_dump);
-
-    fclose (graph_dump);
-
-    // Add show off regime
-    graph_dump_show ();
-    }
-
-
-void dot_connect_nuclear_family (node* parent_node, FILE* graph_log)
-    {
-    if (parent_node != NULL)
+    if (*tree_footprint_begunok++ == '{')
         {
-        fprintf (graph_log, "A%p [label = \"%s\"];\n", parent_node, parent_node->content);
-
-        if (parent_node->left_child != NULL)
+        if (*tree_footprint_begunok == '(')
             {
-            fprintf (graph_log, "A%p -> A%p;\n", parent_node, parent_node->left_child);
-            }
+            char* sign_start = tree_footprint_begunok + 1;
+            char sign[MAX_SIGN_NAME_LENGTH] = {};
 
-        if (parent_node->right_child != NULL)
-            {
-            fprintf (graph_log, "A%p -> A%p;\n", parent_node, parent_node->right_child);
-            }
-        }
-    }
+            tree_footprint_begunok = strchr (tree_footprint_begunok, ')');
+            *tree_footprint_begunok++ = '\0';
 
+            sscanf (sign_start, "%s", sign);
+            printf ("Now processing sign: %s\n", sign);
 
-void graphviz_dump (node* current_node, FILE* graph_log)
-    {
-    if (current_node != NULL)
-        {
-        dot_connect_nuclear_family (current_node, graph_log);
+            node* current_node = create_sign_node (sign);
 
-        graphviz_dump (current_node->left_child, graph_log);
+            current_node->left_child = read_node_recursive (tree_footprint_begunok);
+            current_node->right_child = read_node_recursive (tree_footprint_begunok);
 
-        graphviz_dump (current_node->right_child, graph_log);
-        }
-    }
-
-
-// Mode generalize: node_visitor gets function pointer
-void node_printor (node* current_node)
-    {
-    if (current_node != NULL)
-        {
-        print_node (current_node);
-
-        node_printor (current_node->left_child);
-
-        node_printor (current_node->right_child);
-        }
-    else
-        {
-        print_node (current_node);
-        }
-    }
-
-
-enum LOGIC
-    {
-    INCORRECT = -1,
-    NO = 0,
-    YES = 1,
-    };
-
-
-void clear_buffer ()
-    {
-    scanf ("%*s");
-
-    fprintf (stdin, "kiki\n");
-    fflush (stdout);
-    }
-
-
-int get_answer ()
-    {
-    const size_t MAX_ANSWER_LENGTH = 25;
-
-    char user_answer[MAX_ANSWER_LENGTH] = {};
-    scanf (" %s", user_answer);
-    clear_buffer ();
-
-    const int ATTEMPTS_ALLOWED = 5;
-
-    for (int attempt_id = 0; attempt_id < ATTEMPTS_ALLOWED; attempt_id++)
-        {
-        if (strcmp (user_answer, "No") == 0)
-            {
-            return NO;
-            }
-        else if (strcmp (user_answer, "Yes") == 0)
-            {
-            return YES;
+            return current_node;
             }
         else
             {
-            puts ("Incorrect vvod, kojanii meshok. Please, use Y/N and try again");
-            scanf (" %s ", user_answer);
-            clear_buffer ();
+            char object[MAX_OBJECT_NAME_LENGTH] = {};
+            char* object_start = tree_footprint_begunok;
+
+            tree_footprint_begunok = strchr (tree_footprint_begunok, ';');
+            *tree_footprint_begunok++ = '\0';
+
+            sscanf (object_start, " %s; ", object);
+            printf ("Now processing object: %s\n", object);
+
+            node* current_node = create_object_node (object);
+
+
+            return current_node;
             }
         }
-
-    puts ("Sorry, you're ne obuchaem\n");
-    exit (777);
-    }
-
-const int MAX_SIGN_LENGTH = 20;
-
-
-void add_object (node* razvilka_node, const char* basa_object, const char* user_object)
-    {
-    printf ("Skajite-ka, chem %s distinguish'aetsya ot %s?\n", user_object, basa_object);
-
-    char user_sign[MAX_SIGN_LENGTH];
-    scanf (" %s ", &user_sign);
-    clear_buffer ();
-
-    char* razvilka_sign = (char*) calloc (1, (strlen (user_sign) + 1) * sizeof (char));
-    strcpy (razvilka_sign, user_sign);
-
-
-    razvilka_node->content = razvilka_sign;
-    razvilka_node->node_type = SIGN;
-
-    razvilka_node->right_child = create_node (user_object);
-    razvilka_node->node_type = OBJECT;
-
-    razvilka_node->left_child = create_node (basa_object);
-    razvilka_node->node_type = OBJECT;
+    else if (*tree_footprint_begunok == '\0')
+        {
+        puts ("[SYSTEM] Digitalizing of tree was successfully ended!");
+        }
     }
 
 
-const int MAX_OBJECT_NAME_LENGTH = 20;
-
-
-void ask_object (node* node_object)
+int get_size (FILE* file_pointer)
     {
-    if (node_object != NULL)
-        {
-        const char* basa_object = node_object->content;
+    assert (file_pointer != NULL);
 
+    size_t cur_pos = ftell (file_pointer);
 
-        printf ("Vi zagadali %s?\n", basa_object);
+    // Get size
+    fseek (file_pointer, 0, SEEK_END);
+    int file_size = ftell (file_pointer);
 
+    // Return internal pointer
+    fseek (file_pointer, cur_pos, SEEK_SET);
 
-        int answer = INCORRECT;
-        answer =  get_answer ();
-
-
-        if (answer == YES)
-            {
-            printf ("Ama very clavar mashine!!! Your boy next door is %s\n", basa_object);
-            }
-        else if (answer == NO)
-            {
-            puts ("Togda kolis' shto zagadal!:");
-            char new_object_name[MAX_OBJECT_NAME_LENGTH] = {};
-            scanf ("%s", new_object_name);
-            clear_buffer ();
-
-            add_object (node_object, basa_object, new_object_name);
-
-            printf ("%s kotorii %s was successfully added to data base! Thx)\n", new_object_name, node_object->content);
-            }
-        else
-            {
-            puts ("[ERROR] get_answer worked incorrectly");
-            }
-        }
-    #if VERBOSE > FISRT_LVL
-    else
-        {
-        puts ("Object is empty");
-        }
-    #endif
-    }
-
-
-node* ask_sign (node* sign_node)
-    {
-    const char* sign = sign_node->content;
-    printf ("Ono %s?\n", sign);
-
-
-    int answer = INCORRECT;
-    answer = get_answer ();
-
-
-    if (answer == YES)
-        {
-        return sign_node->right_child;
-        }
-    else if (answer == NO)
-        {
-        return sign_node->left_child;
-        }
-    else
-        {
-        puts ("[ERROR] get_answer worked incorrectly");
-        }
-    }
-
-const int GAME_IS_ON = 1;
-
-
-node* start_akinator ()
-    {
-    node* root = create_node ("Nevedomaya dich");
-    root->node_type = OBJECT;
-
-    while (GAME_IS_ON)
-        {
-        puts ("Hello, I'm akinator. Please, guess somebody\n"
-              "Now i will try to find out who is it");
-
-        node* current_node = root;
-
-        while (current_node->node_type == SIGN)
-            {
-            current_node = ask_sign (current_node);
-            }
-
-        ask_object (current_node);
-
-        puts ("Do u wanna play again?");
-
-        int answer = INCORRECT;
-        answer = get_answer ();
-
-        if (answer == NO)
-            {
-            break;
-            }
-        }
-
-
-    return root;
+    return file_size;
     }
 
 
 int main ()
     {
-    node* root = start_akinator ();
+    #if 0
+    node* root = create_sign_node ("kotyata bivaut");
 
+
+    root->left_child = create_sign_node ("iz francii");
+
+    root->right_child = create_object_node ("rijii kotenok");
+
+    root->left_child->left_child = create_object_node ("francuz");
+    root->left_child->right_child = create_object_node ("belarus");
+
+
+    FILE* tree_writer = tree_writer_create ();
+
+    write_node_recursive (root, tree_writer);
+
+    tree_writer_close (tree_writer);
+    #endif
+
+    FILE* tree_footprint = fopen ("tree_writer.cpp", "r");
+    int tree_file_size = get_size (tree_footprint);
+
+    char* tree_line = (char*) calloc (tree_file_size, sizeof (char));
+    fread (tree_line, sizeof (char), tree_file_size, tree_footprint);
+    tree_line[tree_file_size - 1] = '\0';
+
+    puts (tree_line);
+
+    fclose (tree_footprint);
+    #if 1
+    node* root = read_node_recursive (tree_line);
 
     FILE* graph_dump = graph_dump_create ();
 
     graphviz_dump (root, graph_dump);
 
     graph_dump_close (graph_dump);
+    #endif
     }
