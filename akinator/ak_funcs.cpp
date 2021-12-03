@@ -8,17 +8,14 @@
 #define VERBOSE SECOND_LVL
 
 
-
-
-
-void add_object (node* razvilka_node, const char* basa_object, const char* user_object)
+static void add_object (node* razvilka_node, const char* basa_object, const char* user_object)
     {
     printf ("Skajite-ka, chem %s distinguish'aetsya ot %s?\n", user_object, basa_object);
 
     char user_sign[MAX_SIGN_NAME_LENGTH];
     safe_gets (user_sign, MAX_SIGN_NAME_LENGTH);
 
-    char* razvilka_sign = (char*) calloc (1, (strlen (user_sign) + 1) * sizeof (char));
+    char* razvilka_sign = (char*) elephant_calloc (1, (strlen (user_sign) + 1) * sizeof (char));
     strcpy (razvilka_sign, user_sign);
 
 
@@ -33,7 +30,7 @@ void add_object (node* razvilka_node, const char* basa_object, const char* user_
     }
 
 
-void ask_object (node* node_object)
+static void ask_object (node* node_object)
     {
     if (node_object != NULL)
         {
@@ -73,7 +70,7 @@ void ask_object (node* node_object)
     }
 
 
-node* ask_sign (node* sign_node)
+static node* ask_sign (node* sign_node)
     {
     const char* sign = sign_node->content;
     printf ("Ono %s?\n", sign);

@@ -1,15 +1,11 @@
 digraph G {
-A00024290 [label = "kotyata"];
-A00024290 -> A000242B8;
-A00024290 -> A00024360;
-A000242B8 [label = "iz"];
-A000242B8 -> A000242F8;
-A000242B8 -> A00024338;
-A000242F8 [label = "francuz;}{belarus;}}{rijii"];
-A00024338 [label = "francuz;}{belarus;}}{rijii"];
-A00024360 [label = "iz"];
-A00024360 -> A000243A0;
-A00024360 -> A000243E0;
-A000243A0 [label = "francuz;}{belarus;}}{rijii"];
-A000243E0 [label = "francuz;}{belarus;}}{rijii"];
+A00D82270 [label = "kotyata"];
+A00D82270 -> A00D82298;
+A00D82270 -> A00D82310;
+A00D82298 [label = "izdd"];
+A00D82298 -> A00D822C0;
+A00D82298 -> A00D822E8;
+A00D822C0 [label = "francuz"];
+A00D822E8 [label = "belarus"];
+A00D82310 [label = "rijii"];
 }
