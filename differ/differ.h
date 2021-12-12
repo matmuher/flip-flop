@@ -24,7 +24,7 @@ struct node
     node* left_child;
     node* right_child;
 
-    node_type ntype; //<- SIGN or OBJECT
+    node_type ntype;
     };
 
 
@@ -59,5 +59,18 @@ void tree_dot_dump (node* current_node, FILE* graph_log);
 // Console dump
 
 void cur_read_pos (tree_reader* t_reader);
+
+
+// Optimizer
+
+node* optimize_node_recurs (node* root);
+
+
+// For comparison in differ.cpp and optimizer.cpp
+
+enum comparison
+    {
+    EQUAL = 0,
+    };
 
 #endif // DIFFER_H_INCLUDED

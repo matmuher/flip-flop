@@ -8,12 +8,6 @@
 #include "diff_dsl.h"
 
 
-enum comparison
-    {
-    EQUAL = 0,
-    };
-
-
 node* to_diff (node* cur_node)
     {
     const char* node_content = cur_node->content;
