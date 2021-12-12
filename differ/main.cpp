@@ -6,7 +6,7 @@
 int main ()
     {
     #if 1
-    const char* expression = "((x)/((x)^(2)))";
+    const char* expression = "(()cos((x)^(2)))";
 
     tree_reader t_reader = {};
 

@@ -1,9 +1,11 @@
 #ifndef DIFFER_H_INCLUDED
 #define DIFFER_H_INCLUDED
 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "..\memory_free\elephant_calloc_extern.h"
+
 
 enum node_type
     {
@@ -26,22 +28,22 @@ struct node
     };
 
 
-struct tree_reader
+struct tree_reader // !Add ctor
     {
     char* root;
     char* begunok;
     };
 
 
+// Read expression to tree
+
 node* read_expression_recurs (tree_reader* t_reader);
 
-node* create_node (node_type ntype = UNDEF, const char* content_to_push = NULL);
 
-const char* transform_to_node_content (const char* content_to_push);
+// Differentiate expression
 
-node* tree_copy_recurs (node* root);
+node* to_diff (node* root);
 
-node* to_diff (node* cur_node);
 
 // Dot dump
 
@@ -52,5 +54,10 @@ void dot_dump_show (void);
 void dot_dump_close (FILE* graph_dump);
 
 void tree_dot_dump (node* current_node, FILE* graph_log);
+
+
+// Console dump
+
+void cur_read_pos (tree_reader* t_reader);
 
 #endif // DIFFER_H_INCLUDED
