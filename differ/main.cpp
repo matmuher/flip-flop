@@ -7,7 +7,7 @@ int main ()
     {
     #if 1
 
-        const char* expression = "(()cos((x)^(2)))";
+        const char* expression = "((((x)^(2))-(3))/(x))";
 
         tree_reader t_reader = {};
 
@@ -17,6 +17,8 @@ int main ()
 
         node* tree_root = read_expression_recurs (&t_reader);
 
+        printf ("cos, lc: %p, rc:%p\n", tree_root->left_child, tree_root->right_child);
+
         #if 1
 
             node* diffed_tree_root = to_diff (tree_root);
@@ -25,6 +27,8 @@ int main ()
 
         #if 1
 
+            optimize_node_recurs (diffed_tree_root);
+            optimize_node_recurs (diffed_tree_root);
             optimize_node_recurs (diffed_tree_root);
             optimize_node_recurs (diffed_tree_root);
             optimize_node_recurs (diffed_tree_root);
@@ -53,6 +57,16 @@ int main ()
         tree_dot_dump (diffed_tree_root, dot_file);
 
         dot_dump_close (dot_file);
+
+    #endif
+
+    #if 1
+
+        FILE* tex_file = create_tex ("diff.tex");
+
+        tex_dump_recurs (tex_file, diffed_tree_root);
+
+        close_tex (tex_file);
 
     #endif
 

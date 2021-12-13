@@ -40,14 +40,14 @@ struct tree_reader // !Add ctor
 node* read_expression_recurs (tree_reader* t_reader);
 
 
-// Differentiate expression
+// Differentiate expression [CREATES NEW TREE]
 
 node* to_diff (node* root);
 
 
 // Dot dump
 
-FILE* dot_dump_create (void);
+FILE* dot_dump_create (void); // !Add setting file_name
 
 void dot_dump_show (void);
 
@@ -56,14 +56,24 @@ void dot_dump_close (FILE* graph_dump);
 void tree_dot_dump (node* current_node, FILE* graph_log);
 
 
+// Tex dump
+
+FILE* create_tex (const char* name);
+
+void tex_dump_recurs (FILE* tex_file, node* root);
+
+void close_tex (FILE* tex_file);
+
+
 // Console dump
 
 void cur_read_pos (tree_reader* t_reader);
 
 
-// Optimizer
+// Optimizer [CHANGES CURRENT TREE !!!]
 
-node* optimize_node_recurs (node* root);
+node* optimize_node_recurs (node* root); // !Add optimize until there are changes in the tree
+                                         // Could be everlasting changes?
 
 
 // For comparison in differ.cpp and optimizer.cpp
