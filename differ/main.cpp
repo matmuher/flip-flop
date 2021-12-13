@@ -17,8 +17,6 @@ int main ()
 
         node* tree_root = read_expression_recurs (&t_reader);
 
-        printf ("cos, lc: %p, rc:%p\n", tree_root->left_child, tree_root->right_child);
-
         #if 1
 
             node* diffed_tree_root = to_diff (tree_root);

@@ -7,6 +7,12 @@
 #include "tree_funks.h"
 
 
+/*!
+@brief Read math expression from C-string to tree structure
+@params[in] t_reader Structure that helps synchronize working with
+                     begunok for recursive calls
+@return Pointer to root of tree which was expression parsed to
+*/
 node* read_expression_recurs (tree_reader* t_reader)
     {
     cur_read_pos (t_reader);
@@ -18,11 +24,9 @@ node* read_expression_recurs (tree_reader* t_reader)
             node* node_oper = create_node (OP);
 
             // INORDER TREE READING
-            //t_reader->begunok++;
 
-            printf ("Create left oper child\n");
-            puts (t_reader->begunok);
             node_oper->left_child = read_expression_recurs (t_reader);
+
 
             // Operator node content process
             const size_t OPER_LENGTH = 10;
@@ -33,9 +37,9 @@ node* read_expression_recurs (tree_reader* t_reader)
             // Shift begunok for next recursive reading
             t_reader->begunok += strlen (oper_content);
 
-            printf ("Create right oper child\n");
-            puts (t_reader->begunok);
+
             node_oper->right_child = read_expression_recurs (t_reader);
+
 
             t_reader->begunok++;
 
@@ -43,9 +47,6 @@ node* read_expression_recurs (tree_reader* t_reader)
             }
         else
             {
-            puts ("Finite reading");
-            puts (t_reader->begunok);
-
             // Node content process
             const size_t VERTEX_LENGTH = 10;
             char vertex_content[VERTEX_LENGTH] = {};
@@ -77,6 +78,7 @@ node* read_expression_recurs (tree_reader* t_reader)
                 }
 
             t_reader->begunok += strlen (vertex_content) + 1;
+
             return NULL;
             }
         }

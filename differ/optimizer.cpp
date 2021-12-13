@@ -8,8 +8,13 @@
 #include "tree_funks.h"
 
 
-// Should be implemented to OP nodes
 
+/*!
+@brief Optimizes node'ed expression
+@details Origin node is changed
+@params[in] oper pointer to node that should be optimized
+@return Pointer to optimized node
+*/
 void optimize_node (node* oper)
     {
     if (oper != NULL)
@@ -112,24 +117,26 @@ void optimize_node (node* oper)
                 }
             }
         }
-    puts ("Optimizations was skipped");
     }
 
 
+/*!
+@brief Optimizes tree'ed expression
+@details Origin tree is changed
+@params[in] oper pointer to node that should be optimized
+@return Pointer to optimized tree root
+*/
 node* optimize_node_recurs (node* root)
     {
-    printf ("Now processing %s[%p]\n", root->content, root);
     optimize_node (root);
 
     if (root->left_child != NULL)
         {
-        puts ("LC oprimizarion");
         optimize_node_recurs (root->left_child);
         }
 
     if (root->right_child != NULL)
         {
-        puts ("RC oprimizarion");
         optimize_node_recurs (root->right_child);
         }
 

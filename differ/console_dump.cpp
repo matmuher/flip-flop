@@ -2,6 +2,9 @@
 #include "differ.h"
 
 
+/*!
+@brief Points out current position of begunok
+*/
 void cur_read_pos (tree_reader* t_reader)
     {
     puts (t_reader->root);

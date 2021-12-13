@@ -8,6 +8,15 @@
 #include "diff_dsl.h"
 
 
+/*!
+@brief Differentiate tree'ed expression
+
+@details Origin tree isn't changed. New tree for diff' expression is created
+
+@params[in] cur_node pointer to node that should be differentiated
+
+@return Pointer new tree with differentiated expression
+*/
 node* to_diff (node* cur_node)
     {
     const char* node_content = cur_node->content;

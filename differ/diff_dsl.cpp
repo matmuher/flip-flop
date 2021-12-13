@@ -1,8 +1,11 @@
 #include "differ.h"
 #include "tree_funks.h"
+#include "diff_dsl.h"
 
 
-// (f_x + g_x)' = f_x' + g_x'
+/*!
+@brief (f_x + g_x)' = f_x' + g_x'
+*/
 node* diff_sum (node* cur_node)
     {
     node* diff_node = create_node (OP);
@@ -22,8 +25,9 @@ node* diff_sum (node* cur_node)
     return diff_node;
     }
 
-
-// (f_x * g_x)' = f_x' * g_x + g_x' * f_x
+/*!
+@brief (f_x * g_x)' = f_x' * g_x + g_x' * f_x
+*/
 node* diff_mlt (node* cur_node)
     {
     node* diff_node = create_node (OP, "+");
@@ -39,8 +43,9 @@ node* diff_mlt (node* cur_node)
     return diff_node;
     }
 
-
-// ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
+/*!
+@brief ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
+*/
 node* diff_pow (node* cur_node)
     {
     // ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
@@ -86,8 +91,9 @@ node* diff_pow (node* cur_node)
     return diff_node;
     }
 
-
-// (x / y) = (x * y ^ (-1))
+/*!
+@brief (x / y) = (x * y ^ (-1))
+*/
 node* transform_division (node* cur_node)
     {
     cur_node->content = transform_to_node_content ("*");
@@ -103,8 +109,9 @@ node* transform_division (node* cur_node)
     return cur_node;
     }
 
-
-// (sin_f_x)' = cos * (f_x)'
+/*!
+@brief (sin_f_x)' = cos * (f_x)'
+*/
 node* diff_sin (node* cur_node)
     {
     node* diff_node = create_node (OP, "*");
@@ -118,13 +125,14 @@ node* diff_sin (node* cur_node)
     return diff_node;
     }
 
-
-// (cos_f_x)' = (-1) * sin (f_x) * (f_x)'
+/*!
+@brief (cos_f_x)' = (-1) * sin (f_x) * (f_x)'
+*/
 node* diff_cos (node* cur_node)
     {
     node* diff_node = create_node (OP, "*");
 
-    node* node_l = diff_node->left_child = create_node (VAL, "-1");
+    diff_node->left_child = create_node (VAL, "-1");
 
     node* node_r = diff_node->right_child = create_node (OP, "*");
 
