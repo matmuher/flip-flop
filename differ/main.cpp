@@ -7,7 +7,7 @@ int main ()
     {
     #if 1
 
-        const char* expression = "((((x)^(2))-(3))/(x))";
+        const char* expression = "((((2)+(2))-(13))*(7))";
 
         tree_reader t_reader = {};
 
@@ -17,7 +17,7 @@ int main ()
 
         node* tree_root = read_expression_recurs (&t_reader);
 
-        #if 1
+        #if 0
 
             node* diffed_tree_root = to_diff (tree_root);
 
@@ -25,11 +25,7 @@ int main ()
 
         #if 1
 
-            optimize_node_recurs (diffed_tree_root);
-            optimize_node_recurs (diffed_tree_root);
-            optimize_node_recurs (diffed_tree_root);
-            optimize_node_recurs (diffed_tree_root);
-            optimize_node_recurs (diffed_tree_root);
+            optimize_node_recurs (tree_root);
 
         #endif
 
@@ -52,13 +48,13 @@ int main ()
 
         FILE* dot_file = dot_dump_create ();
 
-        tree_dot_dump (diffed_tree_root, dot_file);
+        tree_dot_dump (tree_root, dot_file);
 
         dot_dump_close (dot_file);
 
     #endif
 
-    #if 1
+    #if 0
 
         FILE* tex_file = create_tex ("diff.tex");
 

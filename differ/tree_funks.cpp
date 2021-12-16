@@ -73,3 +73,35 @@ node* tree_copy_recurs (node* root)
 
     return copy_root;
     }
+
+
+
+
+
+node* tree_visitor (node* root, void (*func)(node*), visit_mode mode)
+    {
+    if (mode == PRE)
+        {
+        func (root);
+        }
+
+    if (root->left_child)
+        {
+        tree_visitor (root->left_child, func, mode);
+        }
+
+    if (mode == IN)
+        {
+        func (root);
+        }
+
+    if (root->right_child)
+        {
+        tree_visitor (root->right_child, func, mode);
+        }
+
+    if (mode == POST)
+        {
+        func (root);
+        }
+    }

@@ -28,14 +28,30 @@ struct node
     };
 
 
+
+//=============================================================================\\
+//                               Tree functions                                \\
+//=============================================================================\\
+
+enum visit_mode
+    {
+    PRE = -1, // Root ->left -> right: like in copying root
+    IN = 0,   // Left -> root -> right: like in human's algebra
+    POST = 1, // Left -> right -> root: like in assembler
+    };
+
+node* tree_visitor (node* root, void (*func)(node*), visit_mode mode);
+
+
+//=============================================================================\\
+//                          Read expression to tree                            \\
+//=============================================================================\\
+
 struct tree_reader // !Add ctor
     {
     char* root;
     char* begunok; //<- Current position in string, that is being read
     };
-
-
-// Read expression to tree
 
 /*!
 @brief Read math expression from C-string to tree structure
@@ -46,7 +62,9 @@ struct tree_reader // !Add ctor
 node* read_expression_recurs (tree_reader* t_reader);
 
 
-// Differentiate expression [CREATES NEW TREE]
+//=============================================================================\\
+//                Differentiate expression [CREATES NEW TREE]                  \\
+//=============================================================================\\
 
 /*!
 @brief Differentiate tree'ed expression
@@ -57,7 +75,9 @@ node* read_expression_recurs (tree_reader* t_reader);
 node* to_diff (node* root); // !Add differentiating for different variables
 
 
-// Dot dump
+//=============================================================================\\
+//                                 Dot dump                                    \\
+//=============================================================================\\
 
 FILE* dot_dump_create (void); // !Add setting file_name
 
@@ -68,7 +88,9 @@ void dot_dump_close (FILE* graph_dump);
 void tree_dot_dump (node* current_node, FILE* graph_log);
 
 
-// Tex dump
+//=============================================================================\\
+//                                 Tex dump                                    \\
+//=============================================================================\\
 
 FILE* create_tex (const char* name);
 
@@ -77,7 +99,9 @@ void tex_dump_recurs (FILE* tex_file, node* root); // !Merge create and recurs f
 void close_tex (FILE* tex_file);
 
 
-// Console dump
+//=============================================================================\\
+//                             Console dump                                    \\
+//=============================================================================\\
 
 /*!
 @brief Points out current position of begunok
@@ -85,7 +109,9 @@ void close_tex (FILE* tex_file);
 void cur_read_pos (tree_reader* t_reader);
 
 
-// Optimizer [CHANGES CURRENT TREE !!!]
+//=============================================================================\\
+//                   Optimizer [CHANGES CURRENT TREE !!!]                      \\
+//=============================================================================\\
 
 /*!
 @brief Optimizes tree'ed expression
@@ -97,7 +123,9 @@ node* optimize_node_recurs (node* root); // !Add optimize until there are change
                                          // Could be everlasting changes?
 
 
-// For comparison in differ.cpp and optimizer.cpp
+//=============================================================================\\
+//               For comparison in differ.cpp and optimizer.cpp                \\
+//=============================================================================\\
 
 enum comparison
     {

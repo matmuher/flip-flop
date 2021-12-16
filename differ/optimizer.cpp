@@ -34,14 +34,21 @@ void optimize_node (node* oper)
                 }
             // x ^* 1 = x and x +- 0 = x
             else if (
-                    (*oper->left_child->content == '1' &&              *oper->content == '*') ||
-                    (            *oper->content == '*' && *oper->right_child->content == '1') ||
-                    (*oper->left_child->content == '1' &&              *oper->content == '^') ||
-                    (            *oper->content == '^' && *oper->right_child->content == '1') ||
-                    (*oper->left_child->content == '0' &&              *oper->content == '-') ||
-                    (            *oper->content == '-' && *oper->right_child->content == '0') ||
-                    (*oper->left_child->content == '0' &&              *oper->content == '+') ||
-                    (            *oper->content == '+' && *oper->right_child->content == '0')
+                    (strcmp (oper->left_child->content, "1") == EQUAL &&                              *oper->content == '*') ||
+
+                    (*oper->content == '*'                            &&  strcmp (oper->right_child->content, "1") == EQUAL) ||
+
+                    (strcmp (oper->left_child->content, "1") == EQUAL &&                              *oper->content == '^') ||
+
+                    (*oper->content == '^'                            &&  strcmp (oper->right_child->content, "1") == EQUAL) ||
+
+                    (strcmp (oper->left_child->content, "0") == EQUAL &&                              *oper->content == '-') ||
+
+                    (*oper->content == '-'                            &&  strcmp (oper->right_child->content, "0") == EQUAL) ||
+
+                    (strcmp (oper->left_child->content,"0") == EQUAL  &&                              *oper->content == '+') ||
+
+                    (*oper->content == '+'                            && strcmp (oper->right_child->content, "0") == EQUAL)
                     )
                 {
                 node* informative_child = NULL;
@@ -119,7 +126,7 @@ void optimize_node (node* oper)
         }
     }
 
-
+#if 0
 /*!
 @brief Optimizes tree'ed expression
 @details Origin tree is changed
@@ -141,4 +148,17 @@ node* optimize_node_recurs (node* root)
         }
 
     return root;
+    }
+#endif
+
+
+/*!
+@brief Optimizes tree'ed expression
+@details Origin tree is changed
+@params[in] oper pointer to node that should be optimized
+@return Pointer to optimized tree root
+*/
+node* optimize_node_recurs (node* root)
+    {
+    return tree_visitor (root, optimize_node, POST);
     }
