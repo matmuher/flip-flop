@@ -62,3 +62,13 @@ void tree_dot_dump (node* current_node, FILE* graph_log)
         tree_dot_dump (current_node->right_child, graph_log);
         }
     }
+
+
+void dot_this_shit (node* root)
+    {
+    FILE* dot_file = dot_dump_create ();
+
+    tree_dot_dump (root, dot_file);
+
+    dot_dump_close (dot_file);
+    }

@@ -7,6 +7,27 @@
 #include "tree_funks.h"
 
 
+char* keywords[] = {"sin", "cos"};
+size_t keywords_num = sizeof (keywords) / sizeof (keywords[0]);
+
+int check_keyword (char* suspect)
+    {
+    int match = false;
+
+    for (int kw_id = 0; kw_id < keywords_num; kw_id++)
+            {
+            if (strcmp (keywords[kw_id], suspect) == EQUAL)
+                {
+                match = true;
+                break;
+                }
+            }
+
+    return match;
+    }
+
+
+
 /*!
 @brief Read math expression from C-string to tree structure
 @params[in] t_reader Structure that helps synchronize working with
@@ -37,9 +58,7 @@ node* read_expression_recurs (tree_reader* t_reader)
             // Shift begunok for next recursive reading
             t_reader->begunok += strlen (oper_content);
 
-
             node_oper->right_child = read_expression_recurs (t_reader);
-
 
             t_reader->begunok++;
 
@@ -51,6 +70,11 @@ node* read_expression_recurs (tree_reader* t_reader)
             const size_t VERTEX_LENGTH = 10;
             char vertex_content[VERTEX_LENGTH] = {};
             int scan_back = sscanf (t_reader->begunok, "%[^()]s", vertex_content);
+
+            if (check_keyword (vertex_content))
+                {
+                return NULL;
+                }
 
             if (scan_back) // Not empty node
                 {

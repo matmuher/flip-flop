@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.11.6)  13 DEC 2021 08:06
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.11.6)  17 DEC 2021 17:41
 entering extended mode
 **./diff.tex
 (diff.tex
@@ -61,14 +61,14 @@ Here is how much of TeX's memory you used:
  18334 multiletter control sequences out of 15000+600000
  403430 words of font info for 27 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 34i,5n,41p,150b,107s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 34i,5n,41p,148b,107s stack positions out of 5000i,500n,10000p,200000b,80000s
 <D:/MKTex/fonts/type1/public/amsfonts/cm/cmmi10.pfb><D:/MKTex/fonts/type1/p
 ublic/amsfonts/cm/cmmi7.pfb><D:/MKTex/fonts/type1/public/amsfonts/cm/cmr10.pfb>
 <D:/MKTex/fonts/type1/public/amsfonts/cm/cmr7.pfb><D:/MKTex/fonts/type1/public/
-amsfonts/cm/cmsy10.pfb><D:/MKTex/fonts/type1/public/amsfonts/cm/cmsy7.pfb>
-Output written on diff.pdf (1 page, 53127 bytes).
+amsfonts/cm/cmsy10.pfb>
+Output written on diff.pdf (1 page, 45813 bytes).
 PDF statistics:
- 36 PDF objects out of 1000 (max. 8388607)
+ 31 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

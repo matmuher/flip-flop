@@ -79,6 +79,8 @@ node* to_diff (node* root); // !Add differentiating for different variables
 //                                 Dot dump                                    \\
 //=============================================================================\\
 
+void dot_this_shit (node* root);
+
 FILE* dot_dump_create (void); // !Add setting file_name
 
 void dot_dump_show (void); // !Merge create and recurs functions
@@ -121,6 +123,22 @@ void cur_read_pos (tree_reader* t_reader);
 */
 node* optimize_node_recurs (node* root); // !Add optimize until there are changes in the tree
                                          // Could be everlasting changes?
+
+
+
+//=============================================================================\\
+//                                     Input                                   \\
+//=============================================================================\\
+
+/*!
+@brief Read [buffer_size] bytes to [write_to_buffer] from [file_stream]
+@details Wrap of fget_s + clear of buffer
+@params[in] write_to_buffer buffer to write
+@params[in] write_to_buffer how many chars to read
+@params[in] file_stream read from here
+@return Pointer to written buffer
+*/
+char* safe_gets (char* write_to_buffer, size_t buffer_size, FILE* file_stream);
 
 
 //=============================================================================\\

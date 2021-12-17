@@ -32,38 +32,6 @@ void optimize_node (node* oper)
 
                 oper->left_child = oper->right_child = NULL;
                 }
-            // x ^* 1 = x and x +- 0 = x
-            else if (
-                    (strcmp (oper->left_child->content, "1") == EQUAL &&                              *oper->content == '*') ||
-
-                    (*oper->content == '*'                            &&  strcmp (oper->right_child->content, "1") == EQUAL) ||
-
-                    (strcmp (oper->left_child->content, "1") == EQUAL &&                              *oper->content == '^') ||
-
-                    (*oper->content == '^'                            &&  strcmp (oper->right_child->content, "1") == EQUAL) ||
-
-                    (strcmp (oper->left_child->content, "0") == EQUAL &&                              *oper->content == '-') ||
-
-                    (*oper->content == '-'                            &&  strcmp (oper->right_child->content, "0") == EQUAL) ||
-
-                    (strcmp (oper->left_child->content,"0") == EQUAL  &&                              *oper->content == '+') ||
-
-                    (*oper->content == '+'                            && strcmp (oper->right_child->content, "0") == EQUAL)
-                    )
-                {
-                node* informative_child = NULL;
-
-                if (isdigit (*oper->left_child->content))
-                    {
-                    informative_child = oper->right_child;
-                    }
-                else // *oper->right_child->content == '1'
-                    {
-                    informative_child = oper->left_child;
-                    }
-
-                copy_node (oper, informative_child);
-                }
             // value [+-*^] value = value
             else if (oper->left_child->ntype == VAL && oper->right_child->ntype == VAL)
                 {
@@ -121,6 +89,38 @@ void optimize_node (node* oper)
 
 
                 oper->left_child = oper->right_child = NULL;
+                }
+            // x ^* 1 = x and x +- 0 = x
+            else if (
+                    (strcmp (oper->left_child->content, "1") == EQUAL &&                              *oper->content == '*') ||
+
+                    (*oper->content == '*'                            &&  strcmp (oper->right_child->content, "1") == EQUAL) ||
+
+                    (strcmp (oper->left_child->content, "1") == EQUAL &&                              *oper->content == '^') ||
+
+                    (*oper->content == '^'                            &&  strcmp (oper->right_child->content, "1") == EQUAL) ||
+
+                    (strcmp (oper->left_child->content, "0") == EQUAL &&                              *oper->content == '-') ||
+
+                    (*oper->content == '-'                            &&  strcmp (oper->right_child->content, "0") == EQUAL) ||
+
+                    (strcmp (oper->left_child->content,"0") == EQUAL  &&                              *oper->content == '+') ||
+
+                    (*oper->content == '+'                            && strcmp (oper->right_child->content, "0") == EQUAL)
+                    )
+                {
+                node* informative_child = NULL;
+
+                if (isdigit (*oper->left_child->content))
+                    {
+                    informative_child = oper->right_child;
+                    }
+                else // *oper->right_child->content == '1'
+                    {
+                    informative_child = oper->left_child;
+                    }
+
+                copy_node (oper, informative_child);
                 }
             }
         }

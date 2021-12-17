@@ -2,12 +2,23 @@
 #include <string.h>
 #include "differ.h"
 
+// ! var search -> e^x, etc
+// ! reading from file
 
-int main ()
+int main (int, char* argv[])
     {
+    #if 0
+
+    size_t file_size = get_size (file_name);
+    FILE* fopen
+    char* expression = elephant_calloc (file_size + 1, sizeof (char));
+    safe_gets (expression, );
+
+    #endif
+
     #if 1
 
-        const char* expression = "((((2)+(2))-(13))*(7))";
+        const char* expression = "(((()sin(x))^(2))+((sin((x)^(5)))))";
 
         tree_reader t_reader = {};
 
@@ -17,44 +28,28 @@ int main ()
 
         node* tree_root = read_expression_recurs (&t_reader);
 
-        #if 0
+        // dot_this_shit (tree_root);
+
+        #if 1
 
             node* diffed_tree_root = to_diff (tree_root);
+
+            // dot_this_shit (diffed_tree_root);
 
         #endif
 
         #if 1
 
-            optimize_node_recurs (tree_root);
+            optimize_node_recurs (diffed_tree_root);
+
+             dot_this_shit (diffed_tree_root);
 
         #endif
 
     #endif
 
-    #if 0
-
-        #include "tree_funks.h"
-
-        node* test_oper_node = create_node (OP, "*");
-
-        test_oper_node->left_child = create_node (VAR, "x");
-        test_oper_node->right_child = create_node (VAL, "0");
-
-        optimize_node_recurs (test_oper_node);
-
-    #endif
 
     #if 1
-
-        FILE* dot_file = dot_dump_create ();
-
-        tree_dot_dump (tree_root, dot_file);
-
-        dot_dump_close (dot_file);
-
-    #endif
-
-    #if 0
 
         FILE* tex_file = create_tex ("diff.tex");
 

@@ -3,26 +3,95 @@
 #include "diff_dsl.h"
 
 
+#define LEFT(node) (node)->left_child
+
+#define RIGHT(node) (node)->right_child
+
+#define CONTENT(node) (node)->content
+
+#define D(node) to_diff (node)
+
+#define COPY(node) tree_copy_recurs (node)
+
+
+node* bi_oper (node* left, node* right, const char* oper)
+    {
+    node* root = create_node (OP, oper);
+
+    LEFT(root) = left;
+    RIGHT(root) = right;
+
+    return root;
+    }
+
+
+node* mono_oper (node* right, const char* oper)
+    {
+    node* root = create_node (OP, oper);
+
+    RIGHT(root) = right;
+
+    return root;
+    }
+
+
+node* sinus (node* arg)
+    {
+    return mono_oper (arg, "sin");
+    }
+
+
+node* cosinus (node* arg)
+    {
+    return mono_oper (arg, "cos");
+    }
+
+
+node* add (node* left, node* right)
+    {
+    return bi_oper (left, right, "+");
+    }
+
+
+node* sub (node* left, node* right)
+    {
+    return bi_oper (left, right, "-");
+    }
+
+
+node* mlt (node* left, node* right)
+    {
+    return bi_oper (left, right, "*");
+    }
+
+
+node* pow (node* left, node* right)
+    {
+    return bi_oper (left, right, "^");
+    }
+
+
+node* create_val (const char* val)
+    {
+    return create_node (VAL, val);
+    }
+
+
 /*!
 @brief (f_x + g_x)' = f_x' + g_x'
 */
 node* diff_sum (node* cur_node)
     {
-    node* diff_node = create_node (OP);
-
-    if (*cur_node->content == '+')
+    if (*CONTENT(cur_node) == '+')
         {
-        diff_node->content = transform_to_node_content ("+");
+        return add (D(LEFT(cur_node)), D(RIGHT(cur_node)) );
         }
-    else if (*cur_node->content == '-')
+    else if (*CONTENT(cur_node) == '-')
         {
-        diff_node->content = transform_to_node_content ("-");
+        return sub (D(LEFT(cur_node)), D(RIGHT(cur_node)) );
         }
 
-    diff_node->left_child = to_diff (cur_node->left_child);
-    diff_node->right_child = to_diff (cur_node->right_child);
-
-    return diff_node;
+    return NULL;
     }
 
 /*!
@@ -30,17 +99,12 @@ node* diff_sum (node* cur_node)
 */
 node* diff_mlt (node* cur_node)
     {
-    node* diff_node = create_node (OP, "+");
+    node* dfx_mlt_gx = mlt (D(LEFT(cur_node)), RIGHT(cur_node) );
+    node* dgx_mlt_fx = mlt (D(RIGHT(cur_node)), LEFT(cur_node) );
 
-    node* node_l = diff_node->left_child = create_node (OP, "*");
-    node_l->left_child = to_diff (cur_node->left_child);
-    node_l->right_child = tree_copy_recurs (cur_node->right_child);
+    node* temp_dump = add (dfx_mlt_gx, dgx_mlt_fx);
 
-    node* node_r = diff_node->right_child = create_node (OP, "*");
-    node_r->left_child = to_diff (cur_node->right_child);
-    node_r->right_child = tree_copy_recurs (cur_node->left_child);
-
-    return diff_node;
+    return temp_dump;
     }
 
 /*!
@@ -48,47 +112,12 @@ node* diff_mlt (node* cur_node)
 */
 node* diff_pow (node* cur_node)
     {
-    // ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
-    //-----------------^
-    node* diff_node = create_node (OP, "*");
+    const char* A_st = CONTENT(RIGHT(cur_node));
+    node* fx = COPY(LEFT(cur_node));
+    node* dfx = D(LEFT(cur_node));
+    node* A = create_val (A_st);
 
-    // ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
-    //---------------^
-    diff_node->left_child = create_node (VAL, cur_node->right_child->content);
-
-    // ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
-    //-----------------------------------^
-    // node_r = ONE right step from start node
-    node* node_r = diff_node->right_child = create_node (OP, "*");
-
-    // ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
-    //---------------------------------------^
-    node_r->right_child = to_diff (cur_node->left_child);
-
-    // ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
-    //-------------------------^
-    // node_r_l = ONE right, ONE left from start node
-    node* node_r_l = node_r->left_child = create_node (OP, "^");
-
-    // ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
-    //---------------------^
-    node_r_l->left_child = tree_copy_recurs
-                                (cur_node->left_child);
-
-    // ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
-    //------------------------------^
-    node* node_r_l_r = node_r_l->right_child = create_node (OP, "-");
-
-    // ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
-    //----------------------------^
-    node_r_l_r->left_child = create_node (VAL, cur_node->right_child->content);
-
-    // ((f_x) ^ A)'= A * (f_x) ^ (A - 1) * (f_x)'
-    //--------------------------------^
-    node_r_l_r->right_child = create_node (VAL, "1");
-
-
-    return diff_node;
+    return mlt (A, mlt (pow (fx, sub (create_val (A_st), create_val ("1"))), dfx));
     }
 
 /*!
@@ -96,17 +125,7 @@ node* diff_pow (node* cur_node)
 */
 node* transform_division (node* cur_node)
     {
-    cur_node->content = transform_to_node_content ("*");
-
-    node* denominator = cur_node->right_child;
-
-    node* div_node = create_node (OP, "^");
-    div_node->left_child = denominator;
-    div_node->right_child = create_node (VAL, "-1");
-
-    cur_node->right_child = div_node;
-
-    return cur_node;
+    return mlt (LEFT(cur_node), pow (RIGHT(cur_node), create_val ("-1")));
     }
 
 /*!
@@ -114,15 +133,7 @@ node* transform_division (node* cur_node)
 */
 node* diff_sin (node* cur_node)
     {
-    node* diff_node = create_node (OP, "*");
-
-    node* node_l = diff_node->left_child = create_node (OP, "cos");
-
-    node_l->right_child = tree_copy_recurs (cur_node->right_child);
-
-    diff_node->right_child = to_diff (cur_node->right_child);
-
-    return diff_node;
+    return mlt (cosinus (COPY(RIGHT(cur_node))), D(RIGHT(cur_node)));
     }
 
 /*!
@@ -130,16 +141,5 @@ node* diff_sin (node* cur_node)
 */
 node* diff_cos (node* cur_node)
     {
-    node* diff_node = create_node (OP, "*");
-
-    diff_node->left_child = create_node (VAL, "-1");
-
-    node* node_r = diff_node->right_child = create_node (OP, "*");
-
-    node* node_r_l = node_r->left_child = create_node (OP, "sin");
-    node_r_l->right_child = tree_copy_recurs (cur_node->right_child);
-
-    node_r->right_child = to_diff (cur_node->right_child);
-
-    return diff_node;
+    return mlt (mlt (create_val ("-1"), sinus (RIGHT(cur_node))), D(RIGHT(cur_node)));
     }
