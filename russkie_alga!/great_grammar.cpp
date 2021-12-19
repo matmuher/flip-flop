@@ -37,14 +37,16 @@ ma_ty get_G (parsed_line_reader* pl_reader)
             break;
             }
 
-        st_begunok->left_child = st (NULL, NULL);
+        node* temp = st (NULL, NULL);
 
-        st_begunok = st_begunok->left_child;
+        temp->left_child = st_begunok;
+
+        st_begunok = temp;
         }
     // cur_read_pos (pl_reader);
     require ('$', pl_reader);
 
-    return root;
+    return st_begunok;
     }
 
 

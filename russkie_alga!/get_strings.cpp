@@ -123,7 +123,7 @@ void put_zeros (char* const buffer, size_t file_size)
         {
         if (*cur_pos == '\n')
             {
-            *cur_pos = '\0';
+            *cur_pos = '#';
             }
         cur_pos++;
         }
