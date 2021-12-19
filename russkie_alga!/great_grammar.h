@@ -14,7 +14,7 @@ struct line_reader
 
 enum ERROR_LIST
     {
-    BAD_DIGIT = -1,
+    BAD_TERMINAL = -1,
     BAD_REQUIREMENT = -2,
     LONG_ID = -3,
     COMPARISON_EXPECTED = -4,
@@ -65,6 +65,7 @@ enum kws
     sinus = 1,
     cosus = 2,
     logus = 3,
+    print = 4,
     };
 
 kws determine_kw (char* unknown_kw);
@@ -110,5 +111,7 @@ node* bi_oper (node* left, node* right, const char* oper);
 node* ass (node* left, node* right);
 
 node* create_val (const char* val);
+
+node* st (node* left, node* right);
 
 #endif // GREAT_GRAMMAR_H_INCLUDED

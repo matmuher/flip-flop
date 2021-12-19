@@ -1,3 +1,31 @@
 digraph G {
-A00C52378 [label = "if"];
+A007A23F0 [label = "statement"];
+A007A23F0 -> A007A3510;
+A007A23F0 -> A007A34E8;
+A007A3510 [label = "statement"];
+A007A3510 -> A007A6C88;
+A007A3510 -> A007A0508;
+A007A6C88 [label = "statement"];
+A007A0508 [label = "while"];
+A007A0508 -> A007A3590;
+A007A0508 -> A007A04F0;
+A007A3590 [label = "<"];
+A007A3590 -> A007A3540;
+A007A3590 -> A007A3568;
+A007A3540 [label = "x"];
+A007A3568 [label = "8."];
+A007A04F0 [label = "="];
+A007A04F0 -> A007A35B8;
+A007A04F0 -> A007A04D8;
+A007A35B8 [label = "x"];
+A007A04D8 [label = "+"];
+A007A04D8 -> A007A35E0;
+A007A04D8 -> A007A04B0;
+A007A35E0 [label = "x"];
+A007A04B0 [label = "1."];
+A007A34E8 [label = "="];
+A007A34E8 -> A007A2420;
+A007A34E8 -> A007A2448;
+A007A2420 [label = "x"];
+A007A2448 [label = "5."];
 }

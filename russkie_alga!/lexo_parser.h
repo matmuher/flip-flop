@@ -5,7 +5,7 @@ union token_content
     {
     char* id;
     double val;
-    char servant;
+    int servant;
     };
 
 
@@ -20,6 +20,7 @@ enum token_type
     T_VAR = 6, // TOVAR or TVAR'?
     T_OO_LONG_NAME = 7,
     T_COMP = 8,
+    T_LINE = 9,
     };
 
 

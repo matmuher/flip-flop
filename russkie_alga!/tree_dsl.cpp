@@ -90,7 +90,7 @@ node* npow (node* left, node* right)
 
 node* eq (node* left, node* right)
     {
-    return bi_oper (left, right, "=");
+    return bi_oper (left, right, "==");
     }
 
 
@@ -109,6 +109,12 @@ node* ls (node* left, node* right)
 node* wh (node* left, node* right)
     {
     return bi_oper (left, right, "while");
+    }
+
+
+node* st (node* left, node* right)
+    {
+    return bi_oper (left, right, "statement");
     }
 
 

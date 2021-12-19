@@ -9,7 +9,7 @@
 //                             GRAMMAR SHIT                                    \\
 //=============================================================================\\
 
-#define VERBOSE_SIGNAL(cmd_name)
+#define VERBOSE_SIGNAL(cmd_name) puts (#cmd_name)
 
 // gfs - get from structure
 #define gfs(element) pl_reader->element
@@ -21,11 +21,30 @@ ma_ty get_G (parsed_line_reader* pl_reader)
     VERBOSE_SIGNAL(get_g);
 
     ma_ty val = {};
-    val = get_A (pl_reader);
+    ma_ty st_begunok = st (NULL, NULL);
+    ma_ty root = st_begunok;
+
+    while (1)
+        {
+        val = get_A (pl_reader);
+        puts ("Bezobrazie");
+        require ('#', pl_reader);
+
+        st_begunok->right_child = val;
+
+        if (gfs(pl[gfs(token_id)].type) == T_END)
+            {
+            break;
+            }
+
+        st_begunok->left_child = st (NULL, NULL);
+
+        st_begunok = st_begunok->left_child;
+        }
     // cur_read_pos (pl_reader);
     require ('$', pl_reader);
 
-    return val;
+    return root;
     }
 
 
@@ -65,7 +84,7 @@ ma_ty get_A (parsed_line_reader* pl_reader)
         ma_ty val = create_node (VAR, gfs(pl[gfs(token_id)].content.id));
         gfs(token_id)++;
 
-        require ('=', pl_reader);
+        require (':', pl_reader);
 
         ma_ty val2 = get_E (pl_reader);
 
@@ -252,7 +271,8 @@ ma_ty get_P (parsed_line_reader* pl_reader)
 
         return val;
         }
-    else if (gfs(pl[gfs(token_id)].type) == T_VAL) // T_VAR process
+    else if (gfs(pl[gfs(token_id)].type) == T_VAL ||
+             gfs(pl[gfs(token_id)].type) == T_VAR) // T_VAR process
         {
         return get_N (pl_reader);
         }
@@ -264,27 +284,28 @@ ma_ty get_N (parsed_line_reader* pl_reader)
     {
     VERBOSE_SIGNAL(get_n);
 
-    size_t start_token_id = gfs(token_id);
-
-    ma_ty nval = {};
-    double val = 0;
-
-     if (gfs(pl[gfs(token_id)].type) == T_VAL)
+    if (gfs(pl[gfs(token_id)].type) == T_VAL)
         {
+        double val = 0;
+
         val = gfs(pl[gfs(token_id)++].content.val);
+
+        const int ACCURACY = 6;
+        char str_val[ACCURACY] = {};
+
+        return create_val (gcvt (val, ACCURACY, str_val));
+        }
+    else if (gfs(pl[gfs(token_id)].type) == T_VAR)
+        {
+        gfs(token_id)++;
+        return create_node (VAR, gfs(pl[gfs(token_id)-1].content.id));
         }
     else
         {
-        syntax_error (pl_reader, BAD_DIGIT);
+        syntax_error (pl_reader, BAD_TERMINAL);
 
         return NULL;
         }
-
-    const int ACCURACY = 6;
-    char str_val[ACCURACY] = {};
-    nval = create_val (gcvt (val, ACCURACY, str_val));
-
-    return nval;
     }
 
 
@@ -324,7 +345,8 @@ int require (char requirement, parsed_line_reader* pl_reader)
 
     token_type t_type = gfs(pl[gfs(token_id)].type);
 
-    if (t_type ==  T_OP || t_type ==  T_PARENTH || t_type ==  T_END)
+    if (t_type ==  T_OP || t_type ==  T_PARENTH || t_type ==  T_END || t_type == T_LINE ||
+        t_type ==  T_COMP)
         {
         if (gfs(pl[gfs(token_id)].content.servant) == requirement)
             {

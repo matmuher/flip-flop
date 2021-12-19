@@ -2,12 +2,17 @@
 #include <string.h>
 #include "great_grammar.h"
 #include "lexo_parser.h"
-
+#include "..\hamlet\d_hamlet_functions.h"
 
 
 int main ()
     {
-    const char* expression = "if(12=3){x=5+4^2*sinus(12)}$";
+    char* file_name = "wasup_world.cum";
+    size_t lines_num = 0;
+    line_buf* lines =  get_strings (file_name, &lines_num, true);
+
+
+    const char* expression = "if(x=3){x:5-1*x-12/y+x^3}$";
 
     // "(sinus(5^2)+3)*(12-3)$"
 
@@ -20,11 +25,11 @@ int main ()
     // printf ("get_G returned %f", get_G (expression));
 
 
-    token* parsed_line = lexo_parse (expression);
+    token* parsed_line = lexo_parse (lines[0].beg_ptr);
 
     parsed_line_reader pl_reader = {0, parsed_line};
 
-    #if 0 // Check lexo parse
+    #if 1 // Check lexo parse
 
     print_pl (&pl_reader);
 

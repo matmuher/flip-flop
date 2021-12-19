@@ -1,0 +1,4 @@
+x:5
+while(x<8){x:x+1}
+print(x)
+$

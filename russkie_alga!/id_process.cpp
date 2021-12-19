@@ -7,7 +7,7 @@
 
 // To add a function you should add it to enum IDS, char* keywords[], determine_keyword (),
 // and describe its work in execute ()
-const char* sfunk[] = {"sinus", "cosus", "logus"};
+const char* sfunk[] = {"sinus", "cosus", "logus", "print"};
 const char* sframe[] = {"while", "if"};
 size_t sfunk_num = sizeof (sfunk) / sizeof (sfunk[0]);
 size_t sframe_num = sizeof (sframe) / sizeof (sframe[0]);
@@ -60,6 +60,7 @@ kws determine_kw (char* unknown_kw)
     IS_THIS(unknown_kw, sinus)
     IS_THIS(unknown_kw, cosus)
     IS_THIS(unknown_kw, logus)
+    IS_THIS(unknown_kw, print)
 
     return undef_kw;
     }
@@ -69,6 +70,7 @@ kws determine_kw (char* unknown_kw)
 
 int isoper (char begunok)
     {
+
     switch (begunok)
         {
         case '*':
@@ -76,7 +78,7 @@ int isoper (char begunok)
         case '^':
         case '+':
         case '-':
-        case '=': // !double equality symbol (also in comparison)
+        case ':': // !double equality symbol (also in comparison)
 
         return true;
 
@@ -179,6 +181,10 @@ token_type try_Id (const char* begunok)
         if (isparenth (*begunok))
             {
             return T_PARENTH;
+            }
+        if (*begunok == '#')
+            {
+            return T_LINE;
             }
         if (*begunok == '$')
             {
