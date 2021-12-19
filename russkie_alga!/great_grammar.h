@@ -77,6 +77,7 @@ double dig_out_val (const char** begunok);
 
 char* dig_out_id (const char** begunok);
 
+void put_HH (char* const buffer, size_t file_size);
 
 //=============================================================================\\
 //                             TREE DSL SHIT                                   \\
@@ -109,6 +110,8 @@ node* wh (node* left, node* right);
 node* bi_oper (node* left, node* right, const char* oper);
 
 node* ass (node* left, node* right);
+
+node* nprint (node* arg);
 
 node* create_val (const char* val);
 

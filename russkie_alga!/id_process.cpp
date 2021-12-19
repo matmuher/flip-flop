@@ -182,6 +182,10 @@ token_type try_Id (const char* begunok)
             {
             return T_PARENTH;
             }
+        if (*begunok == ';')
+            {
+            return T_DELIM;
+            }
         if (*begunok == '#')
             {
             return T_LINE;

@@ -1,4 +1,4 @@
 x:5
-while(x<8){x:x+1}
+if(x<8){x:x+1;x:x*x;}
 print(x)
 $

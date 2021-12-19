@@ -21,6 +21,7 @@ enum token_type
     T_OO_LONG_NAME = 7,
     T_COMP = 8,
     T_LINE = 9,
+    T_DELIM = 10,
     };
 
 

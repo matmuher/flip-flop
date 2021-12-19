@@ -40,6 +40,12 @@ node* nsin (node* arg)
     }
 
 
+node* nprint (node* arg)
+    {
+    return mono_oper (arg, "print");
+    }
+
+
 node* ass (node* left, node* right)
     {
     bi_oper (left, right, "=");

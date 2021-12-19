@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
@@ -27,7 +28,6 @@ ma_ty get_G (parsed_line_reader* pl_reader)
     while (1)
         {
         val = get_A (pl_reader);
-        puts ("Bezobrazie");
         require ('#', pl_reader);
 
         st_begunok->right_child = val;
@@ -64,7 +64,29 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         require ('{', pl_reader);
 
-        ma_ty val2 = get_A (pl_reader);
+        node* st_begunok = st (NULL, NULL);
+
+        node* val2 = st_begunok;
+
+        while (gfs(pl[gfs(token_id)].type) != T_PARENTH ||
+               gfs(pl[gfs(token_id)].content.servant) != '}')
+            {
+            puts ("Fire viederholen!");
+
+            node* temp = get_A (pl_reader);
+
+            dot_this_shit (temp);
+
+            system ("pause");
+
+            st_begunok->left_child = temp;
+
+            require (';', pl_reader);
+
+            st_begunok->right_child = st (NULL, NULL);
+
+            st_begunok = st_begunok->right_child;
+            }
 
         require ('}', pl_reader);
 
@@ -341,12 +363,12 @@ int require (char requirement, parsed_line_reader* pl_reader)
     {
     VERBOSE_SIGNAL(require);
 
-    // printf ("Require %c\n", requirement);
+    printf ("Require %c\n", requirement);
 
     token_type t_type = gfs(pl[gfs(token_id)].type);
 
     if (t_type ==  T_OP || t_type ==  T_PARENTH || t_type ==  T_END || t_type == T_LINE ||
-        t_type ==  T_COMP)
+        t_type ==  T_COMP || t_type == T_DELIM)
         {
         if (gfs(pl[gfs(token_id)].content.servant) == requirement)
             {
@@ -376,6 +398,8 @@ ma_ty execute (parsed_line_reader* pl_reader, size_t kw_token_id, ma_ty arg)
                 return ncos (arg);
             case logus:
                 return nlog (arg);
+            case print:
+                return nprint (arg);
             }
         }
 

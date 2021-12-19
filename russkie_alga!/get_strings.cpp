@@ -60,8 +60,7 @@ char* read_to_buffer (const char* file_name, size_t* file_size, int smart_mode)
 
     // Allocate empty buffer
     char* buffer = NULL;
-    // +1 byte for '\0' in the end
-    *file_size = get_size (file_pointer) + 1;
+    *file_size = get_size (file_pointer);
 
     if (smart_mode == true)
         {
@@ -123,6 +122,24 @@ void put_zeros (char* const buffer, size_t file_size)
     while (cur_pos < buffer + file_size)
         {
         if (*cur_pos == '\n')
+            {
+            *cur_pos = '\0';
+            }
+        cur_pos++;
+        }
+
+    *(buffer + file_size) = '\0';
+    }
+
+void put_HH (char* const buffer, size_t file_size)
+    {
+    assert (buffer != NULL);
+    assert (file_size > 0);
+
+    char* cur_pos = buffer;
+    while (cur_pos < buffer + file_size)
+        {
+        if (*cur_pos == '\0')
             {
             *cur_pos = '#';
             }
