@@ -17,6 +17,7 @@ enum ERROR_LIST
     BAD_DIGIT = -1,
     BAD_REQUIREMENT = -2,
     LONG_ID = -3,
+    COMPARISON_EXPECTED = -4,
     };
 
 const int NAME_LENGTH = 8;
@@ -27,6 +28,10 @@ typedef node* ma_ty;
 //=============================================================================\\
 
 ma_ty get_G (parsed_line_reader* pl_reader);
+
+ma_ty get_A (parsed_line_reader* pl_reader);
+
+ma_ty get_B (parsed_line_reader* pl_reader);
 
 ma_ty get_E (parsed_line_reader* pl_reader);
 
@@ -91,6 +96,18 @@ node* mlt (node* left, node* right);
 node* div (node* left, node* right);
 
 node* npow (node* left, node* right);
+
+node* eq (node* left, node* right);
+
+node* gr (node* left, node* right);
+
+node* ls (node* left, node* right);
+
+node* wh (node* left, node* right);
+
+node* bi_oper (node* left, node* right, const char* oper);
+
+node* ass (node* left, node* right);
 
 node* create_val (const char* val);
 

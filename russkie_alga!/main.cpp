@@ -7,7 +7,7 @@
 
 int main ()
     {
-    const char* expression = "(sinus(5^2)+3)*(12-3)$";
+    const char* expression = "if(12=3){x=5+4^2*sinus(12)}$";
 
     // "(sinus(5^2)+3)*(12-3)$"
 
@@ -19,13 +19,18 @@ int main ()
 
     // printf ("get_G returned %f", get_G (expression));
 
+
     token* parsed_line = lexo_parse (expression);
 
     parsed_line_reader pl_reader = {0, parsed_line};
 
+    #if 0 // Check lexo parse
+
     print_pl (&pl_reader);
 
-    #if 1
+    #endif
+
+    #if 1 // Recursive parse
     node* root = get_G (&pl_reader);
 
     dot_this_shit (root);

@@ -88,6 +88,30 @@ node* npow (node* left, node* right)
     }
 
 
+node* eq (node* left, node* right)
+    {
+    return bi_oper (left, right, "=");
+    }
+
+
+node* gr (node* left, node* right)
+    {
+    return bi_oper (left, right, ">");
+    }
+
+
+node* ls (node* left, node* right)
+    {
+    return bi_oper (left, right, "<");
+    }
+
+
+node* wh (node* left, node* right)
+    {
+    return bi_oper (left, right, "while");
+    }
+
+
 node* create_val (const char* val)
     {
     return create_node (VAL, val);

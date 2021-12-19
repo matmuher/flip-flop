@@ -33,12 +33,14 @@ token* lexo_parse (const char* line)
         switch (token_t)
             {
             TOK_PROC (T_VAR, ID_ASS)
-            TOK_PROC (T_KW, ID_ASS)
+            TOK_PROC (T_SFUNK, ID_ASS)
             TOK_PROC (T_VAL, VAL_ASS)
             TOK_PROC (T_OP, CHAR_ASS)
-            TOK_PROC (T_PARENTH_O, CHAR_ASS)
-            TOK_PROC (T_PARENTH_C, CHAR_ASS)
+            TOK_PROC (T_PARENTH, CHAR_ASS)
             TOK_PROC (T_END, CHAR_ASS)
+            TOK_PROC (T_COMP, CHAR_ASS)
+            TOK_PROC (T_SFRAME, ID_ASS)
+
             default:
                 {
                 puts ("Nevedomya dich occured! Unknown token:");
@@ -58,47 +60,47 @@ void print_pl (parsed_line_reader* pl_reader)
     {
     size_t token_id = 0;
 
-    while (pl_reader->pl[token_id].type != T_END)
+    while (pl_reader->pl[token_id-1].type != T_END)
         {
-        switch (pl_reader->pl[token_id].type)
-            {
-            case T_VAR:
-            case T_KW:
-                printf ("%s ", pl_reader->pl[token_id].content.id);
-                token_id++;
-                break;
-            case T_OP:
-            case T_PARENTH_O:
-            case T_PARENTH_C:
-                printf ("%c ", pl_reader->pl[token_id].content.servant);
-                token_id++;
-                break;
-            case T_VAL:
-                printf ("%lf ", pl_reader->pl[token_id].content.val);
-                token_id++;
-                break;
-            }
+        print_token (pl_reader->pl[token_id++], 0);
         }
 
     putchar ('\n');
     }
 
 
-void print_token (token token_to_print)
+void print_token (token token_to_print, int mode) // 1 - with '\n', 0 - without
     {
+    const int NEW_LINE_MODE = 1;
+    const int SPACE_MODE = 0;
+
     switch (token_to_print.type)
         {
         case T_VAR:
-        case T_KW:
-            printf ("%s\n", token_to_print.content.id);
+        case T_SFUNK:
+        case T_SFRAME:
+            printf ("%s[%d] ", token_to_print.content.id, token_to_print.type);
+            if (mode == NEW_LINE_MODE)
+                {
+                putchar ('\n');
+                }
             break;
         case T_OP:
-        case T_PARENTH_O:
-        case T_PARENTH_C:
-            printf ("%c\n", token_to_print.content.servant);
+        case T_PARENTH:
+        case T_COMP:
+        case T_END:
+            printf ("%c[%d] ", token_to_print.content.servant, token_to_print.type);
+            if (mode == NEW_LINE_MODE)
+                {
+                putchar ('\n');
+                }
             break;
         case T_VAL:
-            printf ("%lf\n", token_to_print.content.val);
+            printf ("%lf[%d] ", token_to_print.content.val, token_to_print.type);
+            if (mode == NEW_LINE_MODE)
+                {
+                putchar ('\n');
+                }
             break;
         }
     }

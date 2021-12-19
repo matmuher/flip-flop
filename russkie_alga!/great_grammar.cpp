@@ -2,33 +2,128 @@
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
+#include "..\differ\tree_funks.h"
 #include "great_grammar.h"
-
 
 //=============================================================================\\
 //                             GRAMMAR SHIT                                    \\
 //=============================================================================\\
 
-#define VERBOSE_SIGNAL(cmd_name) puts (#cmd_name)
+#define VERBOSE_SIGNAL(cmd_name)
 
+// gfs - get from structure
+#define gfs(element) pl_reader->element
 
 // General rule
 ma_ty get_G (parsed_line_reader* pl_reader)
     {
-    cur_read_pos (pl_reader);
+    // cur_read_pos (pl_reader);
     VERBOSE_SIGNAL(get_g);
 
     ma_ty val = {};
-    val = get_E (pl_reader);
-cur_read_pos (pl_reader);
+    val = get_A (pl_reader);
+    // cur_read_pos (pl_reader);
     require ('$', pl_reader);
 
     return val;
     }
 
 
-// gfs - get from structure
-#define gfs(element) pl_reader->element
+// A - first letter of the alphabet
+ma_ty get_A (parsed_line_reader* pl_reader)
+    {
+    if (gfs(pl[gfs(token_id)].type) == T_SFRAME)
+        {
+        size_t sframe_token_id = gfs(token_id);
+        gfs(token_id)++;
+
+        require ('(', pl_reader);
+
+        ma_ty val = get_B (pl_reader);
+
+        require (')', pl_reader);
+
+        require ('{', pl_reader);
+
+        ma_ty val2 = get_A (pl_reader);
+
+        require ('}', pl_reader);
+
+        val = bi_oper (val, val2, gfs(pl[sframe_token_id].content.id));
+
+        return val;
+        }
+    else if ((gfs(pl[gfs(token_id)].type) == T_VAL) ||
+             (gfs(pl[gfs(token_id)].type) == T_SFUNK))
+        {
+        ma_ty val = get_E (pl_reader);
+
+        return val;
+        }
+    else if (gfs(pl[gfs(token_id)].type) == T_VAR)
+        {
+        ma_ty val = create_node (VAR, gfs(pl[gfs(token_id)].content.id));
+        gfs(token_id)++;
+
+        require ('=', pl_reader);
+
+        ma_ty val2 = get_E (pl_reader);
+
+        val = ass (val, val2);
+
+        return val;
+        }
+    else
+        {
+        puts ("Razdel nahoditsya v razrabotke...");
+        }
+    }
+
+
+// Boolean
+ma_ty get_B (parsed_line_reader* pl_reader)
+    {
+    ma_ty val = get_E (pl_reader);
+
+    if (gfs(pl[gfs(token_id)].type) == T_COMP)
+        {
+        size_t comp_token_id = gfs(token_id)++;
+
+        ma_ty val2 = get_E (pl_reader);
+
+        switch (gfs(pl[comp_token_id].content.servant))
+            {
+            case '=':
+                {
+                val = eq (val, val2);
+                break;
+                }
+            case '>':
+                {
+                val = gr (val, val2);
+                break;
+                }
+            case '<':
+                {
+                val = ls (val, val2);
+                break;
+                }
+            default:
+                printf ("%c: ", gfs(pl[gfs(token_id)].content.servant));
+                puts ("This comparison operator hasn't been added yet");
+            }
+
+        return val;
+        }
+    else
+        {
+        syntax_error (pl_reader, COMPARISON_EXPECTED);
+
+        return NULL;
+        }
+    }
+
+
 // Expression
 ma_ty get_E (parsed_line_reader* pl_reader)
     {
@@ -120,7 +215,7 @@ ma_ty get_F (parsed_line_reader* pl_reader)
 
     token_type t_type = gfs(pl[gfs(token_id)].type);
 
-    if (t_type == T_KW)  // some keyword
+    if (t_type == T_SFUNK)  // some keyword
         {
         size_t cur_token_id = gfs(token_id);
         gfs(token_id)++;
@@ -128,8 +223,6 @@ ma_ty get_F (parsed_line_reader* pl_reader)
         require ('(', pl_reader);
 
         ma_ty arg = get_E (pl_reader);
-
-        dot_this_shit (arg);
 
         ma_ty val = execute (pl_reader, cur_token_id, arg);
 
@@ -149,7 +242,8 @@ ma_ty get_P (parsed_line_reader* pl_reader)
     {
     VERBOSE_SIGNAL(get_p);
 
-    if (gfs(pl[gfs(token_id)].type) == T_PARENTH_O)
+    if (gfs(pl[gfs(token_id)].type) == T_PARENTH &&
+        gfs(pl[gfs(token_id)].content.servant) == ')')
         {
         gfs(token_id)++;
         ma_ty val = get_E (pl_reader);
@@ -198,10 +292,11 @@ ma_ty get_N (parsed_line_reader* pl_reader)
 //                             SERVICE SHIT                                    \\
 //=============================================================================\\
 
+// !Add error_code process via switch and define print
 ERROR_LIST syntax_error (parsed_line_reader* pl_reader, ERROR_LIST error_code)
     {
     printf ("[SYNTAX ERROR: %d] -> ", error_code);
-    print_token (gfs(pl[gfs(token_id)]));
+    print_token (gfs(pl[gfs(token_id)]), 1);
 
     return error_code;
     }
@@ -225,11 +320,11 @@ int require (char requirement, parsed_line_reader* pl_reader)
     {
     VERBOSE_SIGNAL(require);
 
-    printf ("Require %c\n", requirement);
+    // printf ("Require %c\n", requirement);
 
     token_type t_type = gfs(pl[gfs(token_id)].type);
 
-    if (t_type ==  T_OP || t_type ==  T_PARENTH_O || t_type ==  T_PARENTH_C || t_type ==  T_END)
+    if (t_type ==  T_OP || t_type ==  T_PARENTH || t_type ==  T_END)
         {
         if (gfs(pl[gfs(token_id)].content.servant) == requirement)
             {
@@ -247,7 +342,7 @@ int require (char requirement, parsed_line_reader* pl_reader)
 
 ma_ty execute (parsed_line_reader* pl_reader, size_t kw_token_id, ma_ty arg)
     {
-    if (gfs(pl[kw_token_id].type) == T_KW)
+    if (gfs(pl[kw_token_id].type) == T_SFUNK)
         {
         kws kw_info = determine_kw (gfs(pl[kw_token_id].content.id));
 
@@ -264,3 +359,5 @@ ma_ty execute (parsed_line_reader* pl_reader, size_t kw_token_id, ma_ty arg)
 
     return NULL;
     }
+
+#undef gfs

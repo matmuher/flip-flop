@@ -7,27 +7,35 @@
 
 // To add a function you should add it to enum IDS, char* keywords[], determine_keyword (),
 // and describe its work in execute ()
-const char* keywords[] = {"sinus", "cosus", "logus"};
-size_t keywords_num = sizeof (keywords) / sizeof (keywords[0]);
+const char* sfunk[] = {"sinus", "cosus", "logus"};
+const char* sframe[] = {"while", "if"};
+size_t sfunk_num = sizeof (sfunk) / sizeof (sfunk[0]);
+size_t sframe_num = sizeof (sframe) / sizeof (sframe[0]);
 
 
 
-int check_keyword (char* suspect)
+token_type check_keyword (char* suspect)
     {
     const int EQUAL = 0;
 
-    int match = false;
-
-    for (size_t kw_id = 0; kw_id < keywords_num; kw_id++)
+    // !Copypaste: add function of search in array, smth like isin ()
+    for (size_t sfunk_id = 0; sfunk_id < sfunk_num; sfunk_id++)
             {
-            if (strcmp (keywords[kw_id], suspect) == EQUAL)
+            if (strcmp (sfunk[sfunk_id], suspect) == EQUAL)
                 {
-                match = true;
-                break;
+                return T_SFUNK;
                 }
             }
 
-    return match;
+    for (size_t sframe_id = 0; sframe_id < sframe_num; sframe_id++)
+        {
+        if (strcmp (sframe[sframe_id], suspect) == EQUAL)
+            {
+            return T_SFRAME;
+            }
+        }
+
+    return T_VAR;
     }
 
 
@@ -58,61 +66,6 @@ kws determine_kw (char* unknown_kw)
 #undef IS_THIS
 
 
-/*!
-@brief Determines is this chunk of expression is identifier or not.
-If it is, determines type of identifier.
-@return Element of IDS enum
-*/
-#if 0
-IDS get_Id (line_reader* exp_reader)
-    {
-    // 7 (God's number) + 1  for '\0'
-
-    char id[NAME_LENGTH] = {};
-    size_t id_begunok = 0;
-
-    // Starts with letter? -> kinda identifier
-    if (isalpha(*exp_reader->begunok))
-        {
-        id[id_begunok++] = *exp_reader->begunok;
-        exp_reader->begunok++;
-
-        // Identifier can consist of both letters and numbers
-        // For instance: ma7vey2003, slava1305, iosif1878
-        // But not: %var1, 34orange, !cucumber_num
-        while (isalnum(*exp_reader->begunok))
-            {
-            // "Kratkost' - sestra talanta"
-            if (id_begunok == NAME_LENGTH)
-                {
-                syntax_error (*exp_reader->begunok, LONG_ID);
-
-                return too_long_name;
-                }
-
-            id[id_begunok++] = *exp_reader->begunok;
-            exp_reader->begunok++;
-            }
-
-        // If identifier is a key_word
-        // function returns id of this keyword
-        if (check_keyword (id))
-            {
-            return determine_keyword (id);
-            }
-
-        // else it is ordinary variable
-        return var;
-        }
-    // If no - non-identifier, lol :)
-    else
-        {
-        return non_id;
-        }
-    }
-#endif
-
-
 
 int isoper (char begunok)
     {
@@ -123,6 +76,42 @@ int isoper (char begunok)
         case '^':
         case '+':
         case '-':
+        case '=': // !double equality symbol (also in comparison)
+
+        return true;
+
+        default:
+
+        return false;
+        }
+    }
+
+
+int iscomp (char begunok)
+    {
+    switch (begunok)
+        {
+        case '=':
+        case '>':
+        case '<':
+
+        return true;
+
+        default:
+
+        return false;
+        }
+    }
+
+
+int isparenth (char begunok)
+    {
+    switch (begunok)
+        {
+        case ')':
+        case '(':
+        case '}':
+        case '{':
 
         return true;
 
@@ -166,15 +155,11 @@ token_type try_Id (const char* begunok)
             begunok++;
             }
 
-        // If identifier is a key_word
-        // function returns id of this keyword
-        if (check_keyword (id))
-            {
-            return T_KW;
-            }
-
-        // else it is ordinary variable
-        return T_VAR;
+        // Identifier can match with:
+        // SFUNK - standard functions (sinus, cosus)
+        // SFRAME - standard constructions (while, if)
+        // None of then -> it is var
+        return check_keyword (id);
         }
     // If no - non-identifier, lol :)
     else
@@ -183,21 +168,21 @@ token_type try_Id (const char* begunok)
             {
             return T_OP;
             }
+        if (iscomp (*begunok))
+            {
+            return T_COMP;
+            }
         if (isdigit (*begunok))
             {
             return T_VAL;
             }
+        if (isparenth (*begunok))
+            {
+            return T_PARENTH;
+            }
         if (*begunok == '$')
             {
             return T_END;
-            }
-        if (*begunok == '(')
-            {
-            return T_PARENTH_O;
-            }
-        if (*begunok == ')')
-            {
-            return T_PARENTH_C;
             }
         }
     }

@@ -13,12 +13,13 @@ enum token_type
     {
     T_END = -1,
     T_VAL = 1,
-    T_KW = 2,
+    T_SFUNK = 2,
     T_OP = 3,
-    T_PARENTH_O = 4,
-    T_PARENTH_C = 5,
-    T_VAR = 6,
-    T_OO_LONG_NAME
+    T_PARENTH = 4,
+    T_SFRAME = 5,
+    T_VAR = 6, // TOVAR or TVAR'?
+    T_OO_LONG_NAME = 7,
+    T_COMP = 8,
     };
 
 
@@ -38,7 +39,7 @@ struct parsed_line_reader
 
 token* lexo_parse (const char* line);
 
-void print_token (token token_to_print);
+void print_token (token token_to_print, int mode);
 
 void print_pl (parsed_line_reader* pl_reader);
 
