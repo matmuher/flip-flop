@@ -2,6 +2,8 @@
 #define GREAT_GRAMMAR_H_INCLUDED
 
 #include "..\differ\differ.h"
+#include "lexo_parser.h"
+
 
 struct line_reader
     {
@@ -24,40 +26,43 @@ typedef node* ma_ty;
 //                             GRAMMAR SHIT                                    \\
 //=============================================================================\\
 
-ma_ty get_G (const char* expression);
+ma_ty get_G (parsed_line_reader* pl_reader);
 
-ma_ty get_E (line_reader* exp_reader);
+ma_ty get_E (parsed_line_reader* pl_reader);
 
-ma_ty get_T (line_reader* exp_reader);
+ma_ty get_T (parsed_line_reader* pl_reader);
 
-ma_ty get_S (line_reader* exp_reader);
+ma_ty get_S (parsed_line_reader* pl_reader);
 
-ma_ty get_F (line_reader* exp_reader);
+ma_ty get_F (parsed_line_reader* pl_reader);
 
-enum IDS // ?Mojno li eto za extern'it'
+ma_ty get_P (parsed_line_reader* pl_reader);
+
+ma_ty get_N (parsed_line_reader* pl_reader);
+
+
+//=============================================================================\\
+//                             SERVICE SHIT                                    \\
+//=============================================================================\\
+
+ERROR_LIST syntax_error (parsed_line_reader* pl_reader, ERROR_LIST error_code);
+
+void cur_read_pos (parsed_line_reader* pl_reader);
+
+int require (char requirement, parsed_line_reader* pl_reader);
+
+ma_ty execute (parsed_line_reader* pl_reader, size_t kw_token_id, ma_ty arg);
+
+
+enum kws
     {
-    too_long_name = -2,
     undef_kw = -1,
-    non_id = 0,
-    var = 1,
-    sinus = 2,
-    cosus = 3,
-    logus = 4,
+    sinus = 1,
+    cosus = 2,
+    logus = 3,
     };
 
-IDS get_Id (line_reader* exp_reader);
-
-enum token_type
-    {
-    T_END = -1,
-    T_VAL = 1,
-    T_KW = 2,
-    T_OP = 3,
-    T_PARENTH_O = 4,
-    T_PARENTH_C = 5,
-    T_VAR = 6,
-    T_OO_LONG_NAME
-    };
+kws determine_kw (char* unknown_kw);
 
 // Copypaste? After all this time? Always...
 token_type try_Id (const char* begunok);
@@ -65,25 +70,6 @@ token_type try_Id (const char* begunok);
 double dig_out_val (const char** begunok);
 
 char* dig_out_id (const char** begunok);
-
-
-
-ma_ty get_P (line_reader* exp_reader);
-
-ma_ty get_N (line_reader* exp_reader);
-
-
-//=============================================================================\\
-//                             SERVICE SHIT                                    \\
-//=============================================================================\\
-
-ERROR_LIST syntax_error (char current_char, ERROR_LIST error_code);
-
-void cur_read_pos (line_reader* exp_reader);
-
-int require (char requirement, line_reader* exp_reader);
-
-ma_ty execute (IDS id_info, ma_ty arg);
 
 
 //=============================================================================\\

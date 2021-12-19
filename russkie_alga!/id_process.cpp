@@ -39,12 +39,15 @@ int are_equal (const char* left, const char* right)
     }
 
 
+
+
+
 #define IS_THIS(unknown_kw, kw) \
     if (are_equal (unknown_kw, #kw)) \
         {                            \
         return kw;                   \
         }
-IDS determine_keyword (char* unknown_kw)
+kws determine_kw (char* unknown_kw)
     {
     IS_THIS(unknown_kw, sinus)
     IS_THIS(unknown_kw, cosus)
@@ -60,6 +63,7 @@ IDS determine_keyword (char* unknown_kw)
 If it is, determines type of identifier.
 @return Element of IDS enum
 */
+#if 0
 IDS get_Id (line_reader* exp_reader)
     {
     // 7 (God's number) + 1  for '\0'
@@ -106,6 +110,7 @@ IDS get_Id (line_reader* exp_reader)
         return non_id;
         }
     }
+#endif
 
 
 
@@ -134,6 +139,7 @@ token_type try_Id (const char* begunok)
 
     char id[NAME_LENGTH] = {};
     size_t id_begunok = 0;
+    const char* start_Id = begunok;
 
     // Starts with letter? -> kinda identifier
     if (isalpha(*begunok))
@@ -149,7 +155,9 @@ token_type try_Id (const char* begunok)
             // "Kratkost' - sestra talanta"
             if (id_begunok == NAME_LENGTH)
                 {
-                syntax_error (*begunok, LONG_ID);
+
+                printf ("Too long identifier name: %s\n", start_Id);
+                // syntax_error (pl_reader, LONG_ID);
 
                 return T_OO_LONG_NAME;
                 }
