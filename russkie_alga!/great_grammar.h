@@ -20,7 +20,7 @@ enum ERROR_LIST
     COMPARISON_EXPECTED = -4,
     };
 
-const int NAME_LENGTH = 8;
+const int NAME_LENGTH = 30;
 typedef node* ma_ty;
 
 //=============================================================================\\
@@ -49,6 +49,8 @@ ma_ty get_N (parsed_line_reader* pl_reader);
 //=============================================================================\\
 //                             SERVICE SHIT                                    \\
 //=============================================================================\\
+
+int are_equal (const char* left, const char* right);
 
 ERROR_LIST syntax_error (parsed_line_reader* pl_reader, ERROR_LIST error_code);
 
@@ -124,5 +126,13 @@ node* nprint (node* arg);
 node* create_val (const char* val);
 
 node* st (node* left, node* right);
+
+node* param (node* left, node* right);
+
+node* def (node* left, node* right);
+
+node* funk (node* left, node* right);
+
+node* call (node* left, node* right, node_type NODE_TYPE);
 
 #endif // GREAT_GRAMMAR_H_INCLUDED

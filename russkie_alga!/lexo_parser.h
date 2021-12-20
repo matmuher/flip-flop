@@ -22,6 +22,8 @@ enum token_type
     T_COMP = 8,
     T_LINE = 9,
     T_DELIM = 10,
+    T_DEF = 11,
+    T_RET = 12,
     };
 
 

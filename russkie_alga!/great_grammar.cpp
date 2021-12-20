@@ -10,7 +10,7 @@
 //                             GRAMMAR SHIT                                    \\
 //=============================================================================\\
 
-#define VERBOSE_SIGNAL(cmd_name)
+#define VERBOSE_SIGNAL(cmd_name) puts(#cmd_name)
 
 // gfs - get from structure
 #define gfs(element) pl_reader->element
@@ -45,6 +45,9 @@ ma_ty get_G (parsed_line_reader* pl_reader)
 // A - first letter of the alphabet
 ma_ty get_A (parsed_line_reader* pl_reader)
     {
+    puts ("MY FIRST STEP");
+
+
     if (gfs(pl[gfs(token_id)].type) == T_SFRAME)
         {
         size_t sframe_token_id = gfs(token_id);
@@ -80,13 +83,18 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         return val;
         }
+    // 5/sinus()/mem()
     else if ((gfs(pl[gfs(token_id)].type) == T_VAL) ||
-             (gfs(pl[gfs(token_id)].type) == T_SFUNK))
+             (gfs(pl[gfs(token_id)].type) == T_SFUNK) ||
+             (gfs(pl[gfs(token_id)].type) == T_VAR &&
+             gfs(pl[gfs(token_id)+1].type) == T_PARENTH))
         {
+        puts ("User function got here");
         ma_ty val = get_E (pl_reader);
 
         return val;
         }
+    // val1:2
     else if (gfs(pl[gfs(token_id)].type) == T_VAR)
         {
         ma_ty val = create_node (VAR, gfs(pl[gfs(token_id)].content.id));
@@ -99,6 +107,78 @@ ma_ty get_A (parsed_line_reader* pl_reader)
         val = ass (val, val2);
 
         return val;
+        }
+    // define
+    else if (gfs(pl[gfs(token_id)].type) == T_DEF)
+        {
+        puts ("Funktion we are in");
+
+        gfs(token_id)++;
+
+        require (' ', pl_reader);
+
+        node* funk_name = create_node (VAR, gfs(pl[gfs(token_id)].content.id));
+        gfs(token_id)++;
+
+        require (' ', pl_reader);
+
+        require ('(', pl_reader);
+
+        // Good-old copypaste
+        node* param_old_binder = NULL;
+
+        while (gfs(pl[gfs(token_id)].type) == T_VAR)
+            {
+            node* param_new_binder = param (NULL, NULL);
+            param_new_binder->left_child = param_old_binder;
+
+            ma_ty parameter = create_node (VAR, gfs(pl[gfs(token_id)++].content.id));
+
+            param_new_binder->right_child = parameter;
+
+            param_old_binder = param_new_binder;
+
+
+            if (gfs(pl[gfs(token_id)].type) != T_PARENTH ||
+                gfs(pl[gfs(token_id)].content.servant) != ')')
+                {
+                require (',', pl_reader);
+                }
+            }
+
+        require (')', pl_reader);
+
+        require ('{', pl_reader);
+
+        node* st_old_binder = NULL;
+
+        while (gfs(pl[gfs(token_id)].type) != T_PARENTH ||
+               gfs(pl[gfs(token_id)].content.servant) != '}')
+            {
+            node* st_new_binder = st (NULL, NULL);
+            st_new_binder->left_child = st_old_binder;
+
+            ma_ty val2 = get_A (pl_reader);
+            require (';', pl_reader); // !Move to get_A
+
+            st_new_binder->right_child = val2;
+
+            st_old_binder = st_new_binder;
+            }
+
+        require ('}', pl_reader);
+
+        return def (funk (funk_name, param_old_binder), st_old_binder);
+        }
+    else if (gfs(pl[gfs(token_id)].type) == T_RET)
+        {
+        gfs(token_id)++;
+
+        require (' ', pl_reader);
+
+        node* ret_val = get_E (pl_reader);
+
+        return mono_oper (ret_val, "return");
         }
     else
         {
@@ -242,24 +322,58 @@ ma_ty get_F (parsed_line_reader* pl_reader)
 
     token_type t_type = gfs(pl[gfs(token_id)].type);
 
-    if (t_type == T_SFUNK)  // some keyword
+    // !Blin nado ceplyat T_UFUNK type while lexo_parsing
+    if (t_type == T_SFUNK ||
+       (t_type == T_VAR && gfs(pl[gfs(token_id)+1].type) == T_PARENTH))  // some keyword
         {
+        puts ("USER FUNCTION CALL!!!");
         size_t cur_token_id = gfs(token_id);
+
+        node* funk_name = create_node (OP, gfs(pl[gfs(token_id)].content.id));
         gfs(token_id)++;
 
         require ('(', pl_reader);
 
-        ma_ty arg = get_E (pl_reader);
 
-        ma_ty val = execute (pl_reader, cur_token_id, arg);
+        // Good-old copypaste
+        node* param_old_binder = NULL;
+
+        while (gfs(pl[gfs(token_id)].type) == T_VAR ||
+               gfs(pl[gfs(token_id)].type) == T_VAL)
+            {
+            node* param_new_binder = param (NULL, NULL);
+            param_new_binder->left_child = param_old_binder;
+
+            ma_ty parameter = get_E (pl_reader);
+
+            param_new_binder->right_child = parameter;
+
+            param_old_binder = param_new_binder;
+
+
+            if (gfs(pl[gfs(token_id)].type) != T_PARENTH ||
+                gfs(pl[gfs(token_id)].content.servant) != ')')
+                {
+                require (',', pl_reader);
+                }
+            }
 
         require (')', pl_reader);
 
-        return val;
+        if (t_type == T_SFUNK)
+            {
+            return call (funk_name, param_old_binder, SFUNK);
+            }
+        else
+            {
+            return call (funk_name, param_old_binder, UFUNK);
+            }
         }
     else
         {
-        return get_P (pl_reader);
+        node* debug_node = get_P (pl_reader);
+        puts ("HASK");
+        return debug_node;
         }
     }
 
@@ -267,6 +381,7 @@ ma_ty get_F (parsed_line_reader* pl_reader)
 // Primary level
 ma_ty get_P (parsed_line_reader* pl_reader)
     {
+    puts ("Get_P is in de haus");
     VERBOSE_SIGNAL(get_p);
 
     if (gfs(pl[gfs(token_id)].type) == T_PARENTH &&
@@ -282,6 +397,7 @@ ma_ty get_P (parsed_line_reader* pl_reader)
     else if (gfs(pl[gfs(token_id)].type) == T_VAL ||
              gfs(pl[gfs(token_id)].type) == T_VAR) // T_VAR process
         {
+        puts ("get_N is in de haus");
         return get_N (pl_reader);
         }
     }
@@ -292,21 +408,29 @@ ma_ty get_N (parsed_line_reader* pl_reader)
     {
     VERBOSE_SIGNAL(get_n);
 
+    print_token (gfs(pl[gfs(token_id)]), 1);
+
     if (gfs(pl[gfs(token_id)].type) == T_VAL)
         {
+        puts ("RACSHA");
         double val = 0;
 
         val = gfs(pl[gfs(token_id)++].content.val);
 
-        const int ACCURACY = 6;
-        char str_val[ACCURACY] = {};
+        char str_val[NAME_LENGTH] = {};
+puts ("MMMMM");
+        gcvt (val, NAME_LENGTH, str_val);
+        puts (str_val);
 
-        return create_val (gcvt (val, ACCURACY, str_val));
+        node* temp_one = create_node (VAL, str_val);
+
+        puts ("CASINO");
+        return temp_one;
         }
     else if (gfs(pl[gfs(token_id)].type) == T_VAR)
         {
-        gfs(token_id)++;
-        return create_node (VAR, gfs(pl[gfs(token_id)-1].content.id));
+        puts ("CARSH>");
+        return create_node (VAR, gfs(pl[gfs(token_id)++].content.id));
         }
     else
         {
@@ -349,7 +473,7 @@ int require (char requirement, parsed_line_reader* pl_reader)
     {
     VERBOSE_SIGNAL(require);
 
-    // printf ("Require %c\n", requirement);
+     printf ("Require %c\n", requirement);
 
     token_type t_type = gfs(pl[gfs(token_id)].type);
 

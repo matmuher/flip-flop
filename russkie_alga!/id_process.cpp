@@ -35,6 +35,17 @@ token_type check_keyword (char* suspect)
             }
         }
 
+    if (are_equal (suspect, "define"))
+        {
+        return T_DEF;
+        }
+
+    if (are_equal (suspect, "return"))
+        {
+        return T_RET;
+        }
+
+
     return T_VAR;
     }
 
@@ -121,6 +132,23 @@ int isparenth (char begunok)
     }
 
 
+int isdelim (char begunok)
+    {
+    switch (begunok)
+        {
+        case ';':
+        case ',':
+        case ' ':
+
+        return true;
+
+        default:
+
+        return false;
+        }
+    }
+
+
 token_type try_Id (const char* begunok)
     {
     // 7 (God's number) + 1  for '\0'
@@ -179,7 +207,7 @@ token_type try_Id (const char* begunok)
             {
             return T_PARENTH;
             }
-        if (*begunok == ';')
+        if (isdelim (*begunok))
             {
             return T_DELIM;
             }

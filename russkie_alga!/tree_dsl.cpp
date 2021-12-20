@@ -50,7 +50,8 @@ node* nprint (node* arg)
 
 node* ass (node* left, node* right)
     {
-    bi_oper (left, right, "=", SFRAME);
+    node* init = mono_oper (right, "initializer");
+    bi_oper (left, init, "=", SFRAME);
     }
 
 
@@ -118,6 +119,29 @@ node* ls (node* left, node* right)
 node* st (node* left, node* right)
     {
     return bi_oper (left, right, "statement");
+    }
+
+
+node* param (node* left, node* right)
+    {
+    return bi_oper (left, right, "parameter");
+    }
+
+
+node* def (node* left, node* right)
+    {
+    return bi_oper (left, right, "define", DEF);
+    }
+
+
+node* funk (node* left, node* right)
+    {
+    return bi_oper (left, right, "function");
+    }
+
+node* call (node* left, node* right, node_type NODE_TYPE)
+    {
+    return bi_oper (left, right, "call", NODE_TYPE);
     }
 
 

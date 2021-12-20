@@ -49,9 +49,12 @@ int main ()
     #endif
 
     #if 1 // Recursive parse
+
     node* root = get_G (&pl_reader);
-dot_this_shit (root);
-    to_asm (root);
+    puts ("wwwwww");
+    dot_this_shit (root);
+
+    // to_asm (root);
 
 
 

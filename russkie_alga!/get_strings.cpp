@@ -2,7 +2,7 @@
 #include "..\hamlet\d_hamlet_functions.h"
 #include "..\memory_free\elephant_calloc_extern.h"
 
-
+// define foo (firstparam,secondparam,thirdparam){var:firstparam;x:secondparam+thirdparam;return 2*var;}
 int get_size (FILE* file_pointer)
     {
     assert (file_pointer != NULL);

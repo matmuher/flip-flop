@@ -42,6 +42,8 @@ token* lexo_parse (const char* line)
             TOK_PROC (T_LINE, CHAR_ASS)
             TOK_PROC (T_DELIM, CHAR_ASS)
             TOK_PROC (T_SFRAME, ID_ASS)
+            TOK_PROC (T_DEF, ID_ASS)
+            TOK_PROC (T_RET, ID_ASS)
 
             default:
                 {
@@ -81,6 +83,8 @@ void print_token (token token_to_print, int mode) // 1 - with '\n', 0 - without
         case T_VAR:
         case T_SFUNK:
         case T_SFRAME:
+        case T_DEF:
+        case T_RET:
             printf ("%s[%d] ", token_to_print.content.id, token_to_print.type);
             if (mode == NEW_LINE_MODE)
                 {
