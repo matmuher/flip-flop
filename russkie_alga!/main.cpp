@@ -6,25 +6,37 @@
 
 void to_asma (node* root);
 
+#if 0
+node* left_grow (const char* binder_node_content,
+                 node* previous_node, node* new_val,
+                 char delimiter,
+                 int (*exit_condition)(token* current_token),
+                 parsed_line_reader* pl_reader)
+    {
+    node* val = get_A (pl_reader);
+    require (delimiter, pl_reader);
+
+    st_begunok->right_child = val;
+
+    if (gfs(pl[gfs(token_id)].type) == T_END)
+        {
+        break;
+        }
+
+    node* temp = st (NULL, NULL);
+
+    temp->left_child = st_begunok;
+
+    st_begunok = temp;
+    }
+#endif
+
 int main ()
     {
+    #if 1 // Sueta
     char* file_name = "wasup_world.cum";
     size_t lines_num = 0;
     line_buf* lines =  get_strings (file_name, &lines_num, true);
-
-
-    const char* expression = "if(x=3){x:5-1*x-12/y+x^3}$";
-
-    // "(sinus(5^2)+3)*(12-3)$"
-
-    // const char* double_test = "11.$";
-
-    // line_reader double_reader = {double_test, double_test};
-
-    // printf ("Double is %f\n", get_N (&double_reader));
-
-    // printf ("get_G returned %f", get_G (expression));
-
 
     token* parsed_line = lexo_parse (lines[0].beg_ptr);
 
@@ -39,10 +51,11 @@ int main ()
     #if 1 // Recursive parse
     node* root = get_G (&pl_reader);
 
-    to_asma (root);
+    // to_asma (root);
 
     // dot_this_shit (root);
 
     #endif
     memory_free ();
+    #endif
     }

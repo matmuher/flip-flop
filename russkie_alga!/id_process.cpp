@@ -47,9 +47,6 @@ int are_equal (const char* left, const char* right)
     }
 
 
-
-
-
 #define IS_THIS(unknown_kw, kw) \
     if (are_equal (unknown_kw, #kw)) \
         {                            \

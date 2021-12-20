@@ -21,32 +21,24 @@ ma_ty get_G (parsed_line_reader* pl_reader)
     // cur_read_pos (pl_reader);
     VERBOSE_SIGNAL(get_g);
 
-    ma_ty val = {};
-    ma_ty st_begunok = st (NULL, NULL);
-    ma_ty root = st_begunok;
+    ma_ty old_binder = NULL;
 
-    while (1)
+    while (gfs(pl[gfs(token_id)].type) != T_END)
         {
-        val = get_A (pl_reader);
-        require ('#', pl_reader);
+        node* new_binder = st (NULL, NULL);
+        new_binder->left_child = old_binder;
 
-        st_begunok->right_child = val;
+        ma_ty val = get_A (pl_reader);
+        require ('#', pl_reader); // !Move to get_A
 
-        if (gfs(pl[gfs(token_id)].type) == T_END)
-            {
-            break;
-            }
+        new_binder->right_child = val;
 
-        node* temp = st (NULL, NULL);
-
-        temp->left_child = st_begunok;
-
-        st_begunok = temp;
+        old_binder = new_binder;
         }
     // cur_read_pos (pl_reader);
     require ('$', pl_reader);
 
-    return st_begunok;
+    return old_binder;
     }
 
 
@@ -66,33 +58,25 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         require ('{', pl_reader);
 
-        node* st_begunok = st (NULL, NULL);
-
-        node* val2 = st_begunok;
+        node* old_binder = NULL;
 
         while (gfs(pl[gfs(token_id)].type) != T_PARENTH ||
                gfs(pl[gfs(token_id)].content.servant) != '}')
             {
-            puts ("Fire viederholen!");
+            node* new_binder = st (NULL, NULL);
+            new_binder->left_child = old_binder;
 
-            node* temp = get_A (pl_reader);
+            ma_ty val2 = get_A (pl_reader);
+            require (';', pl_reader); // !Move to get_A
 
-            dot_this_shit (temp);
+            new_binder->right_child = val2;
 
-            system ("pause");
-
-            st_begunok->left_child = temp;
-
-            require (';', pl_reader);
-
-            st_begunok->right_child = st (NULL, NULL);
-
-            st_begunok = st_begunok->right_child;
+            old_binder = new_binder;
             }
 
         require ('}', pl_reader);
 
-        val = bi_oper (val, val2, gfs(pl[sframe_token_id].content.id));
+        val = bi_oper (val, old_binder, gfs(pl[sframe_token_id].content.id));
 
         return val;
         }
