@@ -83,6 +83,16 @@ void put_HH (char* const buffer, size_t file_size);
 //                             TREE DSL SHIT                                   \\
 //=============================================================================\\
 
+
+//--------------------------------ATLANTS!--------------------------------------
+
+node* bi_oper (node* left, node* right, const char* oper, node_type NODE_TYPE = OP);
+
+node* mono_oper (node* right, const char* oper, node_type NODE_TYPE = OP);
+
+//-----------------------------------------------------------------------------
+
+
 node* nsin (node* arg);
 
 node* ncos (node* arg);
@@ -106,8 +116,6 @@ node* gr (node* left, node* right);
 node* ls (node* left, node* right);
 
 node* wh (node* left, node* right);
-
-node* bi_oper (node* left, node* right, const char* oper);
 
 node* ass (node* left, node* right);
 

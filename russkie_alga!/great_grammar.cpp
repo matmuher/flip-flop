@@ -10,7 +10,7 @@
 //                             GRAMMAR SHIT                                    \\
 //=============================================================================\\
 
-#define VERBOSE_SIGNAL(cmd_name) puts (#cmd_name)
+#define VERBOSE_SIGNAL(cmd_name)
 
 // gfs - get from structure
 #define gfs(element) pl_reader->element
@@ -76,7 +76,7 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         require ('}', pl_reader);
 
-        val = bi_oper (val, old_binder, gfs(pl[sframe_token_id].content.id));
+        val = bi_oper (val, old_binder, gfs(pl[sframe_token_id].content.id), SFRAME);
 
         return val;
         }
@@ -349,7 +349,7 @@ int require (char requirement, parsed_line_reader* pl_reader)
     {
     VERBOSE_SIGNAL(require);
 
-    printf ("Require %c\n", requirement);
+    // printf ("Require %c\n", requirement);
 
     token_type t_type = gfs(pl[gfs(token_id)].type);
 

@@ -1,6 +1,6 @@
-x:1
-y:1
-d:7
-while(y<d){y:x+y;x:y-x;}
-print(y)
+ax:1
+bx:1
+cx:100
+while(ax<cx){ax:ax+bx;bx:ax-bx;}
+print(ax)
 $

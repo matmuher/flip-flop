@@ -4,7 +4,7 @@
 #include "lexo_parser.h"
 #include "..\hamlet\d_hamlet_functions.h"
 
-void to_asma (node* root);
+void to_asm (node* root);
 
 #if 0
 node* left_grow (const char* binder_node_content,
@@ -50,10 +50,10 @@ int main ()
 
     #if 1 // Recursive parse
     node* root = get_G (&pl_reader);
+dot_this_shit (root);
+    to_asm (root);
 
-    // to_asma (root);
 
-    // dot_this_shit (root);
 
     #endif
     memory_free ();

@@ -1,5 +1,6 @@
 #include "..\differ\differ.h"
 #include "..\differ\tree_funks.h"
+#include "great_grammar.h"
 
 
 #define LEFT(node) (node)->left_child
@@ -13,9 +14,9 @@
 #define COPY(node) tree_copy_recurs (node)
 
 
-node* bi_oper (node* left, node* right, const char* oper)
+node* bi_oper (node* left, node* right, const char* oper, node_type NODE_TYPE)
     {
-    node* root = create_node (OP, oper);
+    node* root = create_node (NODE_TYPE, oper);
 
     LEFT(root) = left;
     RIGHT(root) = right;
@@ -24,9 +25,9 @@ node* bi_oper (node* left, node* right, const char* oper)
     }
 
 
-node* mono_oper (node* right, const char* oper)
+node* mono_oper (node* right, const char* oper, node_type NODE_TYPE)
     {
-    node* root = create_node (OP, oper);
+    node* root = create_node (NODE_TYPE, oper);
 
     RIGHT(root) = right;
 
@@ -36,31 +37,32 @@ node* mono_oper (node* right, const char* oper)
 
 node* nsin (node* arg)
     {
-    return mono_oper (arg, "sin");
+
+    return mono_oper (arg, "sin", SFUNK);
     }
 
 
 node* nprint (node* arg)
     {
-    return mono_oper (arg, "print");
+    return mono_oper (arg, "print", SFUNK);
     }
 
 
 node* ass (node* left, node* right)
     {
-    bi_oper (left, right, "=");
+    bi_oper (left, right, "=", SFRAME);
     }
 
 
 node* ncos (node* arg)
     {
-    return mono_oper (arg, "cos");
+    return mono_oper (arg, "cos", SFUNK);
     }
 
 
 node* nlog (node* arg)
     {
-    return mono_oper (arg, "log");
+    return mono_oper (arg, "log", SFUNK);
     }
 
 
@@ -111,11 +113,6 @@ node* ls (node* left, node* right)
     return bi_oper (left, right, "<");
     }
 
-
-node* wh (node* left, node* right)
-    {
-    return bi_oper (left, right, "while");
-    }
 
 
 node* st (node* left, node* right)
