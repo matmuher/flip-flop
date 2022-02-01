@@ -29,14 +29,18 @@ enum dump_level
     };
 
 
-#define VERBOSE SECOND_LVL
+#define VERBOSE FIRST_LVL
 
 
 #define SHOW_MODE
-#undef SHOW_MODE
+// #undef SHOW_MODE
 
 
 //============================FUNCTIONS=================================
+
+
+#define VERBOSE_SIGNAL(signal, level)
+
 
 // __VERIFICATOR__
 
@@ -225,6 +229,9 @@ void lst_ctor (List* lst, size_t lst_size)
 
 
     owlist_ctor (lst);
+
+
+    lst->linear_status = false;
 
 
     #if VERBOSE >= FIRST_LVL
@@ -775,32 +782,22 @@ void lst_delete_cell (List* lst, size_t delete_cell_id)
 
 void cool_dmp (List* lst)
     {
-    fputs ("digraph G { rankdir = LR;\n", lst->graph_log);
+    fputs ("digraph G { rankdir = LR;\n node [shape = record];\n", lst->graph_log);
 
 
     for (size_t cell_id = 0; cell_id < lst->lst_size; cell_id++)
         {
         if (lst->prev[cell_id] == FREE_CELL)
             {
-            fprintf (lst->graph_log, "node_%d[shape = record, rank = %d, label = \" <id_%d> cell_id:\n %d\"];\n",
+            fprintf (lst->graph_log, "node_%d[shape = record, label = \" <id_%d> cell_id:\n %d\"];\n",
                      cell_id, cell_id, cell_id, cell_id);
             }
         else
             {
-            fprintf (lst->graph_log, "node_%d[shape = record, rank = %d, label = \" <id_%d> cell_id:\n %d |"
+            fprintf (lst->graph_log, "node_%d[shape = record, label = \" <id_%d> cell_id:\n %d |"
                                "{ <next_%d> next:\n%d | data:\n%.3f | prev:\n%d}\"];\n",
                     cell_id, cell_id, cell_id, cell_id,
-                    cell_id, lst->next[cell_id], lst->data[cell_id], lst->prev[cell_id]);
-            }
-        }
-
-
-    for (size_t cell_id = 0; cell_id < lst->lst_size; cell_id++)
-        {
-        if (lst->prev[cell_id] != FREE_CELL)
-            {
-            fprintf (lst->graph_log, "node_%d:<next_%d> -> node_%d:<id_%d> [color = \"red\"];\n",
-                     cell_id, cell_id, lst->next[cell_id], lst->next[cell_id]);
+                    lst->next[cell_id], lst->data[cell_id], lst->prev[cell_id]);
             }
         }
 
@@ -812,6 +809,20 @@ void cool_dmp (List* lst)
         fprintf (lst->graph_log, "node_%d:<id_%d> -> node_%d:<id_%d> [color = \"white\"];\n",
                  cell_id, cell_id, cell_id + 1, cell_id + 1);
         }
+
+
+    for (size_t cell_id = 0; cell_id < lst->lst_size; cell_id++)
+        {
+        // Connect list's elements
+
+        if (lst->prev[cell_id] != FREE_CELL)
+            {
+            fprintf (lst->graph_log, "node_%d:<next_%d> -> node_%d:<id_%d> [color = \"red\"];\n",
+                     cell_id, cell_id, lst->next[cell_id], lst->next[cell_id]);
+            }
+        }
+
+
 
 
     fprintf (lst->graph_log, "tail[label = \"tail\"];\n"
@@ -1042,6 +1053,9 @@ void lst_linearize (List* lst)
     // Transfer data from additional array to user's one
 
     memcpy (lst->data, lst->sorted_data, lst->lst_size * sizeof (double));
+
+
+    lst->linear_status = true;
 
 
     #if VERBOSE >= FIRST_LVL

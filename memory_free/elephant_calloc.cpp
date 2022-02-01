@@ -41,4 +41,6 @@ void memory_free (death_note* note)
         free (note->ptrs_list[note->grosse]);
         note->ptrs_list[note->grosse] = NULL;
         }
+
+    puts ("Memory was successfully freed!");
     }

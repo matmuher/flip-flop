@@ -60,13 +60,7 @@ int get_answer (void);
 
 // Dot dump
 
-FILE* graph_dump_create (void);
-
-void graph_dump_show (void);
-
-void graph_dump_close (FILE* graph_dump);
-
-void graphviz_dump (node* current_node, FILE* graph_log);
+void dot_this_shit (node* root);
 
 
 // Akinator
@@ -75,7 +69,7 @@ const int MAX_SIGN_NAME_LENGTH = 20;
 
 const int MAX_OBJECT_NAME_LENGTH = 20;
 
-node* start_akinator (void);
+node* start_akinator (node* user_root = NULL);
 
 
 //  Tree write

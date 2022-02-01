@@ -4,10 +4,16 @@
 #include "ak.h"
 
 
-node* create_node (const char* content_to_push)
+node* create_node (const char* content_to_push = NULL)
     {
-    char* node_content = (char*) elephant_calloc (1, (strlen (content_to_push) + 1) * sizeof (char));
-    strcpy (node_content, content_to_push);
+    char* node_content = NULL;
+
+
+    if (content_to_push != NULL)
+        {
+        node_content = (char*) elephant_calloc (1, (strlen (content_to_push) + 1) * sizeof (char));
+        strcpy (node_content, content_to_push);
+        }
 
 
     node* new_node = (node*) elephant_calloc (1, sizeof (node));
@@ -22,23 +28,28 @@ node* create_node (const char* content_to_push)
     }
 
 
-node* create_sign_node (const char* content)
+node* create_typed_node (const char* content, node_type ntype)
     {
     node* sign_node = create_node (content);
 
-    sign_node->node_type = SIGN;
+    sign_node->node_type = ntype;
 
 
     return sign_node;
     }
 
 
+node* create_sign_node (const char* content)
+    {
+    return create_typed_node (content, SIGN);
+    }
+
+
 node* create_object_node (const char* content)
     {
-    node* object_node = create_node (content);
-
-    object_node->node_type = OBJECT;
-
-
-    return object_node;
+    return create_typed_node (content, OBJECT);
     }
+
+
+
+

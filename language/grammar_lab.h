@@ -7,6 +7,12 @@ enum ERROR_LIST
     BAD_REQUIREMENT = -2,
     };
 
+enum VERBOSE_LVL
+    {
+    FIRST_LVL = 1,
+    SECOND_LVL = 2,
+    };
+
 int get_d (void);
 
 int get_n (void);

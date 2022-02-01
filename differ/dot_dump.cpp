@@ -5,7 +5,7 @@
 
 FILE* dot_dump_create (void)
     {
-    FILE* graph_dump = fopen ("dif.dot", "w");
+    FILE* graph_dump = fopen ("parse.dot", "w");
 
     fputs ("digraph G {\n", graph_dump);
 
@@ -15,8 +15,8 @@ FILE* dot_dump_create (void)
 
 void dot_dump_show (void)
     {
-    system ("dot dif.dot -Tpng -o dif.png");
-    system ("start dif.png");
+    system ("dot parse.dot -Tpng -o parse.png");
+    system ("start parse.png");
     }
 
 

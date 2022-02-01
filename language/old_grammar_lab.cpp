@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "grammar_lab.h"
+#include <math.h>
 
 const int MAX_STR_LENGTH = 100;
-char str[MAX_STR_LENGTH] = "2+7*3-11*(3*3-9)$";
+char str[MAX_STR_LENGTH] = "2^2*3$";
 char* begunok = str;
 
+#define VERBOSE FIRST_LVL
 
 static int syntax_error (char current_char, ERROR_LIST error_code)
     {
@@ -14,10 +16,15 @@ static int syntax_error (char current_char, ERROR_LIST error_code)
     return error_code;
     }
 
+
+#define VERBOSE_SIGNAL(cmd_name)      \
+            puts ("start " #cmd_name);\
+            printf ("%c\n", *begunok);\
+
+
 int get_n (void)
     {
-    puts ("start n");
-    printf ("%c\n", *begunok);
+    VERBOSE_SIGNAL(get_n);
 
     char* start_position_begunok = begunok;
 
@@ -36,10 +43,12 @@ int get_n (void)
     return val;
     }
 
-static char* require (char requirement)
+    static char* require (char requirement)
     {
-    printf ("Ive required and now ama here: %c\n", *begunok);
-    printf ("%p\n", begunok);
+    printf ("Ive required %c and i'm processing: %c\n", requirement, *begunok);
+
+    VERBOSE_SIGNAL(require);
+
     if (*begunok == requirement)
         {
         begunok++;
@@ -55,15 +64,14 @@ static char* require (char requirement)
 
 int get_t (void)
     {
-    puts ("start t");
-    printf ("%c\n", *begunok);
+    VERBOSE_SIGNAL(get_t);
 
-    int val = get_p ();
+    int val = get_d ();
 
     while (*begunok == '*' || *begunok == '/')
         {
         char oper = *begunok++;
-        int val2 = get_p ();
+        int val2 = get_d ();
 
         if (oper == '*')
             {
@@ -79,11 +87,27 @@ int get_t (void)
     }
 
 
+int get_d (void)
+    {
+    VERBOSE_SIGNAL(get_d);
+
+    int val = get_p ();
+
+    if (*begunok == '^')
+        {
+        begunok++;
+        int val2 = get_p ();
+
+        val = pow (val, val2);
+        }
+
+    return val;
+    }
+
 
 int get_e (void)
     {
-    puts ("start e");
-    printf ("%c\n", *begunok);
+    VERBOSE_SIGNAL(get_e);
 
     int val = get_t ();
 
@@ -108,8 +132,7 @@ int get_e (void)
 
 int get_p (void)
     {
-    puts ("start p");
-    printf ("%c\n", *begunok);
+    VERBOSE_SIGNAL(get_p);
 
     if (*begunok == '(')
         {
@@ -129,8 +152,7 @@ int get_p (void)
 
 int get_g (void)
     {
-    puts ("start g");
-    printf ("%c\n", *begunok);
+    VERBOSE_SIGNAL(get_g);
 
     int val = get_e ();
 
@@ -138,3 +160,4 @@ int get_g (void)
 
     return val;
     }
+

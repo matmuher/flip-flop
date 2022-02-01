@@ -1,7 +1,7 @@
 #ifndef ELEPHANT_FUNCTIONS_H_INCLUDED
 #define ELEPHANT_FUNCTIONS_H_INCLUDED
 
-const size_t MAX_PTRS_NUM = 100;
+const size_t MAX_PTRS_NUM = 200;
 
 /*!
 @brief Structure for containing pointers to
@@ -26,6 +26,12 @@ struct death_note
 */
 void* elephant_calloc (size_t elements_num, size_t element_size, death_note* note = &std_note);
 
+// [!!!] if you put there pointer from elephant_calloc bad things will occur
+// because death_not has already remembered elephant_realloc's pointer
+// and memory_free will try to free () it
+// but after realloc () implementing it will not be dynamic allocated memory anymore
+// To conclude: you can use elephant_realloc ()
+// but only with standard calloc'ed or malloc'ed pointers
 /*!
 @brief Calls realloc function from stdlib.h and
        memorizes pointer to reallocated memory

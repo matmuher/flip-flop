@@ -6,7 +6,19 @@
 
 int main ()
     {
+    #if 1
+
+    node* root = start_akinator ();
+
+    write_this_shit (root);
+
+    dot_this_shit (root);
+
+    #endif
+
+
     #if 0
+
     node* root = create_sign_node ("kotyata bivaut");
 
 
@@ -18,20 +30,18 @@ int main ()
     root->left_child->right_child = create_object_node ("belarus");
 
 
-    FILE* tree_writer = tree_writer_create ();
-
-    write_node_recursive (root, tree_writer);
-
-    tree_writer_close (tree_writer);
+    write_this_shit (root);
     #endif
 
 
-    #if 1
+    #if 0
 
     tree matree = {};
     matree.tree_footprint_begunok = read_tree_to_str ();
 
     node* root = read_node_recursive (&matree);
+
+    start_akinator (root);
 
     FILE* graph_dump = graph_dump_create ();
 
@@ -39,6 +49,8 @@ int main ()
 
     graph_dump_close (graph_dump);
 
-    memory_free ();
+
     #endif
+
+    memory_free ();
     }

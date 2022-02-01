@@ -43,6 +43,9 @@ struct List
 
 
     OWList free;
+
+
+    unsigned int linear_status : 1;
     };
 
 
@@ -124,3 +127,9 @@ void cool_dmp_show ();
 @brief Silly linearizing
 */
 void lst_linearize (List* lst);
+
+
+/*!
+@brief Graph dump using html tags
+*/
+void graph_dmp (List* lst);

@@ -14,6 +14,11 @@ enum node_type
     OP = 2,
     VAL = 3,
     VAR = 4,
+    SFUNK = 5,
+    SFRAME = 6,
+    DEF = 7,
+    CALL = 8,
+    UFUNK = 9,
     };
 
 
@@ -40,7 +45,13 @@ enum visit_mode
     POST = 1, // Left -> right -> root: like in assembler
     };
 
-node* tree_visitor (node* root, void (*func)(node*), visit_mode mode);
+enum traversal_mode
+    {
+    RIGHT = -1, // Right leaf is processed earlier than right one
+    LEFT = 1, // Vice versa
+    };
+
+node* tree_visitor (node* root, void (*func)(node*), visit_mode mode, traversal_mode = LEFT);
 
 
 //=============================================================================\\

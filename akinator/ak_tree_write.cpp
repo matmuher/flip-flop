@@ -9,7 +9,6 @@ FILE* tree_writer_create (void)
     {
     FILE* tree_writer = fopen ("tree_writer.cpp", "w");
 
-
     return tree_writer;
     }
 
@@ -37,6 +36,17 @@ void write_node_recursive (node* current_node, FILE* tree_writer)
 
         fputs ("}", tree_writer);
         }
+    }
+
+
+void write_this_shit (node* root)
+    {
+    FILE* tree_writer = tree_writer_create ();
+
+    write_node_recursive (root, tree_writer);
+
+    tree_writer_close (tree_writer);
+    }
 
     putc ('\n', tree_writer);
     }

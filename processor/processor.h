@@ -88,16 +88,6 @@ enum ARGS_NUM
 
 // ASMA' FUNCTIONS
 
-
-int* arg_process (char* str_arg, int* begunok, int* markers, int cmd_id, int arg);
-
-
-/*!
-@brief Analyzes C-string and return command id
-*/
-int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers);
-
-
 /*!
 @brief Reads code into line_buf object
 */

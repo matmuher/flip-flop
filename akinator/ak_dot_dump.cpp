@@ -63,3 +63,13 @@ void graphviz_dump (node* current_node, FILE* graph_log)
         graphviz_dump (current_node->right_child, graph_log);
         }
     }
+
+
+void dot_this_shit (node* root)
+    {
+    FILE* graph_dump = graph_dump_create ();
+
+    graphviz_dump (root, graph_dump);
+
+    graph_dump_close (graph_dump);
+    }

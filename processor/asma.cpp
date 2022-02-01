@@ -9,10 +9,10 @@ int main (int, char* argv[])
     {
     size_t lines_num = 0;
 
-    char* file_name = argv[1] ? argv[1] : (char*) "asm.txt";
+    char* file_name = argv[1] ? argv[1] : (char*) "fib_code.txt";
 
     printf ("Assembling file is %s\n", file_name);
-    getchar ();
+    // getchar ();
 
     line_buf* code = get_code (file_name, &lines_num);
 
@@ -20,6 +20,6 @@ int main (int, char* argv[])
     int* binary = create_binary (code, lines_num, &bin_size);
     write_binary (binary, bin_size);
 
-    stop_inst_console_close ();
+    system ("pause");
     }
 

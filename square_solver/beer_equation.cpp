@@ -244,6 +244,6 @@ void eq_answer_print (int num_of_answers, float *arr_of_answers)
 
 void stop_inst_console_close (void)
     {
-    scanf ("%*s");
+    system ("pause");
     }
 

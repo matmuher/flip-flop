@@ -5,8 +5,14 @@
 
 node* create_node (node_type ntype, const char* content_to_push)
     {
+    puts ("WA HELL");
     // Create node
     node* new_node = (node*) elephant_calloc (1, sizeof (node));
+
+    if(!new_node)
+        {
+        puts ("Node calloc error!");
+        }
 
     // node content
     char* node_content = NULL;
@@ -14,6 +20,12 @@ node* create_node (node_type ntype, const char* content_to_push)
     if (content_to_push != NULL)
         {
         node_content = (char*) elephant_calloc (1, (strlen (content_to_push) + 1) * sizeof (char));
+
+        if(!node_content)
+        {
+        puts ("Node content calloc error!");
+        }
+
         strcpy (node_content, content_to_push);
         }
 
@@ -78,29 +90,49 @@ node* tree_copy_recurs (node* root)
 
 
 
-node* tree_visitor (node* root, void (*func)(node*), visit_mode mode)
+node* tree_visitor (node* root, void (*func)(node*), visit_mode v_mode, traversal_mode t_mode)
     {
-    if (mode == PRE)
+    if (v_mode == PRE)
         {
         func (root);
         }
 
-    if (root->left_child)
+    if (t_mode == LEFT)
         {
-        tree_visitor (root->left_child, func, mode);
+        if (root->left_child)
+            {
+            tree_visitor (root->left_child, func, v_mode);
+            }
+        }
+     else if (t_mode == RIGHT)
+        {
+        if (root->right_child)
+            {
+            tree_visitor (root->right_child, func, v_mode);
+            }
         }
 
-    if (mode == IN)
+    if (v_mode == IN)
         {
         func (root);
         }
 
-    if (root->right_child)
+    if (t_mode == LEFT)
         {
-        tree_visitor (root->right_child, func, mode);
+        if (root->right_child)
+            {
+            tree_visitor (root->right_child, func, v_mode);
+            }
+        }
+    else if (t_mode == RIGHT)
+        {
+        if (root->left_child)
+            {
+            tree_visitor (root->left_child, func, v_mode);
+            }
         }
 
-    if (mode == POST)
+    if (v_mode == POST)
         {
         func (root);
         }

@@ -1,5 +1,15 @@
 #include <stdio.h>
 #include "processor.h"
+#include "..\dictionary\dict.cpp" // Include cpp - cringe?
+
+
+int* arg_process (char* str_arg, int* begunok, int* markers, int cmd_id, int arg, dict word_markers);
+
+/*!
+@brief Analyzes C-string and return command id
+*/
+int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers, dict word_markers);
+
 
 
 line_buf* get_code (char* file_name, size_t* lines_num)
@@ -22,9 +32,12 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size)
     assert (bin_size);
 
     // 1 for command code and MAX_ARGS_NUM for his argument-fellows   --\/--
-    int* binary = (int*) calloc (lines_num, sizeof (int) *     (1 + MAX_ARGS_NUM));
+    int* binary = (int*) calloc (lines_num, sizeof (int)    *   (1 + MAX_ARGS_NUM));
     int* begunok = binary;
-    int markers[9] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
+    const int MARKERS_NUM = 9;
+    int markers[MARKERS_NUM] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
+
+    dict word_markers = NULL;
 
     for (size_t iteration_id = 0; iteration_id < 2; iteration_id++)
         {
@@ -45,11 +58,35 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size)
 
                 markers[marker_id] = jump_to;
 
+                printf ("marker is set to %d\n", jump_to);
+
                 continue;
                 }
 
+            // Word marker process
+            if (string_equal (code_line.words_ptr, "def"))
+                {
+                size_t marker_id = 0;
+
+                const int MARK_LENGTH = 20;
+                char word_mark[MARK_LENGTH] = {};
+
+                sscanf (code_line.words_ptr, "def %s:", word_mark);
+
+                size_t jump_to = 0;
+                jump_to = begunok - binary - 1;
+
+                // If there is no record in dictionary yet
+                // function will just drop warning
+                word_markers = add_dict_cell (word_markers, word_mark, jump_to);
+                printf ("marker is set to %d\n", jump_to);
+
+                continue;
+                }
+
+
             // Command process
-            begunok = cmd_line_process (&code_line, begunok, markers);
+            begunok = cmd_line_process (&code_line, begunok, markers, word_markers);
             }
         }
 
@@ -76,12 +113,12 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size)
                                                                              \
                 char* str_arg = apply_to (code_line, arg_id + 1);            \
                                                                              \
-                begunok = arg_process (str_arg, begunok, markers, cmd_id, arg);   \
+                begunok = arg_process (str_arg, begunok, markers, cmd_id, arg, word_markers);   \
                 }                                                            \
             }                                                                \
         else
 
-int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers)
+int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers, dict word_markers)
     {
     #include "cmd.h"
     // else
@@ -103,18 +140,30 @@ int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers)
         *(begunok - 1) = cmd_id | RAM_MASK;  \
         *begunok++ = REG_ID;                  \
         }
-int* arg_process (char* str_arg, int* begunok, int* markers, int cmd_id, int arg)
+int* arg_process (char* str_arg, int* begunok, int* markers, int cmd_id, int arg, dict word_markers)
     {
     if (str_arg[0] == ':') // For markers
         {
         size_t marker_id = 0;
 
-        if (!sscanf (str_arg, ":%d", &marker_id))
-            {
-            printf ("%s is bad mark\n", str_arg);
-            }
+        const int MARK_LENGTH = 20;
+        char word_mark[MARK_LENGTH] = {};
 
-        *begunok++ = markers[marker_id];
+        if (sscanf (str_arg, ":%d", &marker_id))
+            {
+            *begunok++ = markers[marker_id];
+
+            // printf ("%s is bad mark\n", str_arg);
+            }
+        else if (sscanf (str_arg, ":%s", &word_mark))
+            {
+            dict_cell* mark_in_dict = NULL;
+
+            if (mark_in_dict = search_in_dict (word_markers, word_mark))
+                {
+                *begunok++ = mark_in_dict->value;
+                }
+            }
         }
     else if (str_arg[0] == '[') // For ram's arguments
         {
@@ -172,6 +221,8 @@ void write_binary (int* binary, size_t bin_size)
         }
 
     fclose (bin_file);
+
+    puts ("Binary have been successfully written somewhere");
     }
 
 

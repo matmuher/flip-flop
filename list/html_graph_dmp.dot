@@ -1,0 +1,24 @@
+digraph G
+	{
+	node [shape = plaintext];
+	
+	koshka [label = < 
+					<TABLE> <TR> <TD> koshka </TD> </TR> </TABLE>
+					>];
+	
+	kot [label = <
+				<TABLE> <TR> <TD> kot </TD> </TR> </TABLE>
+				>];
+				
+	struct1 [label=<
+					<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+						<TR><TD>left</TD><TD PORT="f1">mid dle</TD><TD PORT="f2">right</TD></TR>
+					</TABLE>
+				   >];
+				   
+	dog [shape = cds, label = "dogge"];
+	
+	dog -> kot;
+	
+	kot -> koshka;
+	}

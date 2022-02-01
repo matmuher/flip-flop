@@ -12,8 +12,6 @@ void proc_ctor (proc* prc, size_t bin_size, int* cooking_list, FILE* log, FILE* 
 
     prc->ip = 0;
 
-    prc->hlt = 0;
-
     prc->bin_size = bin_size;
 
     prc->recipe = cooking_list;
@@ -66,6 +64,8 @@ void do_cmd (proc* prc, cmd_enum cmd)
     }
 #undef DEF_CMD
 
+
+void vm_print (proc* prc);
 
 #define LOG_NEW_LINE putc ('\n', prc->prc_log)
 void proc_dmp (proc* prc)

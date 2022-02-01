@@ -96,10 +96,18 @@ static node* ask_sign (node* sign_node)
 const int GAME_IS_ON = 1;
 
 
-node* start_akinator (void)
+node* start_akinator (node* user_root)
     {
-    node* root = create_node ("Nevedomaya dich");
-    root->node_type = OBJECT;
+    node* root = NULL;
+
+    if (user_root == NULL)
+        {
+        root = create_object_node ("Nevedomaya dich");
+        }
+    else
+        {
+        root = user_root;
+        }
 
     while (GAME_IS_ON)
         {
