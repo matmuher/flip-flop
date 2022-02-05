@@ -58,8 +58,6 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size)
 
                 markers[marker_id] = jump_to;
 
-                printf ("marker is set to %d\n", jump_to);
-
                 continue;
                 }
 
@@ -71,19 +69,21 @@ int* create_binary (line_buf* code, size_t lines_num, size_t* bin_size)
                 const int MARK_LENGTH = 20;
                 char word_mark[MARK_LENGTH] = {};
 
-                sscanf (code_line.words_ptr, "def %s:", word_mark);
+                if (!sscanf (apply_to (&code_line, 2), "%[^:]", word_mark))
+                    {
+                    printf ("Bad define line: %s\n", code_line.words_ptr);
+                    }
 
                 size_t jump_to = 0;
+
                 jump_to = begunok - binary - 1;
 
                 // If there is no record in dictionary yet
                 // function will just drop warning
                 word_markers = add_dict_cell (word_markers, word_mark, jump_to);
-                printf ("marker is set to %d\n", jump_to);
 
                 continue;
                 }
-
 
             // Command process
             begunok = cmd_line_process (&code_line, begunok, markers, word_markers);
@@ -152,8 +152,6 @@ int* arg_process (char* str_arg, int* begunok, int* markers, int cmd_id, int arg
         if (sscanf (str_arg, ":%d", &marker_id))
             {
             *begunok++ = markers[marker_id];
-
-            // printf ("%s is bad mark\n", str_arg);
             }
         else if (sscanf (str_arg, ":%s", &word_mark))
             {
@@ -163,6 +161,11 @@ int* arg_process (char* str_arg, int* begunok, int* markers, int cmd_id, int arg
                 {
                 *begunok++ = mark_in_dict->value;
                 }
+            else // For pass when there is no mark in the mark_dict yet
+                {
+                *begunok++ = -1;
+                }
+
             }
         }
     else if (str_arg[0] == '[') // For ram's arguments
