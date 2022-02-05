@@ -63,6 +63,7 @@ int are_equal (const char* left, const char* right)
         {                            \
         return kw;                   \
         }
+// kw is for key_word
 kws determine_kw (char* unknown_kw)
     {
     IS_THIS(unknown_kw, sinus)
@@ -149,10 +150,9 @@ int isdelim (char begunok)
     }
 
 
+// Determines type of current lexical token
 token_type try_Id (const char* begunok)
     {
-    // 7 (God's number) + 1  for '\0'
-
     char id[NAME_LENGTH] = {};
     size_t id_begunok = 0;
     const char* start_Id = begunok;
@@ -223,6 +223,7 @@ token_type try_Id (const char* begunok)
     }
 
 
+// Get value from string
 double dig_out_val (const char** begunok)
     {
     double val = 0;
@@ -254,6 +255,7 @@ double dig_out_val (const char** begunok)
     }
 
 
+// Get identifier from string
 char* dig_out_id (const char** begunok)
     {
     char id[NAME_LENGTH] = {};

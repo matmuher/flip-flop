@@ -103,7 +103,7 @@ void backend_it (node* root)
     {
     FILE* alga_file = fopen ("alga.txt", "a");
 
-        size_t mark_id = 0;
+    size_t mark_id = 0;
 
     switch (root->ntype)
         {

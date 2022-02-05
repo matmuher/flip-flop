@@ -12,10 +12,24 @@
 
 #define VERBOSE_SIGNAL(cmd_name) puts(#cmd_name)
 
-// gfs - get from structure
+/*
+gfs - get from structure
+pl - parsed_line
+*/
 #define gfs(element) pl_reader->element
+#define TOKEN_ID gfs(token_id)
+#define TOKEN_TYPE gfs(pl[TOKEN_ID].type)
+#define TOKEN_TYPE_FLEX(token_id) gfs(pl[token_id].type)
+#define REQUIRE(requirement) require (requirement, pl_reader)
+#define CONTENT gfs(pl[TOKEN_ID].content)
+#define TOKEN_SERVANT CONTENT.servant
+#define TOKEN_IDENTIFIER CONTENT.id
+#define SFRAME_IDENTIFIER gfs(pl[sframe_token_id].content.id)
 
-// General rule
+/*
+General rule
+ma_ty - node* (or check great_grammar.h)
+*/
 ma_ty get_G (parsed_line_reader* pl_reader)
     {
     // cur_read_pos (pl_reader);
@@ -23,9 +37,11 @@ ma_ty get_G (parsed_line_reader* pl_reader)
 
     ma_ty old_binder = NULL;
 
-    while (gfs(pl[gfs(token_id)].type) != T_END)
+    while (TOKEN_TYPE != T_END)
         {
-        node* new_binder = st (NULL, NULL);
+        // Statements growing according to tree standard
+
+        node* new_binder = st (NULL, NULL); // st - statement
         new_binder->left_child = old_binder;
 
         ma_ty val = get_A (pl_reader);
@@ -42,63 +58,61 @@ ma_ty get_G (parsed_line_reader* pl_reader)
     }
 
 
-// A - first letter of the alphabet
+// A - first level of parsing
 ma_ty get_A (parsed_line_reader* pl_reader)
     {
-    puts ("MY FIRST STEP");
+    // puts ("MY FIRST STEP");
 
-
-    if (gfs(pl[gfs(token_id)].type) == T_SFRAME)
+    if (TOKEN_TYPE == T_SFRAME) // standard frames f.e.: if, while...
         {
-        size_t sframe_token_id = gfs(token_id);
-        gfs(token_id)++;
+        size_t sframe_token_id = TOKEN_ID;
+        TOKEN_ID++;
 
-        require ('(', pl_reader);
+        REQUIRE('('); // Kak napisat' regulyarku chtobi razom zamenit' vse?
 
         ma_ty val = get_B (pl_reader);
 
-        require (')', pl_reader);
+        REQUIRE(')');
 
-        require ('{', pl_reader);
+        REQUIRE('{');
 
         node* old_binder = NULL;
 
-        while (gfs(pl[gfs(token_id)].type) != T_PARENTH ||
-               gfs(pl[gfs(token_id)].content.servant) != '}')
+        while (TOKEN_TYPE != T_PARENTH ||
+               TOKEN_SERVANT != '}')
             {
             node* new_binder = st (NULL, NULL);
             new_binder->left_child = old_binder;
 
             ma_ty val2 = get_A (pl_reader);
-            require (';', pl_reader); // !Move to get_A
+            require (';', pl_reader); // ?Move to get_A
 
             new_binder->right_child = val2;
 
             old_binder = new_binder;
             }
 
-        require ('}', pl_reader);
+        REQUIRE('}');
 
-        val = bi_oper (val, old_binder, gfs(pl[sframe_token_id].content.id), SFRAME);
+        val = bi_oper (val, old_binder, SFRAME_IDENTIFIER, SFRAME);
 
         return val;
         }
-    // 5/sinus()/mem()
-    else if ((gfs(pl[gfs(token_id)].type) == T_VAL) ||
-             (gfs(pl[gfs(token_id)].type) == T_SFUNK) ||
-             (gfs(pl[gfs(token_id)].type) == T_VAR &&
-             gfs(pl[gfs(token_id)+1].type) == T_PARENTH))
+    else if ((TOKEN_TYPE == T_VAL) || // "55" - value
+             (TOKEN_TYPE == T_SFUNK) || // "print" - standard function
+             (TOKEN_TYPE == T_VAR &&
+             TOKEN_TYPE_FLEX(TOKEN_ID + 2) == T_PARENTH)) // "esh_slizney ()" - user function
         {
-        puts ("User function got here");
+        // puts ("User function got here");
         ma_ty val = get_E (pl_reader);
 
         return val;
         }
-    // val1:2
-    else if (gfs(pl[gfs(token_id)].type) == T_VAR)
+    // "val1:2" - initialization
+    else if (TOKEN_TYPE == T_VAR)
         {
-        ma_ty val = create_node (VAR, gfs(pl[gfs(token_id)].content.id));
-        gfs(token_id)++;
+        ma_ty val = create_node (VAR, gfs(pl[TOKEN_ID].content.id));
+        TOKEN_ID++;
 
         require (':', pl_reader);
 
@@ -108,39 +122,40 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         return val;
         }
-    // define
-    else if (gfs(pl[gfs(token_id)].type) == T_DEF)
+    // "define esh_slizney (param1, param2){x:5;}" - function definition
+    else if (TOKEN_TYPE == T_DEF)
         {
-        puts ("Funktion we are in");
+        // puts ("Funktion we are in");
 
-        gfs(token_id)++;
+        TOKEN_ID++;
 
-        require (' ', pl_reader);
+        REQUIRE(' ');
 
-        node* funk_name = create_node (VAR, gfs(pl[gfs(token_id)].content.id));
-        gfs(token_id)++;
+        node* funk_name = create_node (VAR, TOKEN_IDENTIFIER);
+        TOKEN_ID++;
 
-        require (' ', pl_reader);
+        REQUIRE(' ');
 
-        require ('(', pl_reader);
+        REQUIRE('(');
 
         // Good-old copypaste
         node* param_old_binder = NULL;
 
-        while (gfs(pl[gfs(token_id)].type) == T_VAR)
+        // Getting parameters
+        while (TOKEN_TYPE == T_VAR)
             {
             node* param_new_binder = param (NULL, NULL);
             param_new_binder->left_child = param_old_binder;
 
-            ma_ty parameter = create_node (VAR, gfs(pl[gfs(token_id)++].content.id));
+            ma_ty parameter = create_node (VAR, gfs(pl[TOKEN_ID++].content.id));
 
             param_new_binder->right_child = parameter;
 
             param_old_binder = param_new_binder;
 
 
-            if (gfs(pl[gfs(token_id)].type) != T_PARENTH ||
-                gfs(pl[gfs(token_id)].content.servant) != ')')
+            if (TOKEN_TYPE != T_PARENTH ||
+                TOKEN_SERVANT != ')')
                 {
                 require (',', pl_reader);
                 }
@@ -152,8 +167,8 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         node* st_old_binder = NULL;
 
-        while (gfs(pl[gfs(token_id)].type) != T_PARENTH ||
-               gfs(pl[gfs(token_id)].content.servant) != '}')
+        while (TOKEN_TYPE != T_PARENTH ||
+               gfs(pl[TOKEN_ID].content.servant) != '}')
             {
             node* st_new_binder = st (NULL, NULL);
             st_new_binder->left_child = st_old_binder;
@@ -170,9 +185,9 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         return def (funk (funk_name, param_old_binder), st_old_binder);
         }
-    else if (gfs(pl[gfs(token_id)].type) == T_RET)
+    else if (TOKEN_TYPE == T_RET)
         {
-        gfs(token_id)++;
+        TOKEN_ID++;
 
         require (' ', pl_reader);
 
@@ -182,7 +197,7 @@ ma_ty get_A (parsed_line_reader* pl_reader)
         }
     else
         {
-        puts ("Razdel nahoditsya v razrabotke...");
+        printf ("[UNEXPECTED TOKEN] : %d\n", TOKEN_TYPE);
         }
     }
 
@@ -192,13 +207,14 @@ ma_ty get_B (parsed_line_reader* pl_reader)
     {
     ma_ty val = get_E (pl_reader);
 
-    if (gfs(pl[gfs(token_id)].type) == T_COMP)
+    if (TOKEN_TYPE == T_COMP)
         {
-        size_t comp_token_id = gfs(token_id)++;
+        char comp_oper = TOKEN_SERVANT;
+        size_t comp_token_id = TOKEN_ID++;
 
         ma_ty val2 = get_E (pl_reader);
 
-        switch (gfs(pl[comp_token_id].content.servant))
+        switch (comp_oper)
             {
             case '=':
                 {
@@ -216,7 +232,7 @@ ma_ty get_B (parsed_line_reader* pl_reader)
                 break;
                 }
             default:
-                printf ("%c: ", gfs(pl[gfs(token_id)].content.servant));
+                printf ("%c: ", TOKEN_SERVANT);
                 puts ("This comparison operator hasn't been added yet");
             }
 
@@ -238,12 +254,12 @@ ma_ty get_E (parsed_line_reader* pl_reader)
 
     ma_ty val = get_T (pl_reader);
 
-    if (gfs(pl[gfs(token_id)].type) == T_OP)
+    if (TOKEN_TYPE == T_OP)
         {
-        while (gfs(pl[gfs(token_id)].content.servant) == '+' ||
-               gfs(pl[gfs(token_id)].content.servant) == '-')
+        while (gfs(pl[TOKEN_ID].content.servant) == '+' ||
+               gfs(pl[TOKEN_ID].content.servant) == '-')
             {
-            char oper = gfs(pl[gfs(token_id)++].content.servant);
+            char oper = gfs(pl[TOKEN_ID++].content.servant);
             ma_ty val2 = get_T (pl_reader);
 
             if (oper == '+')
@@ -270,12 +286,12 @@ ma_ty get_T (parsed_line_reader* pl_reader)
 
     ma_ty val = get_S (pl_reader);
 
-    if (gfs(pl[gfs(token_id)].type) == T_OP)
+    if (TOKEN_TYPE == T_OP)
         {
-        while (gfs(pl[gfs(token_id)].content.servant) == '*' ||
-               gfs(pl[gfs(token_id)].content.servant) == '/')
+        while (gfs(pl[TOKEN_ID].content.servant) == '*' ||
+               gfs(pl[TOKEN_ID].content.servant) == '/')
             {
-            char oper = gfs(pl[gfs(token_id)++].content.servant);
+            char oper = gfs(pl[TOKEN_ID++].content.servant);
             ma_ty val2 = get_S (pl_reader);
 
             if (oper == '*')
@@ -300,11 +316,11 @@ ma_ty get_S (parsed_line_reader* pl_reader)
 
     ma_ty val = get_F (pl_reader);
 
-    if (gfs(pl[gfs(token_id)]).type == T_OP)
+    if (gfs(pl[TOKEN_ID]).type == T_OP)
         {
-        while (gfs(pl[gfs(token_id)].content.servant) == '^')
+        while (gfs(pl[TOKEN_ID].content.servant) == '^')
             {
-            gfs(token_id)++; // Skip '^'
+            TOKEN_ID++; // Skip '^'
             ma_ty val2 = get_F (pl_reader);
 
             val = npow (val, val2);
@@ -318,28 +334,31 @@ ma_ty get_S (parsed_line_reader* pl_reader)
 // Factor
 ma_ty get_F (parsed_line_reader* pl_reader)
     {
+    puts ("OMOMOMOMOMOMOM");
     VERBOSE_SIGNAL(get_f);
 
-    token_type t_type = gfs(pl[gfs(token_id)].type);
+    token_type t_type = TOKEN_TYPE;
 
     // !Blin nado ceplyat T_UFUNK type while lexo_parsing
     if (t_type == T_SFUNK ||
-       (t_type == T_VAR && gfs(pl[gfs(token_id)+1].type) == T_PARENTH))  // some keyword
+       (t_type == T_VAR && TOKEN_TYPE_FLEX(TOKEN_ID + 2) == T_PARENTH))  // some keyword
         {
         puts ("USER FUNCTION CALL!!!");
-        size_t cur_token_id = gfs(token_id);
+        size_t cur_token_id = TOKEN_ID;
 
-        node* funk_name = create_node (OP, gfs(pl[gfs(token_id)].content.id));
-        gfs(token_id)++;
+        node* funk_name = create_node (OP, gfs(pl[TOKEN_ID].content.id));
+        TOKEN_ID++;
+
+        REQUIRE(' ');
 
         require ('(', pl_reader);
 
 
         // Good-old copypaste
         node* param_old_binder = NULL;
-
-        while (gfs(pl[gfs(token_id)].type) == T_VAR ||
-               gfs(pl[gfs(token_id)].type) == T_VAL)
+puts ("NYAMNYAMNYAMNYAMNYAMNYAMNYAM");
+        while (TOKEN_TYPE == T_VAR ||
+               TOKEN_TYPE == T_VAL)
             {
             node* param_new_binder = param (NULL, NULL);
             param_new_binder->left_child = param_old_binder;
@@ -351,8 +370,8 @@ ma_ty get_F (parsed_line_reader* pl_reader)
             param_old_binder = param_new_binder;
 
 
-            if (gfs(pl[gfs(token_id)].type) != T_PARENTH ||
-                gfs(pl[gfs(token_id)].content.servant) != ')')
+            if (TOKEN_TYPE != T_PARENTH ||
+                gfs(pl[TOKEN_ID].content.servant) != ')')
                 {
                 require (',', pl_reader);
                 }
@@ -362,17 +381,19 @@ ma_ty get_F (parsed_line_reader* pl_reader)
 
         if (t_type == T_SFUNK)
             {
+
             return call (funk_name, param_old_binder, SFUNK);
             }
         else
             {
+
             return call (funk_name, param_old_binder, UFUNK);
             }
         }
     else
         {
         node* debug_node = get_P (pl_reader);
-        puts ("HASK");
+
         return debug_node;
         }
     }
@@ -381,21 +402,21 @@ ma_ty get_F (parsed_line_reader* pl_reader)
 // Primary level
 ma_ty get_P (parsed_line_reader* pl_reader)
     {
-    puts ("Get_P is in de haus");
+    // puts ("Get_P is in de haus");
     VERBOSE_SIGNAL(get_p);
 
-    if (gfs(pl[gfs(token_id)].type) == T_PARENTH &&
-        gfs(pl[gfs(token_id)].content.servant) == ')')
+    if (TOKEN_TYPE == T_PARENTH &&
+        gfs(pl[TOKEN_ID].content.servant) == ')')
         {
-        gfs(token_id)++;
+        TOKEN_ID++;
         ma_ty val = get_E (pl_reader);
 
         require (')', pl_reader);
 
         return val;
         }
-    else if (gfs(pl[gfs(token_id)].type) == T_VAL ||
-             gfs(pl[gfs(token_id)].type) == T_VAR) // T_VAR process
+    else if (TOKEN_TYPE == T_VAL ||
+             TOKEN_TYPE == T_VAR) // T_VAR process
         {
         puts ("get_N is in de haus");
         return get_N (pl_reader);
@@ -408,29 +429,26 @@ ma_ty get_N (parsed_line_reader* pl_reader)
     {
     VERBOSE_SIGNAL(get_n);
 
-    print_token (gfs(pl[gfs(token_id)]), 1);
+    print_token (gfs(pl[TOKEN_ID]), 1);
 
-    if (gfs(pl[gfs(token_id)].type) == T_VAL)
+    if (TOKEN_TYPE == T_VAL)
         {
-        puts ("RACSHA");
         double val = 0;
 
-        val = gfs(pl[gfs(token_id)++].content.val);
+        val = gfs(pl[TOKEN_ID++].content.val);
 
         char str_val[NAME_LENGTH] = {};
-puts ("MMMMM");
+
         gcvt (val, NAME_LENGTH, str_val);
         puts (str_val);
 
         node* temp_one = create_node (VAL, str_val);
 
-        puts ("CASINO");
         return temp_one;
         }
-    else if (gfs(pl[gfs(token_id)].type) == T_VAR)
+    else if (TOKEN_TYPE == T_VAR)
         {
-        puts ("CARSH>");
-        return create_node (VAR, gfs(pl[gfs(token_id)++].content.id));
+        return create_node (VAR, gfs(pl[TOKEN_ID++].content.id));
         }
     else
         {
@@ -449,7 +467,7 @@ puts ("MMMMM");
 ERROR_LIST syntax_error (parsed_line_reader* pl_reader, ERROR_LIST error_code)
     {
     printf ("[SYNTAX ERROR: %d] -> ", error_code);
-    print_token (gfs(pl[gfs(token_id)]), 1);
+    print_token (gfs(pl[TOKEN_ID]), 1);
 
     return error_code;
     }
@@ -475,14 +493,14 @@ int require (char requirement, parsed_line_reader* pl_reader)
 
      printf ("Require %c\n", requirement);
 
-    token_type t_type = gfs(pl[gfs(token_id)].type);
+    token_type t_type = TOKEN_TYPE;
 
     if (t_type ==  T_OP || t_type ==  T_PARENTH || t_type ==  T_END || t_type == T_LINE ||
         t_type ==  T_COMP || t_type == T_DELIM)
         {
-        if (gfs(pl[gfs(token_id)].content.servant) == requirement)
+        if (gfs(pl[TOKEN_ID].content.servant) == requirement)
             {
-            gfs(token_id)++;
+            TOKEN_ID++;
 
             return true;
             }

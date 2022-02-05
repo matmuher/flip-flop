@@ -34,31 +34,32 @@ node* left_grow (const char* binder_node_content,
 int main ()
     {
     #if 1 // Sueta
-    char* file_name = "wasup_world.cum";
-    size_t lines_num = 0;
-    line_buf* lines =  get_strings (file_name, &lines_num, true);
+        char* file_name = "wasup_world.cum";
+        size_t lines_num = 0;
+        line_buf* lines =  get_strings (file_name, &lines_num, true);
 
-    token* parsed_line = lexo_parse (lines[0].beg_ptr);
+        token* parsed_line = lexo_parse (lines[0].beg_ptr);
 
-    parsed_line_reader pl_reader = {0, parsed_line};
+        parsed_line_reader pl_reader = {0, parsed_line};
 
-    #if 0 // Check lexo parse
+        #if 1 // Check lexo parse
 
-    print_pl (&pl_reader);
+            print_pl (&pl_reader);
 
-    #endif
+        #endif
 
-    #if 1 // Recursive parse
+        #if 1 // Recursive parse
 
-    node* root = get_G (&pl_reader);
-    puts ("wwwwww");
-    dot_this_shit (root);
+            node* root = get_G (&pl_reader);
 
-    // to_asm (root);
+            puts ("Descent parsing ended");
 
+            dot_this_shit (root);
 
+            // to_asm (root);
+        #endif
 
-    #endif
-    memory_free ();
+        memory_free ();
+
     #endif
     }

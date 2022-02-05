@@ -1,3 +1,5 @@
-define foo (firstparam,secondparam,thirdparam){var:firstparam;x:secondparam+thirdparam;return 2*var;}
-define main (){a:11;x:5*2+foo(a+3,a+8*a*99);return 0;}
+z:5
+main ()
+define main (){n:7;Fib (n);}
+define Fib (n){if(n=1){return 1;};if(n=2){return 1;};return Fib (n-1)+Fib (n-2);}
 $

@@ -36,8 +36,8 @@ struct token
 
 struct parsed_line_reader
     {
-    size_t token_id;
-    token* pl;
+    size_t token_id; // Current token
+    token* pl; // Pointer to the first token in parsed line
     };
 
 

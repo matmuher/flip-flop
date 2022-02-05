@@ -3,6 +3,13 @@
 #include "great_grammar.h"
 #include "lexo_parser.h"
 
+
+/*
+Parse string into tokens:
+
+for comprehensive list of tokens
+take a look in "lexo_parser.h, enum token_type"
+*/
 token* lexo_parse (const char* line)
     {
     size_t line_length = strlen (line);
@@ -13,8 +20,11 @@ token* lexo_parse (const char* line)
     size_t token_id = 0;
 
 
-    // Suspicious define: how to in elegant way
-    // concatenate "content." and "id"?
+    /*
+    [ATTENTION! gypsy tricks]
+    Suspicious define: how to in elegant way
+    concatenate "content." and "ass"?
+    */
     #define TOK_PROC(TYPE, ass)                   \
         case TYPE:                                \
             {                                     \
@@ -47,24 +57,26 @@ token* lexo_parse (const char* line)
 
             default:
                 {
-                puts ("Nevedomya dich occured! Unknown token:");
-                puts (begunok);
+                printf ("[UNKNOWN TOKEN] : %s\n", begunok);
                 }
             }
         }
     #undef TOK_PROC
 
+    // it's token of last processed token, so it shows how many tokens there are in line
+    //                                                       \/
     parsed_line = (token*) elephant_realloc (parsed_line, token_id, sizeof (token));
 
     return parsed_line;
     }
 
 
+// pl is for parsed_line
 void print_pl (parsed_line_reader* pl_reader)
     {
     size_t token_id = 0;
 
-    while (pl_reader->pl[token_id-1].type != T_END)
+    while (pl_reader->pl[token_id - 1].type != T_END)
         {
         print_token (pl_reader->pl[token_id++], 0);
         }
@@ -85,30 +97,44 @@ void print_token (token token_to_print, int mode) // 1 - with '\n', 0 - without
         case T_SFRAME:
         case T_DEF:
         case T_RET:
+            {
             printf ("%s[%d] ", token_to_print.content.id, token_to_print.type);
+
             if (mode == NEW_LINE_MODE)
                 {
                 putchar ('\n');
                 }
+
             break;
+            }
+
         case T_OP:
         case T_PARENTH:
         case T_COMP:
         case T_DELIM:
         case T_LINE:
         case T_END:
+            {
             printf ("%c[%d] ", token_to_print.content.servant, token_to_print.type);
+
             if (mode == NEW_LINE_MODE)
                 {
                 putchar ('\n');
                 }
+
             break;
+            }
+
         case T_VAL:
+            {
             printf ("%lf[%d] ", token_to_print.content.val, token_to_print.type);
+
             if (mode == NEW_LINE_MODE)
                 {
                 putchar ('\n');
                 }
+
             break;
+            }
         }
     }
