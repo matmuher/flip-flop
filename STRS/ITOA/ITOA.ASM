@@ -1,5 +1,5 @@
 ;		[ITOA]
-
+.286
 .model tiny
 
 .code
@@ -83,6 +83,8 @@ itoa_stack		proc
 ;------------------------------------------------
 itoa2		proc
 		
+		pusha
+		
 		xor CX, CX		; two's degree counter
 		mov BP, AX		; save origin int
 		mov AX, BX		; for div
@@ -126,6 +128,8 @@ itoa2		proc
 		
 		call perevorot
 	
+		popa
+
 		ret
 		endp		
 ;------------------------------------------------
@@ -146,13 +150,17 @@ itoa2		proc
 ;	puts string in user's memory
 ; -----------------------------------------------
 ;[destroy]:
-;	AX, BX, CX, DX, ES, DI
+;	AX, BX, CX, DX, DI, SI, BP
 ;------------------------------------------------
 itoa		proc
 
 		nop
 		nop
 		nop
+
+		IRP REG, <AX,BX,CX,DX,DI,SI,BP>
+			push REG
+		ENDM
 		
 		mov BP, DI	
 
@@ -177,6 +185,10 @@ whale:
 		mov DI, BP
 		
 		call perevorot
+		
+		IRP REG, <BP,SI,DI,DX,CX,BX,AX>
+			pop REG
+		ENDM
 
 		ret
 
@@ -202,14 +214,18 @@ whale:
 ;	reversed string stored in user's adress
 ;------------------------------------------------
 ;[destroy]:
-;	BX, DX, CX, BP, DI
+;	BX, CX, DX, DI, BP
 ;------------------------------------------------
 perevorot		proc
 			
 			nop
 			nop
 			nop
-			
+
+			IRP REG, <BX,CX,DX,DI,BP>
+				push REG
+			ENDM	
+	
 			mov BP, DI
 			dec CX
 			add BP, CX		; Now BP points to end of string
@@ -224,10 +240,14 @@ perevorot		proc
 			inc DI
 			
 			cmp BP, DI
-			jg poka
-			
-			ret		
+			jg poka			
+		
+			IRP REG, <BP,DI,DX,CX,BX>
+				pop REG
+			ENDM
 	
+			ret
+
 			nop
 			nop
 			nop
