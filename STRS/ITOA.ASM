@@ -8,7 +8,7 @@ org 100h
 
 start:
 
-mov BX, 2d	;BASE
+mov BX, 8d	;BASE
 
 		;[TRANSMIT STRING STORAGE ADRESS]
 mov AX, DS
@@ -16,7 +16,7 @@ mov ES, AX
 
 lea DI, int2str
 
-mov AX, 5d	;[INTEGER ITSELF]
+mov AX, 177d	;[INTEGER ITSELF]
  
 ;call itoa
 
@@ -105,7 +105,9 @@ itoa2		proc
 			shl BP, CL
 
 			sub AX, BP		; Get rest
-			add AL, '0'
+			
+			xchg SI, AX
+			mov AL, ma_alpha[SI]
 			
 			stosb			; Put it in de string
 		
@@ -117,7 +119,7 @@ itoa2		proc
 		
 		mov AL, '$'
 		mov ES:[DI], AL
-			
+					; Prepare for perevorot()	
 		sub DI, DX
 		mov CX, DI
 		mov DI, DX
@@ -157,11 +159,12 @@ itoa		proc
 whale:		
 		xor DX, DX			
 		div BX
-
-		add DL, '0'
+		
+		xchg SI, DX
+		mov DL, ma_alpha[SI]
 		mov ES:[DI], DL
 		inc DI
-
+		
 		cmp AX, 0 
 		jne whale
 		
@@ -234,6 +237,7 @@ perevorot		proc
 
 .data
 
+ma_alpha db '0123456789ABCDEF'
 int2str db 100 dup(0)		; User allocate memory
 debug_machine db 'Four$'
 
