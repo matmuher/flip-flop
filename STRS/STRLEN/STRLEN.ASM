@@ -20,8 +20,8 @@ main:
 	
 ;	call regs_strlen
 
-;	mov DX, DI
-;	add DX, '0'	
+	mov DX, DI
+	add DX, '0'	
 
 	mov AH, 02h
 	int 21h
@@ -38,7 +38,6 @@ stack_strlen		proc
 				; [PROLOG]
 			push BP			; save previous BP
 			mov bp, sp
-			sub sp, 4		; storage for 2 params
 			
 
 			mov DI, [BP + 2 + 2 * 1]
@@ -48,7 +47,6 @@ stack_strlen		proc
 			call regs_strlen
 
 				; [EPILOG]
-			add SP, 4		; free params' storage						
 			pop BP
 			ret
 
