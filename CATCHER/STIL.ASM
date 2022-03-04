@@ -1,101 +1,230 @@
 ;		[UNHOLY CATCHER]
-
+.286
 .model tiny
 
 .code
 org 100h
 
 start:
-	extrn DrawFrame_std:far, ROOF:word
+			;[HOTKEY STATUS]
+	HOTKEY = 41d
+	DEPRES = 0
+	PRESS1 = 1
+	PRESS2 = 2
 
-	push DS
-	mov BX, SEG ROOF
-	mov DS, BX
-	call DrawFrame_std
-	pop DS
-comment !
-	;		[Recapture 08h interrupt]
+			;[SAVE 08H INT]
+	
 	xor BX, BX
-	mov ES, BX	; original 08h
+	mov ES, BX
+	mov BX, 08h * 4	
+	
+	mov AX, ES:[BX]
+	mov word ptr OLD08H, AX
+	
+	mov AX, ES:[BX + 2]
+	mov word ptr OLD08H + 2, AX
 
-	cli
-	mov BX, 08h * 4 ; 
-	mov ES:[BX],offset vorishka
+
+			;[RECAPTURE OF 08H]
+
 	mov AX, CS
-	mov ES:[BX + 2], AX
+	
+	cli
+		mov word ptr ES:[BX], offset New08h
+		mov word ptr ES:[BX + 2], AX
 	sti
+			
+
+			;[SAVE 09H INT]
+	
+	xor BX, BX
+	mov ES, BX
+	mov BX, 09h * 4	
+	
+	mov AX, ES:[BX]
+	mov word ptr OLD09H, AX
+	
+	mov AX, ES:[BX + 2]
+	mov word ptr OLD09H + 2, AX
+
+
+			;[RECAPTURE OF 09H]
+
+	mov AX, CS
+	
+	cli
+		mov word ptr ES:[BX], offset New09h
+		mov word ptr ES:[BX + 2], AX
+	sti
+
+
+			;[STAY RESIDENT]
 
 	mov AX, 3100h
 	mov DX, offset proga_end
 	shr DX, 4
-	inc DX
-	inc DX
+	add DX, 10d
 	int 21h	
-!
+	
+	mov byte ptr hotkey_status, 0		
+	
+			;[PAUSE]
+
 	xor AH, AH
 	int 16h
+
+			;[EXIT 0]
 
 	mov AX, 4c00h
 	int 21h
 
-vorishka		proc
+	
+;--------------------------------------
+New08h		proc
+					;[SAVE REGS]
+
+			IRP REG,<AX,BX,DI,ES>
+				push REG
+			ENDM
+			
+
+					;[PREPARE FOR VIDEO OUTPUT]	
+						
+			mov BX, 0b800h
+			mov ES, BX
+			scr_pos = (80d * 8d + 40d) * 2d
+			mov DI, scr_pos
+			
+					;[PROCESS HOTKEY]
+					; Output hotkey_status
+
+			mov AH, 10100100b ; green back, red chars
+			xor AL, AL
+			mov AL, hotkey_status
+			add AL, '0'
+			stosw
+
+			mov AL, '!'
+			stosw
+
+			mov AL, ' '
+			stosw
+			
+			
+			
+			cmp hotkey_status, PRESS1
+			je draw
+			
+			cmp hotkey_status, PRESS2
+			je stop_draw
+			
+			cmp hotkey_status, DEPRES
+			je no_hot
+
+			
+			draw:
+				mov AL, 'D'
+				mov AH, 10010111b ; blue back, white chars
+				stosw	
+				
+				jmp die_end
+					
+			stop_draw:
+				mov AL, 'S'
+				mov AH, 00000111b ; black back, white chars 
+				stosw
+
+				mov byte ptr hotkey_status, DEPRES
+
+				jmp die_end
+				
+			no_hot:
+				mov AL, 'N'
+				mov AH, 01000111b ; red back, white chars
+				stosw
+
+			die_end:
+
+					;[SAVE REGS]
+
+			IRP REG,<ES,DI,BX,AX>
+				pop REG
+			ENDM
+
+					;[TRANSFER CONTROL TO THE ORIGINAL INT]
+
+			db 0EAh		; FAR JMP OLD08H
+			OLD08H dd 0
+					
+			endp
+;--------------------------------------
+
+
+;--------------------------------------
+New09h		proc
 			
 			push AX
 			push BX
-			push ES
-			push DI
+			
 
-			;		[Get bukva]
+				;[Get bukva]
+
 			KbrdPrt = 60h
 			in AL, KbrdPrt
+	
+			cmp AL, HOTKEY
+			je hotkey_pressed
 
-			KB = 11000001b
-			mov AH, KB
-			
-			VDSEG = 0b800h
-			mov BX, VDSEG
-			mov ES, BX
-			STD_SHIFT = (80d * 8d + 40d) * 2		
-			mov DI, STD_SHIFT
-			
-			;		[Print user's bukva]
-			
-			cmp AL, 2
-			jne skip_regs
-			
-			mov ES:[DI], AX
-			
-			mov ES:[DI + 160d], BX
-			mov ES:[DI + 320d], CX
-			mov ES:[DI + 480d], DX
-			
-			skip_regs:
-			;		[Calm down keyboard]
-			GREATEST_BIT = 80h
-			mov AH, AL
-			or AL, GREATEST_BIT
-			
-			KbrdPrtMig = 61h
-			out KbrdPrtMig, AL
+			jmp return_control
 
-			mov AL, AH
-			out KbrdPrtMig, AL
+		hotkey_pressed:
 
-			mov AL, 20h
-			out 20h, AL
+			add hotkey_status, 1d	;DEPRES (0) +1 % 3 = PRESS1 (1) 
+						;PRESS1 (1) +1 % 3 = PRESS2 (2)
+						;PRESS2 (2) +1 % 3 = DEPRES (0) 
+			xor AX, AX
+			mov AL, hotkey_status
+			mov BL, 3d
 			
-			pop DI
-			pop ES
+			div BL
+			
+			mov hotkey_status, AH
+			
+			
+		return_control:
+
 			pop BX
 			pop AX
-			
-			;add AL, 2			
-
-			iret			
+		
+			db 0EAh		; FAR JMP OLD09H
+			OLD09H dd 0
+	
 			endp
-proga_end db 0
+;--------------------------------------
 
+
+;--------------------------------------
+DrawFrameRegs		proc
+			
+			push BX
+			push DS
+
+		;	mov BX, SEG ROOF
+			mov DS, BX
+			
+		;	call DrawFrame_std
+			
+			pop DS
+			pop BX 
+			
+			ret
+			endp
+;--------------------------------------
 .data
+
+hotkey_status db 0
+
+proga_end db 0
 
 end start
 

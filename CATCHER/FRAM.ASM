@@ -5,10 +5,9 @@
 
 .code
 
-public DrawFrame_std, ROOF
-
-
 org 100h
+
+start:
 
 jmp main
 		
@@ -161,4 +160,4 @@ FLOOR db 0C8h, 0CDh, 0BCh
 ;--------------------------------------
 
 
-end
+end start
