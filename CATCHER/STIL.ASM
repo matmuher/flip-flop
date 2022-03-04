@@ -6,7 +6,14 @@
 org 100h
 
 start:
+	extrn DrawFrame_std:far, ROOF:word
 
+	push DS
+	mov BX, SEG ROOF
+	mov DS, BX
+	call DrawFrame_std
+	pop DS
+comment !
 	;		[Recapture 08h interrupt]
 	xor BX, BX
 	mov ES, BX	; original 08h
@@ -24,6 +31,9 @@ start:
 	inc DX
 	inc DX
 	int 21h	
+!
+	xor AH, AH
+	int 16h
 
 	mov AX, 4c00h
 	int 21h
@@ -84,5 +94,8 @@ vorishka		proc
 			iret			
 			endp
 proga_end db 0
+
+.data
+
 end start
 
