@@ -73,21 +73,11 @@ itoa_stack		proc
 			mov BX, [BP + second]
 			mov AX, [BP + first]
 			
-			push BX
-			OR BX, 1b
-			pop BX			
-
-			je bin_family
-			
-			call itoa
+			call itoa2
 			
 			jmp die_ende
 
-		bin_family:
-			
-			call itoa2
-					
-		die_ende:
+				
 			popa
 			
 				;[EPILOG]

@@ -3,12 +3,13 @@
 .model tiny
 
 .code
+
 org 100h
 
+;--------------------------------------
 start:
-	
 
-			;[HOTKEY STATUS]
+		;[HOTKEY STATUS]
 			
 	HOTKEY = 41d
 	DEPRES = 0
@@ -19,13 +20,14 @@ start:
 	call Recature08h
 	call Recapture09h
 			
-
 	call TSR
 	
 	mov AX, 4c00h
 	int 21h
+;--------------------------------------
 		
 
+;--------------------------------------
 TSR			proc
 
 				;[Terminate and stay resident]
@@ -50,7 +52,10 @@ TSR			proc
 			
 			;ret
 			endp
-
+;--------------------------------------			
+			
+			
+;--------------------------------------
 Recature08h	proc
 				
 						
@@ -351,18 +356,310 @@ DrawLine	proc
 ;--------------------------------------
 
 DrawRegs	proc
-
+			
+			
+			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
+				pop REG
+			ENDM
+			
+			
+			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
+				push REG
+			ENDM
+			
+			
 			text_field = total_shift + 82d * 2d
 			
+			new_line = 80d * 2d
+			num_len = 10d ; register content length
+			
+			regs_style = 1010011100000000b ; red back, white chars
+			
+			
 			mov DI, text_field
-			mov BX, VIDEOSEG
-			mov ES, BX
-			mov AH, 10100101b
-			mov AL, '7'
-			stosw
+			
+			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
+		
+					;[ITOA REGS]
+				
+				push REG
+				push 16d
+				push CS
+				push offset reg_str
+				
+				call itoa_stack
+			
+					;[PRINT REGISTERS]
+					
+				push regs_style ; red back, white chars
+				push num_len
+				push DI
+				push offset reg_str
+				push VIDEOSEG
+				
+				call PrntStr_stack
+				
+				add DI, new_line
+			ENDM
 			
 			ret
 			endp
+			
+			REGISTERS db 'AXBXCXDXDISIBPES'
+			reg_str db num_len DUP(0)
+;------------------------------------------------
+
+
+;------------------------------------------------
+;		[ITOA via stack]
+;------------------------------------------------
+;[params]:
+;	1) integer to print
+;	2) base (in which base should be transfered)
+;	
+;	3) segment adress
+;	4) offser in segment
+;------------------------------------------------
+;[return]:
+;	puts string in user's memory
+;------------------------------------------------
+itoa_stack		proc
+						;[PROLOG]
+			push BP
+			mov BP, SP
+
+						;[PARAMS]
+			fourth = 2 + 2
+			third = fourth + 2
+			second = third + 2
+			first = second + 2
+					
+			pusha
+			
+			mov DI, [BP + fourth]
+			mov ES, [BP + third]
+			mov BX, [BP + second]
+			mov AX, [BP + first]
+			
+			call itoa2
+		
+				
+			popa
+			
+				;[EPILOG]
+			pop BP						
+			ret 8 
+			endp
+;------------------------------------------------
+
+
+;------------------------------------------------
+;		[ITOA for 2^n]
+;------------------------------------------------
+;[equal to ITOA]
+;------------------------------------------------
+itoa2		proc
+		
+		pusha
+		
+		xor CX, CX		; two's degree counter
+		mov BP, AX		; save origin int
+		mov AX, BX		; for div
+		
+		xor DX, DX
+		
+	pokamest:
+		mov BX, 2d	
+		inc CX			; two's degree
+		div BX
+
+		cmp AX, 1d
+		jne pokamest
+			
+		mov DX, DI
+			
+		rest:
+			mov AX, BP
+
+			shr BP, CL		; Clean CX bits from edge
+			shl BP, CL
+
+			sub AX, BP		; Get rest
+			
+			xchg SI, AX
+			mov AL, cs:ma_alpha[SI]
+			
+			stosb			; Put it in de string
+		
+			shr BP, CL
+		
+			cmp BP, 0
+		
+		jne rest
+		
+		mov AL, '$'
+		mov ES:[DI], AL
+					; Prepare for perevorot()	
+		sub DI, DX
+		mov CX, DI
+		mov DI, DX
+		
+		mov BX, CS
+		mov ES, BX
+		
+		call perevorot
+	
+		popa
+
+		ret
+		endp	
+
+		ma_alpha db '0123456789ABCDEF'
+;------------------------------------------------
+
+
+;------------------------------------------------
+;		[PEREVOROT]
+;------------------------------------------------
+;[params]:
+;	CX - length of string
+;
+;	ES -\ adress of string
+;	DI -/ that needs some perevorot
+;------------------------------------------------
+;[returns]:
+;	reversed string stored in user's adress
+;------------------------------------------------
+;[destroy]:
+;	BX, CX, DX, DI, BP
+;------------------------------------------------
+perevorot		proc
+			
+			nop
+			nop
+			nop
+
+			IRP REG, <BX,CX,DX,DI,BP>
+				push REG
+			ENDM	
+	
+			mov BP, DI
+			dec CX
+			add BP, CX		; Now BP points to end of string
+
+		poka:
+			mov DL, ES:[DI]
+			mov BL, ES:[BP]
+			mov ES:[BP], DL
+			mov ES:[DI], BL
+
+			dec BP
+			inc DI
+			
+			cmp BP, DI
+			jg poka			
+		
+			IRP REG, <BP,DI,DX,CX,BX>
+				pop REG
+			ENDM
+	
+			ret
+
+			nop
+			nop
+			nop
+			
+			endp
+;------------------------------------------------
+
+
+;--------------------------------------
+;		[PrntStr_stack]
+;--------------------------------------
+;[params]:
+;	1 - color
+;	2 - length
+;	3 - start of string in videoseg
+;	4 - start of source string
+;	5 - videosegment addres
+;--------------------------------------
+;[returns]:
+;	prints string on the screen
+;--------------------------------------
+PrntStr_stack		proc
+
+					push BP
+					mov BP, SP
+					
+						;[PARAMS]
+					
+					fifth = 2 + 2
+					fourth = fifth + 2
+					third = fourth + 2
+					second = third + 2
+					first = second + 2
+							
+					pusha
+					
+					mov ES, [BP + fifth]
+					mov SI, [BP + fourth]
+					mov DI, [BP + third]
+					mov CX, [BP + second]
+					mov AX, [BP + first]
+					
+					call PrntStr
+						
+					popa
+						
+					pop BP
+					ret 10
+
+					endp
+
+
+;--------------------------------------
+;          Print String
+;--------------------------------------
+; Params:
+;	AH - color
+;	CX - length
+;	DI - start of string in videoseg
+;	SI - start of source string
+;	ES - videosegment addres
+;
+; Destroy: AX, CX, DI, SI
+;--------------------------------------
+PrntStr proc
+	
+	cld		; DF = 0
+
+str_prnt:	
+	
+	mov AL, CS:[SI]
+	inc SI
+	;lodsb		; mov AL, [SI] ; put char from string
+			;inc SI ; shift to the next	
+
+	cmp AL, '$'
+	je str_end
+
+
+	mov ES:[DI], AX
+	add DI, 2d
+	;stosw		; mov ES:[DI], AX ; put symbol on screen
+				; add DI, 2 ; shift to next symbol_place	
+	loop str_prnt
+
+	mov AL, ' '
+
+	mov ES:[DI], AX
+	add DI, 2d
+str_end:
+	ret
+
+	endp
+;--------------------------------------
+
 
 ROOF  db 0C9h, 0CDh, 0BBh
 WALL  db 0BAh, ' ', 0BAh
