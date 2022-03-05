@@ -1,5 +1,5 @@
 ;		[UNHOLY CATCHER]
-.286
+.186
 .model tiny
 
 .code
@@ -8,7 +8,7 @@ org 100h
 
 ;--------------------------------------
 start:
-	
+
 		;[HOTKEY STATUS]
 			
 	HOTKEY = 41d
@@ -26,6 +26,280 @@ start:
 	int 21h
 ;--------------------------------------
 		
+		
+;--------------------------------------
+DrawRegs	proc
+			
+			
+			text_field = total_shift + 82d * 2d
+			
+			new_line = 80d * 2d
+			num_len = 10d ; register content length
+			
+			regs_style = 1010011100000000b ; red back, white chars
+			
+			regs_num = 8d
+			mov CX, regs_num
+			
+			mov AX, regs_style
+			
+			mov BX, VIDEOSEG
+			mov ES, BX
+			
+			mov DI, text_field
+			
+			mov SI, offset REGISTERS
+			
+			
+			reg_labels:
+			
+				mov AL, CS:[SI]
+				inc SI
+				
+				mov ES:[DI], AX
+				add DI, 2d
+				
+				mov AL, CS:[SI]
+				inc SI
+				
+				mov ES:[DI], AX
+				add DI, 2d
+				
+				
+				add DI, new_line - 2d * 2d
+				
+			loop reg_labels
+				
+			
+			pop ret_adr
+			
+			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
+				pop REG
+			ENDM
+		
+			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
+				push REG
+			ENDM
+			
+			push ret_adr
+			
+			mov video_begunok, text_field + 2d * 3
+			
+			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
+		
+					;[ITOA REGS]
+				
+				push REG
+				push 16d
+				push CS
+				push offset reg_str
+				
+				call itoa_stack
+			
+					;[PRINT REGISTERS]
+					
+				push regs_style ; red back, white chars
+				push num_len
+				push video_begunok
+				push offset reg_str
+				push VIDEOSEG
+				
+				call PrntStr_stack
+				
+				add video_begunok, new_line
+			ENDM
+			
+			
+			
+			ret
+			endp
+			
+			video_begunok dw 0
+			ret_adr dw 0
+			REGISTERS db 'AXBXCXDXDISIBPES'
+			reg_str db num_len DUP(0)
+;------------------------------------------------		
+				
+		
+;--------------------------------------
+;		[DrawFrame]
+;--------------------------------------
+;[params]: you have no choice)
+;	AH - color
+;--------------------------------------
+;[destroy]: 
+;	AX, BX, CX, DX, DI, SI, BP, ES
+;--------------------------------------
+DrawFrame	proc
+
+		IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
+			push REG
+		ENDM
+		
+		VIDEOSEG = 0b800h
+	
+		; set frame sizes
+		len = 12d  
+		HEIGHT = 12d
+ 
+		; set frame position on screen
+		line_shift = 9d
+		column_shift = 60d
+
+		weedth = 80d * 2h ; one line shift in VIDEOSEG
+		line = weedth - len * 2h ; transition to a new line for frame element
+		total_shift = line_shift * weedth + column_shift * 2h
+		
+		mov BX, VIDEOSEG
+		mov ES, BX
+		
+		xor DI, DI
+		mov DI, total_shift
+		mov CX, len
+		
+				;[PRINT ROOF]
+		mov SI, offset ROOF
+		call DrawLine
+		add DI, line
+		
+				;[PRINT WALL]
+		mov DX, HEIGHT
+
+		ma_wall:	
+
+			mov CX, len
+			mov SI, offset WALL
+
+			call DrawLine
+			add DI, line
+
+			dec DX
+			CMP DX, 0
+
+		JNZ ma_wall
+
+				;[PRINT FLOOR]
+		mov CX, len
+		mov SI, offset FLOOR
+	
+		call DrawLine
+
+		IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
+			pop REG
+		ENDM
+
+		ret
+		endp
+;--------------------------------------		
+		
+		
+;------------------------------------------------
+;		[SaveScreen]
+;------------------------------------------------		
+SaveScreen	proc
+			
+			resolution = len * (HEIGHT + 2)
+			
+			IRP REG,<AX,BX,CX,DI,ES>
+				push REG
+			ENDM
+			
+			
+			xor DX, DX
+			
+			mov BX, VIDEOSEG
+			mov ES, BX
+			
+			mov DI, total_shift
+			
+			ss_rows:
+				
+				xor CX, CX
+				ss_columns:
+				
+					mov AX, DX
+					mov BL, len * 2d
+					MUL BL
+					
+					add AX, CX
+					
+					xchg AX, BX
+					mov word ptr AX,  ES:[DI]
+					mov word ptr cs:buffer[BX], AX
+					add DI, 2d
+					add CX, 2d
+					
+				cmp CX, len * 2
+				jne ss_columns
+				
+				add DI, new_line - len * 2d
+				inc DX
+				
+			cmp DX, (HEIGHT + 2)
+			jne ss_rows
+			
+			IRP REG,<ES,DI,CX,BX,AX>
+				pop REG
+			ENDM
+			
+			ret
+			endp
+			
+		buffer dw resolution DUP(0100000100100100b)
+;------------------------------------------------
+
+
+;------------------------------------------------
+;		[PutBuffer]
+;------------------------------------------------
+PutBuffer	proc
+
+			IRP REG,<AX,BX,CX,DX,DI,ES>
+				push REG
+			ENDM
+			
+			
+			xor DX, DX
+			
+			mov BX, VIDEOSEG
+			mov ES, BX
+			
+			mov DI, total_shift
+			
+			rows:
+				
+				xor CX, CX
+				columns:
+				
+					mov AX, DX
+					mov BL, len * 2d
+					MUL BL
+					
+					add AX, CX
+					
+					xchg AX, BX
+					mov word ptr AX, cs:buffer[BX]
+					mov word ptr ES:[DI], AX
+					add DI, 2d
+					add CX, 2d
+					
+				cmp CX, len * 2
+				jne columns
+				
+				add DI, new_line - len * 2d
+				inc DX
+				
+			cmp DX, (HEIGHT + 2)
+			jne rows
+			
+			
+			IRP REG,<ES,DI,DX,CX,BX,AX>
+				pop REG
+			ENDM
+			
+			ret
+			endp
+;------------------------------------------------
 		
 ;--------------------------------------
 TSR			proc
@@ -122,6 +396,8 @@ New08h		proc
 			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
 				push REG
 			ENDM
+			
+			
 
 					;[PREPARE FOR VIDEO OUTPUT]	
  						
@@ -166,16 +442,17 @@ New08h		proc
 				jmp die_end
 					
 			stop_draw:
-				mov AH, 00100000b ; black back, white chars 
-				call DrawFrame
+				;mov AH, 00100000b ; black back, white chars 
+				call PutBuffer
 
 				mov byte ptr cs:[hotkey_status], DEPRES
 
 				jmp die_end
 				
 			no_hot:
-				mov AH, 01000000b ; black back, white chars 
-				call DrawFrame
+				;mov AH, 01000000b ; black back, white chars 
+				;call DrawFrame
+				call SaveScreen
 
 			die_end:
 
@@ -242,78 +519,6 @@ New09h		proc
 
 
 ;--------------------------------------
-;		[DrawFrame]
-;--------------------------------------
-;[params]: you have no choice)
-;	AH - color
-;--------------------------------------
-;[destroy]: 
-;	AX, BX, CX, DX, DI, SI, BP, ES
-;--------------------------------------
-DrawFrame	proc
-
-		IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
-			push REG
-		ENDM
-		
-		VIDEOSEG = 0b800h
-	
-		; set frame sizes
-		len = 12d  
-		HEIGHT = 12d
- 
-		; set frame position on screen
-		line_shift = 9d
-		column_shift = 60d
-
-		weedth = 80d * 2h ; one line shift in VIDEOSEG
-		line = weedth - len * 2h ; transition to a new line for frame element
-		total_shift = line_shift * weedth + column_shift * 2h
-		
-		mov BX, VIDEOSEG
-		mov ES, BX
-		
-		xor DI, DI
-		mov DI, total_shift
-		mov CX, len
-		
-				;[PRINT ROOF]
-		mov SI, offset ROOF
-		call DrawLine
-		add DI, line
-		
-				;[PRINT WALL]
-		mov DX, HEIGHT
-
-		ma_wall:	
-
-			mov CX, len
-			mov SI, offset WALL
-
-			call DrawLine
-			add DI, line
-
-			dec DX
-			CMP DX, 0
-
-		JNZ ma_wall
-
-				;[PRINT FLOOR]
-		mov CX, len
-		mov SI, offset FLOOR
-	
-		call DrawLine
-
-		IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
-			pop REG
-		ENDM
-
-		ret
-		endp
-;--------------------------------------
-
-
-;--------------------------------------
 ;		[DrawLine]
 ;--------------------------------------
 ;[params]:
@@ -357,98 +562,6 @@ DrawLine	proc
 			ret
 			endp
 ;--------------------------------------
-
-DrawRegs	proc
-			
-			
-			text_field = total_shift + 82d * 2d
-			
-			new_line = 80d * 2d
-			num_len = 10d ; register content length
-			
-			regs_style = 1010011100000000b ; red back, white chars
-			
-			regs_num = 8d
-			mov CX, regs_num
-			
-			mov AX, regs_style
-			
-			mov BX, VIDEOSEG
-			mov ES, BX
-			
-			mov DI, text_field
-			
-			mov SI, offset REGISTERS
-			
-			
-			reg_labels:
-			
-				mov AL, CS:[SI]
-				inc SI
-				
-				mov ES:[DI], AX
-				add DI, 2d
-				
-				mov AL, CS:[SI]
-				inc SI
-				
-				mov ES:[DI], AX
-				add DI, 2d
-				
-				
-				add DI, new_line - 2d * 2d
-				
-			loop reg_labels
-				
-			
-			pop ret_adr
-			
-			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
-				pop REG
-			ENDM
-		
-			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
-				push REG
-			ENDM
-			
-			push ret_adr
-			
-			mov video_begunok, text_field + 2d * 3
-			
-			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
-		
-					;[ITOA REGS]
-				
-				push REG
-				push 16d
-				push CS
-				push offset reg_str
-				
-				call itoa_stack
-			
-					;[PRINT REGISTERS]
-					
-				push regs_style ; red back, white chars
-				push num_len
-				push video_begunok
-				push offset reg_str
-				push VIDEOSEG
-				
-				call PrntStr_stack
-				
-				add video_begunok, new_line
-			ENDM
-			
-			
-			
-			ret
-			endp
-			
-			video_begunok dw 0
-			ret_adr dw 0
-			REGISTERS db 'AXBXCXDXDISIBPES'
-			reg_str db num_len DUP(0)
-;------------------------------------------------
 
 
 ;------------------------------------------------
@@ -669,6 +782,7 @@ PrntStr_stack		proc
 					ret 10
 
 					endp
+;--------------------------------------
 
 
 ;--------------------------------------
@@ -715,13 +829,15 @@ str_end:
 ;--------------------------------------
 
 
+;--------------------------------------
 ROOF  db 0C9h, 0CDh, 0BBh
 WALL  db 0BAh, ' ', 0BAh
 FLOOR db 0C8h, 0CDh, 0BCh
 
-hotkey_status db 1
+hotkey_status db 0
 
 proga_end db 0
+;--------------------------------------
 
 end start
 
