@@ -8,7 +8,7 @@ org 100h
 
 ;--------------------------------------
 start:
-
+	
 		;[HOTKEY STATUS]
 			
 	HOTKEY = 41d
@@ -26,7 +26,7 @@ start:
 	int 21h
 ;--------------------------------------
 		
-
+		
 ;--------------------------------------
 TSR			proc
 
@@ -57,7 +57,6 @@ TSR			proc
 			
 ;--------------------------------------
 Recature08h	proc
-				
 						
 					;[SAVE 08H INT]
 	
@@ -119,7 +118,7 @@ Recapture09h proc
 ;--------------------------------------
 New08h		proc
 					;[SAVE REGS]
-
+			
 			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
 				push REG
 			ENDM
@@ -181,11 +180,10 @@ New08h		proc
 			die_end:
 
 					;[SAVE REGS]
-
+			
 			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
 				pop REG
 			ENDM
-			
 					;[TRANSFER CONTROL TO THE ORIGINAL INT]
 
 			db 0EAh		; FAR JMP OLD08H
@@ -216,21 +214,20 @@ New09h		proc
 
 			jmp return_control
 
-		hotkey_pressed:
+			hotkey_pressed:
 
-			add cs:[hotkey_status], 1d	;DEPRES (0) +1 % 3 = PRESS1 (1) 
-						;PRESS1 (1) +1 % 3 = PRESS2 (2)
-						;PRESS2 (2) +1 % 3 = DEPRES (0) 
-			xor AX, AX
-			mov AL, cs:[hotkey_status]
-			mov BL, 3d
-			
-			div BL
-			
-			mov cs:[hotkey_status], AH
-			
-			
-		return_control:
+				add cs:[hotkey_status], 1d	;DEPRES (0) +1 % 3 = PRESS1 (1) 
+							;PRESS1 (1) +1 % 3 = PRESS2 (2)
+							;PRESS2 (2) +1 % 3 = DEPRES (0) 
+				xor AX, AX
+				mov AL, cs:[hotkey_status]
+				mov BL, 3d
+				
+				div BL
+				
+				mov cs:[hotkey_status], AH
+				
+			return_control:
 
 		
 			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
@@ -255,11 +252,14 @@ New09h		proc
 ;--------------------------------------
 DrawFrame	proc
 
+		IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
+			push REG
+		ENDM
 		
 		VIDEOSEG = 0b800h
 	
 		; set frame sizes
-		len = 10d  
+		len = 12d  
 		HEIGHT = 12d
  
 		; set frame position on screen
@@ -304,6 +304,9 @@ DrawFrame	proc
 	
 		call DrawLine
 
+		IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
+			pop REG
+		ENDM
 
 		ret
 		endp
@@ -358,16 +361,6 @@ DrawLine	proc
 DrawRegs	proc
 			
 			
-			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
-				pop REG
-			ENDM
-			
-			
-			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
-				push REG
-			ENDM
-			
-			
 			text_field = total_shift + 82d * 2d
 			
 			new_line = 80d * 2d
@@ -375,8 +368,52 @@ DrawRegs	proc
 			
 			regs_style = 1010011100000000b ; red back, white chars
 			
+			regs_num = 8d
+			mov CX, regs_num
+			
+			mov AX, regs_style
+			
+			mov BX, VIDEOSEG
+			mov ES, BX
 			
 			mov DI, text_field
+			
+			mov SI, offset REGISTERS
+			
+			
+			reg_labels:
+			
+				mov AL, CS:[SI]
+				inc SI
+				
+				mov ES:[DI], AX
+				add DI, 2d
+				
+				mov AL, CS:[SI]
+				inc SI
+				
+				mov ES:[DI], AX
+				add DI, 2d
+				
+				
+				add DI, new_line - 2d * 2d
+				
+			loop reg_labels
+				
+			
+			pop ret_adr
+			
+			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
+				pop REG
+			ENDM
+		
+			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
+				push REG
+			ENDM
+			
+			push ret_adr
+			
+			mov video_begunok, text_field + 2d * 3
 			
 			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
 		
@@ -393,18 +430,22 @@ DrawRegs	proc
 					
 				push regs_style ; red back, white chars
 				push num_len
-				push DI
+				push video_begunok
 				push offset reg_str
 				push VIDEOSEG
 				
 				call PrntStr_stack
 				
-				add DI, new_line
+				add video_begunok, new_line
 			ENDM
+			
+			
 			
 			ret
 			endp
 			
+			video_begunok dw 0
+			ret_adr dw 0
 			REGISTERS db 'AXBXCXDXDISIBPES'
 			reg_str db num_len DUP(0)
 ;------------------------------------------------
@@ -434,7 +475,9 @@ itoa_stack		proc
 			second = third + 2
 			first = second + 2
 					
-			pusha
+			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
+				push REG
+			ENDM
 			
 			mov DI, [BP + fourth]
 			mov ES, [BP + third]
@@ -443,8 +486,10 @@ itoa_stack		proc
 			
 			call itoa2
 		
-				
-			popa
+		
+			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
+				pop REG
+			ENDM
 			
 				;[EPILOG]
 			pop BP						
@@ -460,7 +505,9 @@ itoa_stack		proc
 ;------------------------------------------------
 itoa2		proc
 		
-		pusha
+		IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
+			push REG
+		ENDM
 		
 		xor CX, CX		; two's degree counter
 		mov BP, AX		; save origin int
@@ -509,7 +556,9 @@ itoa2		proc
 		
 		call perevorot
 	
-		popa
+		IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
+			pop REG
+		ENDM
 
 		ret
 		endp	
@@ -599,7 +648,10 @@ PrntStr_stack		proc
 					second = third + 2
 					first = second + 2
 							
-					pusha
+					IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
+						push REG
+					ENDM	
+			
 					
 					mov ES, [BP + fifth]
 					mov SI, [BP + fourth]
@@ -609,7 +661,9 @@ PrntStr_stack		proc
 					
 					call PrntStr
 						
-					popa
+					IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
+						pop REG
+					ENDM
 						
 					pop BP
 					ret 10
@@ -665,7 +719,7 @@ ROOF  db 0C9h, 0CDh, 0BBh
 WALL  db 0BAh, ' ', 0BAh
 FLOOR db 0C8h, 0CDh, 0BCh
 
-hotkey_status db 0
+hotkey_status db 1
 
 proga_end db 0
 
