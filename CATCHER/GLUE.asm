@@ -157,6 +157,7 @@ New08h		proc
 			draw:
 				mov AH, 00010000b ; blue back, white chars
 				call DrawFrame
+				call DrawRegs
 				
 				jmp die_end
 					
@@ -179,6 +180,7 @@ New08h		proc
 			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
 				pop REG
 			ENDM
+			
 					;[TRANSFER CONTROL TO THE ORIGINAL INT]
 
 			db 0EAh		; FAR JMP OLD08H
@@ -252,12 +254,12 @@ DrawFrame	proc
 		VIDEOSEG = 0b800h
 	
 		; set frame sizes
-		len = 30d  
-		HEIGHT = 5d
+		len = 10d  
+		HEIGHT = 12d
  
 		; set frame position on screen
-		line_shift = 10d
-		column_shift = 30d
+		line_shift = 9d
+		column_shift = 60d
 
 		weedth = 80d * 2h ; one line shift in VIDEOSEG
 		line = weedth - len * 2h ; transition to a new line for frame element
@@ -318,35 +320,49 @@ DrawFrame	proc
 ;--------------------------------------
 DrawLine	proc
 
-		mov AL, CS:[SI]
-		inc SI
-		;lodsb		; mov AL, [SI]  |  read left corner
-					; inc SI  |  shift to middle element
-					
-		stosw		; mov ES:[DI], AX  |  put in video memory
-					; add DI, 2  |  shift to next video cell
-		
-		mov AL, CS:[SI]
-		inc SI
-		;lodsb		; mov AL, [SI]  |  read middle element
-		
-		sub CX, 2   ; now CX is length of middle section 
+			mov AL, CS:[SI]
+			inc SI
+			;lodsb		; mov AL, [SI]  |  read left corner
+						; inc SI  |  shift to middle element
+						
+			stosw		; mov ES:[DI], AX  |  put in video memory
+						; add DI, 2  |  shift to next video cell
+			
+			mov AL, CS:[SI]
+			inc SI
+			;lodsb		; mov AL, [SI]  |  read middle element
+			
+			sub CX, 2   ; now CX is length of middle section 
 
-		mid:		
-			stosw		;mov ES:[DI], AX  | put middle element
-						;add DI, 2 | shift to next video cell
-			loop mid        	
-		
-		
-		mov AL, CS:[SI]
-		inc SI
-		;lodsb		; read right corner
-		
-		stosw		; put it in video memory
- 
-		ret
-		endp
+			mid:		
+				stosw		;mov ES:[DI], AX  | put middle element
+							;add DI, 2 | shift to next video cell
+				loop mid        	
+			
+			
+			mov AL, CS:[SI]
+			inc SI
+			;lodsb		; read right corner
+			
+			stosw		; put it in video memory
+	 
+			ret
+			endp
 ;--------------------------------------
+
+DrawRegs	proc
+
+			text_field = total_shift + 82d * 2d
+			
+			mov DI, text_field
+			mov BX, VIDEOSEG
+			mov ES, BX
+			mov AH, 10100101b
+			mov AL, '7'
+			stosw
+			
+			ret
+			endp
 
 ROOF  db 0C9h, 0CDh, 0BBh
 WALL  db 0BAh, ' ', 0BAh
