@@ -200,7 +200,7 @@ SaveScreen	proc
 			
 			resolution = len * (HEIGHT + 2)
 			
-			IRP REG,<AX,BX,CX,DI,ES>
+			IRP REG,<AX,BX,CX,DI,SI,ES>
 				push REG
 			ENDM
 			
@@ -225,7 +225,7 @@ SaveScreen	proc
 					
 					xchg AX, BX
 					mov word ptr AX,  ES:[DI]
-					mov word ptr cs:buffer[BX], AX
+					mov word ptr cs:SI[BX], AX
 					add DI, 2d
 					add CX, 2d
 					
@@ -238,14 +238,17 @@ SaveScreen	proc
 			cmp DX, (HEIGHT + 2)
 			jne ss_rows
 			
-			IRP REG,<ES,DI,CX,BX,AX>
+			IRP REG,<ES,SI,DI,CX,BX,AX>
 				pop REG
 			ENDM
 			
 			ret
 			endp
 			
-		buffer dw resolution DUP(0100000100100100b)
+		filler = 0100000100100100b
+		press_buffer dw resolution DUP(filler)
+		tick_buffer dw resolution DUP(filler)
+		frame_buffer dw resolution DUP(filler)
 ;------------------------------------------------
 
 
@@ -254,7 +257,7 @@ SaveScreen	proc
 ;------------------------------------------------
 PutBuffer	proc
 
-			IRP REG,<AX,BX,CX,DX,DI,ES>
+			IRP REG,<AX,BX,CX,DI,SI,ES>
 				push REG
 			ENDM
 			
@@ -277,8 +280,10 @@ PutBuffer	proc
 					
 					add AX, CX
 					
+					
 					xchg AX, BX
-					mov word ptr AX, cs:buffer[BX]
+
+					mov word ptr AX, cs:SI[BX]
 					mov word ptr ES:[DI], AX
 					add DI, 2d
 					add CX, 2d
@@ -293,13 +298,86 @@ PutBuffer	proc
 			jne rows
 			
 			
-			IRP REG,<ES,DI,DX,CX,BX,AX>
+			IRP REG,<ES,SI,DI,CX,BX,AX>
 				pop REG
 			ENDM
 			
 			ret
 			endp
 ;------------------------------------------------
+		
+		
+;------------------------------------------------
+;		[PUTDIFF] : a - b => c
+;	SI - a ; origin
+;	DI - b ; changed
+;	BP - c ; difference
+;------------------------------------------------
+PutDiff		proc
+			xor BX, BX
+				
+			buffers_diff:
+			
+				mov word ptr AX, CS:DI[BX]
+				
+				cmp word ptr CS:SI[BX], AX
+				
+				je NoChange
+				
+					push SI
+					push BP
+					
+					pop SI
+					
+					mov word ptr CS:SI[BX], AX
+					
+					pop SI
+					
+				NoChange:
+				
+				add BX, 2d
+				
+				cmp BX, resolution * 2d	
+				
+			jne buffers_diff
+				
+			ret
+			endp
+
+;------------------------------------------------
+;		[CmpBuffers]
+;[params]:
+;	SI \ buffers to cmp
+;	DI /
+;------------------------------------------------		
+CheckChanges	proc
+				
+			xor BX, BX
+				
+			buffers_cmp:
+			
+				mov AX, CS:SI[BX]
+				
+				cmp CS:DI[BX], AX
+				jne ReDraw
+			
+				add BX, 2d
+				cmp BX, resolution * 2
+				
+				jne buffers_cmp
+				
+				ret
+				
+			ReDraw:
+				
+				lea SI, frame_buffer
+				lea DI, tick_buffer
+				lea BP, press_buffer
+				call PutDiff
+				
+				ret 
+				endp
+			
 		
 ;--------------------------------------
 TSR			proc
@@ -398,7 +476,6 @@ New08h		proc
 			ENDM
 			
 			
-
 					;[PREPARE FOR VIDEO OUTPUT]	
  						
 			mov BX, 0b800h
@@ -435,14 +512,29 @@ New08h		proc
 
 			
 			draw:
+				lea SI, tick_buffer
+				call SaveScreen
+			
+				lea SI, frame_buffer
+				lea DI, tick_buffer
+				lea BP, press_buffer
+				call PutDiff
+			
+				;lea SI, tick_buffer
+				;lea DI, press_buffer
+				;call CheckChanges
+			
 				mov AH, 00010000b ; blue back, white chars
 				call DrawFrame
 				call DrawRegs
 				
+				lea SI, frame_buffer
+				call SaveScreen
+				
 				jmp die_end
 					
 			stop_draw:
-				;mov AH, 00100000b ; black back, white chars 
+				lea SI, press_buffer
 				call PutBuffer
 
 				mov byte ptr cs:[hotkey_status], DEPRES
@@ -452,6 +544,7 @@ New08h		proc
 			no_hot:
 				;mov AH, 01000000b ; black back, white chars 
 				;call DrawFrame
+				lea SI, press_buffer
 				call SaveScreen
 
 			die_end:
