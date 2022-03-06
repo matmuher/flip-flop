@@ -11,7 +11,7 @@ start:
 
 		;[HOTKEY STATUS]
 			
-	HOTKEY = 41d
+	HOTKEY = 41d ; ~
 	DEPRES = 0
 	PRESS1 = 1
 	PRESS2 = 2
@@ -26,7 +26,19 @@ start:
 	int 21h
 ;--------------------------------------
 		
-		
+
+;--------------------------------------
+;		[DrawRegs]
+;--------------------------------------
+;[return]:
+;
+;	Prints column with registers for example:
+;
+;			AX 4DCC
+;			BX B0G2
+;			...
+;
+;	Place on screen is set by "total_shift" constant
 ;--------------------------------------
 DrawRegs	proc
 			
@@ -39,6 +51,7 @@ DrawRegs	proc
 			regs_style = 1010011100000000b ; red back, white chars
 			
 			regs_num = 8d
+			
 			mov CX, regs_num
 			
 			mov AX, regs_style
@@ -51,6 +64,8 @@ DrawRegs	proc
 			mov SI, offset REGISTERS
 			
 			
+					;[PRINT REGS' LABELS]
+							
 			reg_labels:
 			
 				mov AL, CS:[SI]
@@ -71,6 +86,8 @@ DrawRegs	proc
 			loop reg_labels
 				
 			
+					;[PRINT REGS' VALUES]
+			
 			pop ret_adr
 			
 			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
@@ -83,11 +100,11 @@ DrawRegs	proc
 			
 			push ret_adr
 			
-			mov video_begunok, text_field + 2d * 3
-			
+			mov video_begunok, text_field + 2d * 3	
+							
 			IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
 		
-					;[ITOA REGS]
+						;[ITOA REGS]
 				
 				push REG
 				push 16d
@@ -124,11 +141,15 @@ DrawRegs	proc
 ;--------------------------------------
 ;		[DrawFrame]
 ;--------------------------------------
-;[params]: you have no choice)
+;[params]:
+;
 ;	AH - color
 ;--------------------------------------
-;[destroy]: 
-;	AX, BX, CX, DX, DI, SI, BP, ES
+;[return]:
+;
+;	Prints fram with given colour
+;
+;	Place on screen is set by "total_shift" constant
 ;--------------------------------------
 DrawFrame	proc
 
@@ -193,9 +214,17 @@ DrawFrame	proc
 ;--------------------------------------		
 		
 		
-;------------------------------------------------
+;--------------------------------------
 ;		[SaveScreen]
-;------------------------------------------------		
+;--------------------------------------
+;[params]:
+;
+;	SI - buffer in CS to store video memory area
+;--------------------------------------
+;[return]:
+;	
+;	Saves screen area (set by LEN, HEIGHT, TOTAL_SHIFT constants) to buffer
+;--------------------------------------		
 SaveScreen	proc
 			
 			resolution = len * (HEIGHT + 2)
@@ -249,12 +278,20 @@ SaveScreen	proc
 		press_buffer dw resolution DUP(filler)
 		tick_buffer dw resolution DUP(filler)
 		frame_buffer dw resolution DUP(filler)
-;------------------------------------------------
+;--------------------------------------
 
 
-;------------------------------------------------
+;--------------------------------------
 ;		[PutBuffer]
-;------------------------------------------------
+;--------------------------------------
+;[params]:
+;
+;	SI - buffer in CS segment that should be put on screen
+;--------------------------------------
+;[return]:
+;	
+;	Puts saved buffer in video memory area (set by LEN, HEIGHT, TOTAL_SHIFT constants)
+;--------------------------------------	
 PutBuffer	proc
 
 			IRP REG,<AX,BX,CX,DI,SI,ES>
@@ -304,15 +341,32 @@ PutBuffer	proc
 			
 			ret
 			endp
-;------------------------------------------------
+;--------------------------------------	
 		
 		
-;------------------------------------------------
-;		[PUTDIFF] : a - b => c
-;	SI - a ; origin
-;	DI - b ; changed
-;	BP - c ; difference
-;------------------------------------------------
+;--------------------------------------	
+;		[PUTDIFF]
+;--------------------------------------	
+;[descript]:
+;
+;	Writes difference between 2 buffers in the third:
+;
+;		a - b -> c
+;--------------------------------------	
+;[params]:
+;
+;	SI - a ; origin buffer
+;
+;	DI - b ; changed buffer
+;
+;	BP - c ; where to put difference
+;
+;	*all buffers should store in CS
+;--------------------------------------	
+;[return]:
+;
+;	Difference is written in BP buffer
+;--------------------------------------	
 PutDiff		proc
 			xor BX, BX
 				
@@ -343,42 +397,15 @@ PutDiff		proc
 				
 			ret
 			endp
+;--------------------------------------
 
-;------------------------------------------------
-;		[CmpBuffers]
-;[params]:
-;	SI \ buffers to cmp
-;	DI /
-;------------------------------------------------		
-CheckChanges	proc
-				
-			xor BX, BX
-				
-			buffers_cmp:
-			
-				mov AX, CS:SI[BX]
-				
-				cmp CS:DI[BX], AX
-				jne ReDraw
-			
-				add BX, 2d
-				cmp BX, resolution * 2
-				
-				jne buffers_cmp
-				
-				ret
-				
-			ReDraw:
-				
-				lea SI, frame_buffer
-				lea DI, tick_buffer
-				lea BP, press_buffer
-				call PutDiff
-				
-				ret 
-				endp
-			
-		
+
+;--------------------------------------
+;		[TSR]
+;--------------------------------------
+;[descript]:
+;	
+;	TSR interruption wrapper
 ;--------------------------------------
 TSR			proc
 
@@ -466,6 +493,8 @@ Recapture09h proc
 			
 			ret
 			endp
+;--------------------------------------
+
 
 ;--------------------------------------
 New08h		proc
@@ -622,7 +651,8 @@ New09h		proc
 ;	ES - videoseg addr
 ;--------------------------------------
 ;[destroy]:
-;	
+;
+;	AX, CX, DI, SI
 ;--------------------------------------
 DrawLine	proc
 
@@ -657,19 +687,23 @@ DrawLine	proc
 ;--------------------------------------
 
 
-;------------------------------------------------
+;--------------------------------------
 ;		[ITOA via stack]
-;------------------------------------------------
+;--------------------------------------
 ;[params]:
+;
 ;	1) integer to print
+;
 ;	2) base (in which base should be transfered)
 ;	
 ;	3) segment adress
+;
 ;	4) offser in segment
-;------------------------------------------------
+;--------------------------------------
 ;[return]:
+;
 ;	puts string in user's memory
-;------------------------------------------------
+;--------------------------------------
 itoa_stack		proc
 						;[PROLOG]
 			push BP
@@ -701,14 +735,28 @@ itoa_stack		proc
 			pop BP						
 			ret 8 
 			endp
-;------------------------------------------------
+;--------------------------------------
 
 
-;------------------------------------------------
+;--------------------------------------
 ;		[ITOA for 2^n]
-;------------------------------------------------
-;[equal to ITOA]
-;------------------------------------------------
+;--------------------------------------
+;[params]:
+;
+;	AX - integer to print
+;	BX - base (to)
+;
+;	ES -\ memory adress with
+;	DI -/ enough memory to store stringed-integer
+;--------------------------------------
+;[return]:
+;
+;	puts string in user's memory
+;--------------------------------------
+;[destroy]:
+;
+;	AX, BX, CX, DX, DI, SI, BP
+;--------------------------------------
 itoa2		proc
 		
 		IRP REG,<AX,BX,CX,DX,DI,SI,BP,ES>
@@ -770,24 +818,27 @@ itoa2		proc
 		endp	
 
 		ma_alpha db '0123456789ABCDEF'
-;------------------------------------------------
+;--------------------------------------
 
 
-;------------------------------------------------
+;--------------------------------------
 ;		[PEREVOROT]
-;------------------------------------------------
+;--------------------------------------
 ;[params]:
+;
 ;	CX - length of string
 ;
 ;	ES -\ adress of string
 ;	DI -/ that needs some perevorot
-;------------------------------------------------
+;--------------------------------------
 ;[returns]:
+;
 ;	reversed string stored in user's adress
-;------------------------------------------------
+;--------------------------------------
 ;[destroy]:
+;
 ;	BX, CX, DX, DI, BP
-;------------------------------------------------
+;--------------------------------------
 perevorot		proc
 			
 			nop
@@ -825,20 +876,26 @@ perevorot		proc
 			nop
 			
 			endp
-;------------------------------------------------
+;--------------------------------------
 
 
 ;--------------------------------------
 ;		[PrntStr_stack]
 ;--------------------------------------
 ;[params]:
+;
 ;	1 - color
+;
 ;	2 - length
+;
 ;	3 - start of string in videoseg
+;
 ;	4 - start of source string
-;	5 - videosegment addres
+;
+;	5 - videosegment addres	//useless ?
 ;--------------------------------------
 ;[returns]:
+;
 ;	prints string on the screen
 ;--------------------------------------
 PrntStr_stack		proc
@@ -881,14 +938,21 @@ PrntStr_stack		proc
 ;--------------------------------------
 ;          Print String
 ;--------------------------------------
-; Params:
-;	AH - color
-;	CX - length
-;	DI - start of string in videoseg
-;	SI - start of source string
-;	ES - videosegment addres
+;[params]:
 ;
-; Destroy: AX, CX, DI, SI
+;	AH - color
+;
+;	CX - length
+;
+;	DI - start of string in videoseg
+;
+;	SI - start of source string
+;
+;	ES - videosegment addres
+;--------------------------------------
+; [destroy]:
+;
+;	AX, CX, DI, SI
 ;--------------------------------------
 PrntStr proc
 	
