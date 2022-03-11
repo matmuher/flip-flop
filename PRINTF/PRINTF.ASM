@@ -10,7 +10,8 @@ org 100h
 ;--------------------------------------
 start:
 
-push 'A'
+push offset test_str
+push '|'
 push offset ma_str
 
 call printf
@@ -68,8 +69,11 @@ printf		proc
 	
 	
 	frmt_proc:
-		
 		inc SI
+
+		cmp byte ptr DS:[SI], 's'
+		je str_proc
+		
 		cmp byte ptr DS:[SI], 'c'
 		je chr_proc
 	
@@ -87,12 +91,24 @@ printf		proc
 	chr_proc:
 		mov byte ptr DL, BP[DI]
 		add DI, 2	; Next argument
+	
 		mov AH, 02h
 		int 21h
 		
 		inc SI		; Next str symbol
 		jmp str_scan
 		
+	
+	str_proc: 		; String must be stored in DS
+		mov DX, BP[DI]
+		add DI, 2
+		
+		mov AH, 09h
+		int 21h		
+		
+		inc SI
+		jmp str_scan
+	
 				
 	str_end:
 				;[EPILOG]
@@ -106,6 +122,7 @@ printf		proc
 ;--------------------------------------
 .data
 
-ma_str db 'Hello world! %c$'
+test_str db 'Goodbye war?$'
+ma_str db 'Hello world! %c %s$'
 
 end start
