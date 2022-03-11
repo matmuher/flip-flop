@@ -134,7 +134,7 @@ DrawRegs	proc
 			video_begunok dw 0
 			ret_adr dw 0
 			REGISTERS db 'AXBXCXDXDISIBPES'
-			reg_str db num_len DUP(0)
+			reg_str db '0000$'
 ;------------------------------------------------		
 				
 		
@@ -580,6 +580,8 @@ New08h		proc
 
 					;[SAVE REGS]
 			
+		
+			
 			IRP REG,<ES,BP,SI,DI,DX,CX,BX,AX>
 				pop REG
 			ENDM
@@ -797,9 +799,6 @@ itoa2		proc
 			cmp BP, 0
 		
 		jne rest
-		
-		mov AL, '$'
-		mov ES:[DI], AL
 					; Prepare for perevorot()	
 		sub DI, DX
 		mov CX, DI
