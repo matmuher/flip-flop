@@ -10,6 +10,8 @@ org 100h
 ;--------------------------------------
 start:
 
+call prp_jmp_table
+
 push offset test_str
 push '|'
 push offset ma_str
@@ -71,13 +73,12 @@ printf		proc
 	frmt_proc:
 		inc SI
 
-		cmp byte ptr DS:[SI], 's'
-		je str_proc
-		
-		cmp byte ptr DS:[SI], 'c'
-		je chr_proc
+		xor BX, BX
+		mov BL, DS:[SI]
+		shl BL, 1d
 	
-		
+		jmp word ptr jmp_table[BX]		
+
 	common_char:
 				;[PRINT CHAR]
 		lodsb
@@ -120,9 +121,39 @@ printf		proc
 
 
 ;--------------------------------------
+SET_JMP		MACRO CHAR, JMP_FUNC
+
+		xor BX, BX
+		mov BL, CHAR
+		shl BL, 1d
+		
+		mov AX, offset JMP_FUNC
+		mov jmp_table[BX], AX
+				
+		ENDM
+;--------------------------------------
+;		[PRP_JMP_TABLE]
+;--------------------------------------
+;[descript]:
+;	Prepares jmp_table for printf
+;--------------------------------------
+prp_jmp_table	proc
+
+		SET_JMP 'c', chr_proc
+
+		SET_JMP 's', str_proc
+
+		ret
+		endp
+;--------------------------------------
+
+
+;--------------------------------------
 .data
 
+jmp_table dw ('z') DUP(0)
+
 test_str db 'Goodbye war?$'
-ma_str db 'Hello world! %c %s$'
+ma_str db 'a %c %s$'
 
 end start
