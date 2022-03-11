@@ -12,6 +12,7 @@ start:
 
 call prp_jmp_table
 
+push 3d
 push offset test_str
 push 31d
 push ','
@@ -19,7 +20,7 @@ push offset ma_str
 
 call printf
 
-add SP, 2 * 2
+add SP, 4 * 2
 
 call exit
 ;--------------------------------------
@@ -40,7 +41,17 @@ exit		proc
 ;--------------------------------------
 ;[descript]:
 ;
-;	Prints string concerning specifiers
+;	Prints string concerning specifiers:
+;	
+;	%h - hexadecimal
+;	%d - decimals
+;	%o - octal
+;	%b - binary
+;
+;	%c - char
+;	%s - string ($-ended)
+;
+;	%% - percent
 ;--------------------------------------
 ;[params]:
 ;
@@ -53,9 +64,14 @@ exit		proc
 ;	or negative in error case
 ;--------------------------------------
 printf		proc
+
 				;[PROLOG]
 		push BP
 		mov BP, SP
+		
+		IRP REG, <AX, BX, DX, DI, SI>
+			push REG
+		ENDM
 		
 		xor DI, DI
 		mov DI, 4
@@ -71,6 +87,16 @@ printf		proc
 		je frmt_proc
 		
 		jmp common_char
+		
+					
+	str_end:
+
+		IRP REG, <SI, DI, DX, BX, AX>
+			pop REG
+		ENDM
+				;[EPILOG]
+		pop BP
+		ret
 	
 	
 	frmt_proc:
@@ -163,13 +189,26 @@ printf		proc
 		inc SI
 		jmp str_scan
 
-		
-	str_end:
-				;[EPILOG]
-		pop BP
-		ret
 
+	prc_proc:
+		mov DL, '%'
+		mov AH, 02h
+		int 21h
+		
+		inc SI
+		jmp str_scan
+
+	alert_unknwn_frmt:
+		mov DX, offset alert_unknwn_frmt_str
+		mov AH, 09h
+		int 21h
+		
+		inc SI
+		jmp str_scan
+	
 		endp
+
+alert_unknwn_frmt_str db '%[ERROR:Unknown format]$'
 ;--------------------------------------
 
 
@@ -213,6 +252,8 @@ prp_jmp_table	proc
 		SET_JMP 'b', bin_proc
 		
 		SET_JMP 'x', hex_proc
+		
+		SET_JMP '%', prc_proc
 		
 		ret
 		endp
@@ -441,9 +482,9 @@ perevorot		proc
 .data
 ma_alpha db '0123456789ABCDEF'
 integer db 17 DUP(0)
-jmp_table dw ('z') DUP(0)
+jmp_table dw ('z') DUP(offset alert_unknwn_frmt)
 
-test_str db 'milk packets$'
-ma_str db 'Give me please%c %x %s$'
+test_str db 'milk packets with fat $'
+ma_str db 'Give me please%c %x %s %d %% %g$'
 
 end start
