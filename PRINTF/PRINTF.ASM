@@ -13,7 +13,7 @@ start:
 call prp_jmp_table
 
 push offset test_str
-push 4d
+push 31d
 push ','
 push offset ma_str
 
@@ -84,7 +84,6 @@ printf		proc
 	
 
 	common_char:
-				;[PRINT CHAR]
 		lodsb
 		xchg DL, AL
 		mov AH, 02h
@@ -123,6 +122,33 @@ printf		proc
 		
 		jmp int_proc
 
+
+	hex_proc:
+		push BP[DI]
+		add DI, 2
+		
+		push 16d
+		
+		jmp int_proc	
+
+
+	oct_proc:
+		push BP[DI]
+		add DI, 2
+		
+		push 8d
+		
+		jmp int_proc
+
+		
+	bin_proc:
+		push BP[DI]
+		add DI, 2
+		
+		push 2d
+		
+		jmp int_proc
+
 	
 	int_proc:
 		push DS
@@ -136,6 +162,7 @@ printf		proc
 		
 		inc SI
 		jmp str_scan
+
 		
 	str_end:
 				;[EPILOG]
@@ -180,7 +207,13 @@ prp_jmp_table	proc
 		SET_JMP 's', str_proc
 		
 		SET_JMP 'd', dec_proc
-
+		
+		SET_JMP 'o', oct_proc
+		
+		SET_JMP 'b', bin_proc
+		
+		SET_JMP 'x', hex_proc
+		
 		ret
 		endp
 ;--------------------------------------
@@ -411,6 +444,6 @@ integer db 17 DUP(0)
 jmp_table dw ('z') DUP(0)
 
 test_str db 'milk packets$'
-ma_str db 'Give me please%c %d %s$'
+ma_str db 'Give me please%c %x %s$'
 
 end start
