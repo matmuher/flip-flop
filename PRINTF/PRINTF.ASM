@@ -12,7 +12,7 @@ start:
 
 call prp_jmp_table
 
-push 3d
+push 3082d
 push offset test_str
 push 31d
 push ','
@@ -60,8 +60,9 @@ exit		proc
 ;	... - format params	
 ;--------------------------------------
 ;
-;	Returns number of written chars
-;	or negative in error case
+;	CX - number of written chars
+;	or
+;	FFFF - if format error occured
 ;--------------------------------------
 printf		proc
 
@@ -79,7 +80,10 @@ printf		proc
 		mov SI, BP[DI]
 		add DI, 2
 		
-	str_scan:			;[WHILE]
+		xor CX, CX
+
+
+	str_scan:
 		cmp byte ptr DS:[SI], '$'
 		je str_end 
 		
@@ -90,7 +94,6 @@ printf		proc
 		
 					
 	str_end:
-
 		IRP REG, <SI, DI, DX, BX, AX>
 			pop REG
 		ENDM
@@ -114,6 +117,8 @@ printf		proc
 		xchg DL, AL
 		mov AH, 02h
 		int 21h
+		
+		inc CX		
 
 		jmp str_scan	
 
@@ -125,6 +130,8 @@ printf		proc
 		mov AH, 02h
 		int 21h
 		
+		inc CX
+		
 		inc SI		; Next str symbol
 		jmp str_scan
 		
@@ -135,6 +142,8 @@ printf		proc
 		
 		mov AH, 09h
 		int 21h		
+			
+		inc CX
 		
 		inc SI
 		jmp str_scan
@@ -186,6 +195,8 @@ printf		proc
 		mov AH, 09h
 		int 21h
 		
+		inc CX
+		
 		inc SI
 		jmp str_scan
 
@@ -195,16 +206,20 @@ printf		proc
 		mov AH, 02h
 		int 21h
 		
+		inc CX
+		
 		inc SI
 		jmp str_scan
+
 
 	alert_unknwn_frmt:
 		mov DX, offset alert_unknwn_frmt_str
 		mov AH, 09h
 		int 21h
-		
-		inc SI
-		jmp str_scan
+				
+		xor CX, CX
+		dec CX
+		jmp str_end		
 	
 		endp
 
@@ -297,65 +312,6 @@ itoa_stack		proc
 			pop BP						
 			ret 8
 			endp
-;------------------------------------------------
-
-
-;------------------------------------------------
-;		[ITOA for 2^n]
-;------------------------------------------------
-;[equal to ITOA]
-;------------------------------------------------
-itoa2		proc
-		
-		pusha
-		
-		xor CX, CX		; two's degree counter
-		mov BP, AX		; save origin int
-		mov AX, BX		; for div
-		
-		xor DX, DX
-	pokamest:
-		mov BX, 2d	
-		inc CX			; two's degree
-		div BX
-
-		cmp AX, 1d
-		jne pokamest
-			
-		mov DX, DI
-			
-		rest:
-			mov AX, BP
-
-			shr BP, CL		; Clean CX bits from edge
-			shl BP, CL
-
-			sub AX, BP		; Get rest
-			
-			xchg SI, AX
-			mov AL, ma_alpha[SI]
-			
-			stosb			; Put it in de string
-		
-			shr BP, CL
-		
-			cmp BP, 0
-		
-		jne rest
-		
-		mov AL, '$'
-		mov ES:[DI], AL
-					; Prepare for perevorot()	
-		sub DI, DX
-		mov CX, DI
-		mov DI, DX
-		
-		call perevorot
-	
-		popa
-
-		ret
-		endp		
 ;------------------------------------------------
 
 
@@ -485,6 +441,6 @@ integer db 17 DUP(0)
 jmp_table dw ('z') DUP(offset alert_unknwn_frmt)
 
 test_str db 'milk packets with fat $'
-ma_str db 'Give me please%c %x %s %d %% %g$'
+ma_str db 'GgWP%g$'
 
 end start
