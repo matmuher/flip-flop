@@ -9,6 +9,7 @@
 *.exe
 *.jpg
 *.bmp
+*.bat
 /hamlet/bin/*
 /hamlet/obj/*
 /hamlet/pit/*

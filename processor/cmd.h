@@ -45,3 +45,7 @@ DEF_CMD(make_dot, 21, ZERO_ARGS, MAKE_DOT)
 DEF_CMD(r_cos,    22, ZERO_ARGS, PUSH(R_COS))
 
 DEF_CMD(r_sin,    23, ZERO_ARGS, PUSH(R_SIN))
+
+DEF_CMD(ret,      24, ZERO_ARGS, JUMP(POP))
+
+DEF_CMD(call,     25, ONE_ARG,   PUSH(prc->ip + 1); JUMP(ARG1))
