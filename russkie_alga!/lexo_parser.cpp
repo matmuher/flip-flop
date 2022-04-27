@@ -46,7 +46,8 @@ token* lexo_parse (const char* line)
             TOK_PROC (T_SFUNK, ID_ASS)
             TOK_PROC (T_VAL, VAL_ASS)
             TOK_PROC (T_OP, CHAR_ASS)
-            TOK_PROC (T_PARENTH, CHAR_ASS)
+            TOK_PROC (T_SQUARE_BR, CHAR_ASS)
+            TOK_PROC (T_ROUND_BR, CHAR_ASS)
             TOK_PROC (T_END, CHAR_ASS)
             TOK_PROC (T_COMP, CHAR_ASS)
             TOK_PROC (T_LINE, CHAR_ASS)
@@ -109,7 +110,8 @@ void print_token (token token_to_print, int mode) // 1 - with '\n', 0 - without
             }
 
         case T_OP:
-        case T_PARENTH:
+        case T_ROUND_BR:
+        case T_SQUARE_BR:
         case T_COMP:
         case T_DELIM:
         case T_LINE:

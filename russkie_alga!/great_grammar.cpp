@@ -78,8 +78,7 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         node* old_binder = NULL;
 
-        while (TOKEN_TYPE != T_PARENTH ||
-               TOKEN_SERVANT != '}')
+        while (TOKEN_TYPE != T_SQUARE_BR)
             {
             node* new_binder = st (NULL, NULL);
             new_binder->left_child = old_binder;
@@ -101,7 +100,7 @@ ma_ty get_A (parsed_line_reader* pl_reader)
     else if ((TOKEN_TYPE == T_VAL) || // "55" - value
              (TOKEN_TYPE == T_SFUNK) || // "print" - standard function
              (TOKEN_TYPE == T_VAR &&
-             TOKEN_TYPE_FLEX(TOKEN_ID + 2) == T_PARENTH)) // "esh_slizney ()" - user function
+             TOKEN_TYPE_FLEX(TOKEN_ID + 2) == T_ROUND_BR)) // "esh_slizney ()" - user function
         {
         // puts ("User function got here");
         ma_ty val = get_E (pl_reader);
@@ -154,8 +153,7 @@ ma_ty get_A (parsed_line_reader* pl_reader)
             param_old_binder = param_new_binder;
 
 
-            if (TOKEN_TYPE != T_PARENTH ||
-                TOKEN_SERVANT != ')')
+            if (TOKEN_TYPE != T_ROUND_BR)
                 {
                 require (',', pl_reader);
                 }
@@ -167,8 +165,7 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         node* st_old_binder = NULL;
 
-        while (TOKEN_TYPE != T_PARENTH ||
-               gfs(pl[TOKEN_ID].content.servant) != '}')
+        while (TOKEN_TYPE != T_SQUARE_BR)
             {
             node* st_new_binder = st (NULL, NULL);
             st_new_binder->left_child = st_old_binder;
@@ -341,7 +338,7 @@ ma_ty get_F (parsed_line_reader* pl_reader)
 
     // !Blin nado ceplyat T_UFUNK type while lexo_parsing
     if (t_type == T_SFUNK ||
-       (t_type == T_VAR && TOKEN_TYPE_FLEX(TOKEN_ID + 2) == T_PARENTH))  // some keyword
+       (t_type == T_VAR && TOKEN_TYPE_FLEX(TOKEN_ID + 2) == T_ROUND_BR) )  // some keyword
         {
         puts ("USER FUNCTION CALL!!!");
         size_t cur_token_id = TOKEN_ID;
@@ -370,8 +367,7 @@ puts ("NYAMNYAMNYAMNYAMNYAMNYAMNYAM");
             param_old_binder = param_new_binder;
 
 
-            if (TOKEN_TYPE != T_PARENTH ||
-                gfs(pl[TOKEN_ID].content.servant) != ')')
+            if (TOKEN_TYPE != T_ROUND_BR)
                 {
                 require (',', pl_reader);
                 }
@@ -386,7 +382,6 @@ puts ("NYAMNYAMNYAMNYAMNYAMNYAMNYAM");
             }
         else
             {
-
             return call (funk_name, param_old_binder, UFUNK);
             }
         }
@@ -405,8 +400,7 @@ ma_ty get_P (parsed_line_reader* pl_reader)
     // puts ("Get_P is in de haus");
     VERBOSE_SIGNAL(get_p);
 
-    if (TOKEN_TYPE == T_PARENTH &&
-        gfs(pl[TOKEN_ID].content.servant) == ')')
+    if (TOKEN_TYPE == T_ROUND_BR)
         {
         TOKEN_ID++;
         ma_ty val = get_E (pl_reader);
@@ -495,8 +489,8 @@ int require (char requirement, parsed_line_reader* pl_reader)
 
     token_type t_type = TOKEN_TYPE;
 
-    if (t_type ==  T_OP || t_type ==  T_PARENTH || t_type ==  T_END || t_type == T_LINE ||
-        t_type ==  T_COMP || t_type == T_DELIM)
+    if (t_type ==  T_OP || t_type ==  T_ROUND_BR || t_type ==  T_END || t_type == T_LINE ||
+        t_type ==  T_COMP || t_type == T_DELIM || t_type == T_SQUARE_BR)
         {
         if (gfs(pl[TOKEN_ID].content.servant) == requirement)
             {

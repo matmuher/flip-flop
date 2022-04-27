@@ -6,60 +6,32 @@
 
 void to_asm (node* root);
 
-#if 0
-node* left_grow (const char* binder_node_content,
-                 node* previous_node, node* new_val,
-                 char delimiter,
-                 int (*exit_condition)(token* current_token),
-                 parsed_line_reader* pl_reader)
+node* build_ast (const char* file_name);
+
+int main (int, char* argv[])
     {
-    node* val = get_A (pl_reader);
-    require (delimiter, pl_reader);
+    const char* file_name = argv[1] ? argv[1] : "wasup_world.cum";
 
-    st_begunok->right_child = val;
+    node* root = build_ast (file_name);
 
-    if (gfs(pl[gfs(token_id)].type) == T_END)
-        {
-        break;
-        }
+    system ("pause");
 
-    node* temp = st (NULL, NULL);
+    dot_this_shit (root);
 
-    temp->left_child = st_begunok;
+    // to_asm (root);
 
-    st_begunok = temp;
+    memory_free ();
     }
-#endif
 
-int main ()
+node* build_ast (const char* file_name)
     {
-    #if 1 // Sueta
-        char* file_name = "wasup_world.cum";
-        size_t lines_num = 0;
-        line_buf* lines =  get_strings (file_name, &lines_num, true);
-
-        token* parsed_line = lexo_parse (lines[0].beg_ptr);
-
-        parsed_line_reader pl_reader = {0, parsed_line};
-
-        #if 1 // Check lexo parse
-
-            print_pl (&pl_reader);
-
-        #endif
-
-        #if 1 // Recursive parse
-
-            node* root = get_G (&pl_reader);
-
-            puts ("Descent parsing ended");
-
-            dot_this_shit (root);
-
-            // to_asm (root);
-        #endif
-
-        memory_free ();
-
-    #endif
+    // Lexical parsing
+    size_t lines_num = 0;
+    line_buf* lines =  get_strings ((char*) file_name, &lines_num, true);
+    token* parsed_line = lexo_parse (lines[0].beg_ptr);
+    parsed_line_reader pl_reader = {0, parsed_line};
+    print_pl (&pl_reader);
+    system("pause");
+    // Syntax parsing
+    return get_G (&pl_reader);
     }

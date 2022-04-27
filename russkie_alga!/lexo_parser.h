@@ -15,7 +15,6 @@ enum token_type
     T_VAL = 1,
     T_SFUNK = 2,
     T_OP = 3,
-    T_PARENTH = 4,
     T_SFRAME = 5,
     T_VAR = 6, // TOVAR or TVAR'?
     T_OO_LONG_NAME = 7,
@@ -24,6 +23,8 @@ enum token_type
     T_DELIM = 10,
     T_DEF = 11,
     T_RET = 12,
+    T_ROUND_BR = 13,
+    T_SQUARE_BR = 14,
     };
 
 

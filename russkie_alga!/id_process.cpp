@@ -115,12 +115,26 @@ int iscomp (char begunok)
     }
 
 
-int isparenth (char begunok)
+int isround (char begunok)
     {
     switch (begunok)
         {
         case ')':
         case '(':
+
+        return true;
+
+        default:
+
+        return false;
+        }
+    }
+
+// Square stands for '{' :)
+int issquare (char begunok)
+    {
+    switch (begunok)
+        {
         case '}':
         case '{':
 
@@ -203,9 +217,13 @@ token_type try_Id (const char* begunok)
             {
             return T_VAL;
             }
-        if (isparenth (*begunok))
+        if (isround (*begunok))
             {
-            return T_PARENTH;
+            return T_ROUND_BR;
+            }
+        if (issquare (*begunok))
+            {
+            return T_SQUARE_BR;
             }
         if (isdelim (*begunok))
             {
