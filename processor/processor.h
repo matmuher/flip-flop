@@ -33,10 +33,11 @@
 const int MY_SIGN = 'MM';
 
 
-const int CMD_MASK = 0x1F; // Is used to extract first 5 bytes of command code
+const int CMD_MASK = 0b00011111; // Is used to extract first 5 bytes of command code
 
 
-const int RAM_MASK = 0x80, REG_MASK = 0x40, IMM_MASK = 0x20;
+const int RAM_MASK = 0b10000000, REG_MASK = 0b01000000, IMM_MASK = 0b00100000,
+          REG_REL_MASK = 0b11000000; // <- register relative addressing mask
 
 
 const int MAX_ARGS_NUM = 1, MAX_REG_NUM = 4, NON_VIDEO_RAM_SIZE = 10;

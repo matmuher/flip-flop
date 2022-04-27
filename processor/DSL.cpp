@@ -1,9 +1,15 @@
 
+// reg[1] = bx
+
 #define PUSH(ARG)                       \
     {                                   \
     int arg = ARG;                      \
     if ((cmd & CMD_MASK) == cmd_push)   \
         {                               \
+        if ((cmd & REG_REL_MASK) == REG_REL_MASK) \
+            {                                     \
+            push (prc, prc->ram[prc->reg[1] + arg]); \
+            }                           \
         if (cmd & IMM_MASK)             \
             {                           \
             push (prc, arg);            \
@@ -27,7 +33,12 @@
 #define POPR(ARG)                                \
     {                                            \
     int arg = ARG;                               \
-    if (cmd & REG_MASK)                          \
+                                                 \
+    if ((cmd & REG_REL_MASK) == REG_REL_MASK)    \
+        {                                        \
+        prc->ram[prc->reg[1] + arg] = POP;       \
+        }                                        \
+    else if (cmd & REG_MASK)                     \
         {                                        \
         prc->reg[arg] = POP;                     \
         }                                        \

@@ -12,7 +12,6 @@ int main (int, char* argv[])
     char* file_name = argv[1] ? argv[1] : (char*) "fib_code.txt";
 
     printf ("Assembling file is %s\n", file_name);
-    // getchar ();
 
     line_buf* code = get_code (file_name, &lines_num);
 

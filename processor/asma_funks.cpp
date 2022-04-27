@@ -137,7 +137,7 @@ int* cmd_line_process (parsed_line* code_line, int* begunok, int* markers, dict 
 #define REG_PROC(REG_STR, REG_ID)            \
     else if (string_equal (str_arg, REG_STR))\
         {                                    \
-        *(begunok - 1) = cmd_id | RAM_MASK;  \
+        *(begunok - 1) = cmd_id | REG_MASK;  \
         *begunok++ = REG_ID;                  \
         }
 int* arg_process (char* str_arg, int* begunok, int* markers, int cmd_id, int arg, dict word_markers)
@@ -170,15 +170,23 @@ int* arg_process (char* str_arg, int* begunok, int* markers, int cmd_id, int arg
         }
     else if (str_arg[0] == '[') // For ram's arguments
         {
-        size_t ram_id = 0;
+        int ram_shift = 0;
 
-        if (!sscanf (str_arg, "[%d]", &ram_id))
+        if (sscanf (str_arg, "[%d]", &ram_shift))
+            {
+            *(begunok - 1) = cmd_id | RAM_MASK;
+            *begunok++ = ram_shift;
+            }
+        else if (sscanf (str_arg, "[bx+%d]", &ram_shift))
+            {
+
+            *(begunok - 1) = cmd_id | REG_REL_MASK;
+            *begunok++ = ram_shift;
+            }
+        else
             {
             printf ("%s is bad ram_id\n", str_arg);
             }
-
-        *(begunok - 1) = cmd_id | RAM_MASK;
-        *begunok++ = ram_id;
         }
     else if (sscanf (str_arg, "%d", &arg)) // For immediate arguments
         {
