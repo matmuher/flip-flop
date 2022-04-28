@@ -139,9 +139,9 @@ node* funk (node* left, node* right)
     return bi_oper (left, right, "function", FUNK);
     }
 
-node* call (node* left, node* right, node_type NODE_TYPE)
+node* call (node* left, node* right)
     {
-    return bi_oper (left, right, "call", NODE_TYPE);
+    return bi_oper (left, right, "call", CALL);
     }
 
 

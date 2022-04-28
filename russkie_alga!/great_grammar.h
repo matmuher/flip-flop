@@ -133,6 +133,6 @@ node* def (node* left, node* right);
 
 node* funk (node* left, node* right);
 
-node* call (node* left, node* right, node_type NODE_TYPE);
+node* call (node* left, node* right);
 
 #endif // GREAT_GRAMMAR_H_INCLUDED

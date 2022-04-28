@@ -335,12 +335,15 @@ ma_ty get_F (parsed_line_reader* pl_reader)
     token_type t_type = TOKEN_TYPE;
 
     if (t_type == T_SFUNK ||
-        t_type == T_UFUNK )  // some keyword
+        t_type == T_UFUNK)  // some keyword
         {
         puts ("USER FUNCTION CALL!!!");
         size_t cur_token_id = TOKEN_ID;
 
-        node* funk_name = create_node (OP, gfs(pl[TOKEN_ID].content.id));
+        node_type funk_type = t_type == T_SFUNK? SFUNK : UFUNK;
+
+        node* funk_name = create_node (funk_type, gfs(pl[TOKEN_ID].content.id));
+
         TOKEN_ID++;
 
         REQUIRE(' ');
@@ -372,15 +375,8 @@ ma_ty get_F (parsed_line_reader* pl_reader)
 
         require (')', pl_reader);
 
-        if (t_type == T_SFUNK)
-            {
 
-            return call (funk_name, param_old_binder, SFUNK);
-            }
-        else
-            {
-            return call (funk_name, param_old_binder, UFUNK);
-            }
+        return call (funk_name, param_old_binder);
         }
     else
         {
