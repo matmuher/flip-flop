@@ -12,7 +12,7 @@ node* build_ast (const char* file_name);
 
 int main (int, char* argv[])
     {
-    const char* file_name = argv[1] ? argv[1] : "wasup_world.cum";
+    const char* file_name = argv[1] ? argv[1] : "text.cum";
 
     node* root = build_ast (file_name);
 
@@ -25,6 +25,12 @@ int main (int, char* argv[])
     dict ma_dict = NULL;
     ma_dict = collect_vars (ma_dict, root);
     print_dict (ma_dict);
+system ("pause");
+    FILE* asm_file = fopen ("asm.txt", "w");
+
+    assembly (root, asm_file, ma_dict);
+
+    fclose (asm_file);
 
     system ("pause");
 
