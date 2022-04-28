@@ -50,8 +50,8 @@ node* nprint (node* arg)
 
 node* ass (node* left, node* right)
     {
-    node* init = mono_oper (right, "initializer");
-    bi_oper (left, init, "=", SFRAME);
+    node* init = mono_oper (right, "initializer", INIT);
+    bi_oper (left, init, "=", INIT);
     }
 
 
@@ -99,32 +99,32 @@ node* npow (node* left, node* right)
 
 node* eq (node* left, node* right)
     {
-    return bi_oper (left, right, "==");
+    return bi_oper (left, right, "==", CMP);
     }
 
 
 node* gr (node* left, node* right)
     {
-    return bi_oper (left, right, ">");
+    return bi_oper (left, right, ">", CMP);
     }
 
 
 node* ls (node* left, node* right)
     {
-    return bi_oper (left, right, "<");
+    return bi_oper (left, right, "<", CMP);
     }
 
 
 
 node* st (node* left, node* right)
     {
-    return bi_oper (left, right, "statement");
+    return bi_oper (left, right, "statement", ST);
     }
 
 
 node* param (node* left, node* right)
     {
-    return bi_oper (left, right, "parameter");
+    return bi_oper (left, right, "parameter", PARAM);
     }
 
 
@@ -136,7 +136,7 @@ node* def (node* left, node* right)
 
 node* funk (node* left, node* right)
     {
-    return bi_oper (left, right, "function");
+    return bi_oper (left, right, "function", FUNK);
     }
 
 node* call (node* left, node* right, node_type NODE_TYPE)

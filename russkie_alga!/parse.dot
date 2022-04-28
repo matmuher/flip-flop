@@ -1,15 +1,19 @@
 digraph G {
-A009B33B0 [label = "statement"];
-A009B33B0 -> A009B34B0;
-A009B34B0 [label = "="];
-A009B34B0 -> A009B33E0;
-A009B34B0 -> A009B3480;
-A009B33E0 [label = "z"];
-A009B3480 [label = "initializer"];
-A009B3480 -> A009B3458;
-A009B3458 [label = "+"];
-A009B3458 -> A009B3408;
-A009B3458 -> A009B3430;
-A009B3408 [label = "a"];
-A009B3430 [label = "b"];
+A006E33E0 [label = "statement"];
+A006E33E0 -> A006E3530;
+A006E3530 [label = "="];
+A006E3530 -> A006E3410;
+A006E3530 -> A006E3500;
+A006E3410 [label = "z"];
+A006E3500 [label = "initializer"];
+A006E3500 -> A006E34D8;
+A006E34D8 [label = "+"];
+A006E34D8 -> A006E3488;
+A006E34D8 -> A006E34B0;
+A006E3488 [label = "*"];
+A006E3488 -> A006E3438;
+A006E3488 -> A006E3460;
+A006E3438 [label = "a"];
+A006E3460 [label = "3"];
+A006E34B0 [label = "7"];
 }

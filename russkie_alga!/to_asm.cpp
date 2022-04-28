@@ -1,8 +1,16 @@
 #include <assert.h>
 #include "..\differ\tree_funks.h"
 #include "..\dictionary\dict.h"
+#include "..\differ\differ.h"
 #include "to_asm.h"
 
+
+void expression_assembly (node* cur_node, FILE* asm_file, dict ma_dict);
+
+void expression_node_assembly (node* cur_node, FILE* asm_file, dict ma_dict);
+
+
+void store_value_assembly (node* cur_node, FILE* asm_file, dict ma_dict);
 
 dict collect_vars (dict ma_dict, node* root)
     {
@@ -57,7 +65,7 @@ void op_node_process (node* op_node, FILE* asm_file, dict ma_dict)
     if (left_node->ntype == VAR)
         {
         ram_shift = dict_get_val (ma_dict, left_node->content);
-        fprintf (asm_file, "push [bx + %d]\n", dict_get_val);
+        fprintf (asm_file, "push [bx + %d]\n", ram_shift);
         }
     else if (left_node->ntype == VAL)
         {
@@ -65,15 +73,15 @@ void op_node_process (node* op_node, FILE* asm_file, dict ma_dict)
         }
 
     // Right node process
-    node* rigth_node = op_node->right_child;
-    if (rigth_node->ntype == VAR)
+    node* right_node = op_node->right_child;
+    if (right_node->ntype == VAR)
         {
-        ram_shift = dict_get_val (ma_dict, rigth_node->content);
-        fprintf (asm_file, "push [bx + %d]\n", dict_get_val);
+        ram_shift = dict_get_val (ma_dict, right_node->content);
+        fprintf (asm_file, "push [bx + %d]\n", ram_shift);
         }
-    else if (rigth_node->ntype == VAL)
+    else if (right_node->ntype == VAL)
         {
-        fprintf (asm_file, "push %s\n", rigth_node->content);
+        fprintf (asm_file, "push %s\n", right_node->content);
         }
 
     // Op process
@@ -95,26 +103,105 @@ void op_node_process (node* op_node, FILE* asm_file, dict ma_dict)
     }
 
 
-void assembly (node* root, FILE* asm_file, dict ma_dict)
+void st_assembly (node* root, FILE* asm_file, dict ma_dict)
     {
-    puts (root->content);
-
-    if (root->ntype == OP && root->content[0])
+    switch (root->right_child->ntype)
         {
-        puts ("Came in!");
-        op_node_process (root, asm_file, ma_dict);
+        case INIT:
+            {
+            node* init_node = root->right_child;
+
+            expression_assembly (init_node->right_child->right_child, asm_file, ma_dict);
+
+            store_value_assembly (init_node->left_child, asm_file, ma_dict);
+
+            break;
+            }
+
+        default:
+            {
+            printf ("[ERROR]: Error during processing of [%s]\n", root->content);
+
+            break;
+            }
         }
+    }
 
-    if (root->left_child)
+void expression_assembly (node* root, FILE* asm_file, dict ma_dict)
+    {
+    if (root->left_child) expression_assembly (root->left_child, asm_file, ma_dict);
+
+    if (root->right_child) expression_assembly (root->right_child, asm_file, ma_dict);
+
+    expression_node_assembly (root, asm_file, ma_dict);
+    }
+
+
+void expression_node_assembly (node* cur_node, FILE* asm_file, dict ma_dict)
+    {
+    puts (cur_node->content);
+
+    switch (cur_node->ntype)
         {
-        puts ("Left");
-        assembly (root->left_child, asm_file, ma_dict);
+        case OP:
+            {
+            switch (cur_node->content[0])
+                {
+                case '+':
+                    fprintf (asm_file, "add\n");
+                    break;
+                case '-':
+                    fprintf (asm_file, "sub\n");
+                    break;
+                case '*':
+                    fprintf (asm_file, "mlt\n");
+                    break;
+                case '/':
+                    fprintf (asm_file, "saw\n");
+                    break;
+                }
+            break;
+            }
+
+        case VAR:
+            {
+            size_t ram_shift = 0;
+
+            ram_shift = dict_get_val (ma_dict, cur_node->content);
+
+            fprintf (asm_file, "push [bx + %d]\n", ram_shift);
+
+            break;
+            }
+
+        case VAL:
+            {
+            fprintf (asm_file, "push %s\n", cur_node->content);
+
+            break;
+            }
+
+        default:
+            {
+            printf ("Unexpected member of expression: %s\n", cur_node->content);
+            }
         }
+    }
 
-    if (root->right_child)
+
+void store_value_assembly (node* cur_node, FILE* asm_file, dict ma_dict)
+    {
+    if (cur_node->ntype == VAR)
         {
-        puts ("Right");
-        assembly (root->right_child, asm_file, ma_dict);
+        size_t ram_shift = 0;
+
+        ram_shift = dict_get_val (ma_dict, cur_node->content);
+
+        fprintf (asm_file, "pop [bx + %d]\n", ram_shift);
+        }
+    else
+        {
+        puts ("[ERROR]: Unable to initialize non-variable\n");
         }
     }
 

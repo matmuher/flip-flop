@@ -430,7 +430,9 @@ ma_ty get_N (parsed_line_reader* pl_reader)
 
         char str_val[NAME_LENGTH] = {};
 
-        gcvt (val, NAME_LENGTH, str_val);
+        const size_t DECIMAL_RADIX = 10;
+
+        itoa (val, str_val, DECIMAL_RADIX);
         puts (str_val);
 
         node* temp_one = create_node (VAL, str_val);

@@ -16,23 +16,23 @@ int main (int, char* argv[])
 
     node* root = build_ast (file_name);
 
-    system ("pause");
+    // system ("pause");
 
-    dot_this_shit (root);
+    // dot_this_shit (root);
 
     // to_asm (root);
 
     dict ma_dict = NULL;
     ma_dict = collect_vars (ma_dict, root);
     print_dict (ma_dict);
-system ("pause");
-    FILE* asm_file = fopen ("asm.txt", "w");
-
-    assembly (root, asm_file, ma_dict);
-
-    fclose (asm_file);
 
     system ("pause");
+
+    FILE* asm_file = fopen ("asm.txt", "w");
+
+    st_assembly (root, asm_file, ma_dict);
+    system ("pause");
+    fclose (asm_file);
 
     memory_free ();
     }
