@@ -4,6 +4,25 @@
 #include "lexo_parser.h"
 
 
+token* lexo_parse_second_traversal (token* parsed_line)
+    {
+    size_t token_id = 0;
+
+    while (parsed_line[token_id].type != T_END)
+        {
+        if (parsed_line[token_id].type == T_VAR && parsed_line[token_id + 1].type == T_DELIM &&
+            parsed_line[token_id + 1].content.servant == ' ' && parsed_line[token_id + 2].type == T_ROUND_BR)
+            {
+            parsed_line[token_id].type = T_UFUNK;
+            }
+
+        token_id++;
+        }
+
+    return parsed_line;
+    }
+
+
 /*
 Parse string into tokens:
 
@@ -94,6 +113,7 @@ void print_token (token token_to_print, int mode) // 1 - with '\n', 0 - without
     switch (token_to_print.type)
         {
         case T_VAR:
+        case T_UFUNK:
         case T_SFUNK:
         case T_SFRAME:
         case T_DEF:

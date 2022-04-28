@@ -97,10 +97,9 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         return val;
         }
-    else if ((TOKEN_TYPE == T_VAL) || // "55" - value
-             (TOKEN_TYPE == T_SFUNK) || // "print" - standard function
-             (TOKEN_TYPE == T_VAR &&
-             TOKEN_TYPE_FLEX(TOKEN_ID + 2) == T_ROUND_BR)) // "esh_slizney ()" - user function
+    else if (TOKEN_TYPE == T_VAL   || // "55" - value
+             TOKEN_TYPE == T_SFUNK || // "print" - standard function
+             TOKEN_TYPE == T_UFUNK) // "esh_slizney ()" - user function
         {
         // puts ("User function got here");
         ma_ty val = get_E (pl_reader);
@@ -130,7 +129,7 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         REQUIRE(' ');
 
-        node* funk_name = create_node (VAR, TOKEN_IDENTIFIER);
+        node* funk_name = create_node (UFUNK, TOKEN_IDENTIFIER);
         TOKEN_ID++;
 
         REQUIRE(' ');
@@ -331,14 +330,12 @@ ma_ty get_S (parsed_line_reader* pl_reader)
 // Factor
 ma_ty get_F (parsed_line_reader* pl_reader)
     {
-    puts ("OMOMOMOMOMOMOM");
     VERBOSE_SIGNAL(get_f);
 
     token_type t_type = TOKEN_TYPE;
 
-    // !Blin nado ceplyat T_UFUNK type while lexo_parsing
     if (t_type == T_SFUNK ||
-       (t_type == T_VAR && TOKEN_TYPE_FLEX(TOKEN_ID + 2) == T_ROUND_BR) )  // some keyword
+        t_type == T_UFUNK )  // some keyword
         {
         puts ("USER FUNCTION CALL!!!");
         size_t cur_token_id = TOKEN_ID;
@@ -353,7 +350,7 @@ ma_ty get_F (parsed_line_reader* pl_reader)
 
         // Good-old copypaste
         node* param_old_binder = NULL;
-puts ("NYAMNYAMNYAMNYAMNYAMNYAMNYAM");
+
         while (TOKEN_TYPE == T_VAR ||
                TOKEN_TYPE == T_VAL)
             {

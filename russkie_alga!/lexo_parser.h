@@ -25,6 +25,7 @@ enum token_type
     T_RET = 12,
     T_ROUND_BR = 13,
     T_SQUARE_BR = 14,
+    T_UFUNK = 15,
     };
 
 
@@ -43,6 +44,8 @@ struct parsed_line_reader
 
 
 token* lexo_parse (const char* line);
+
+token* lexo_parse_second_traversal (token* parsed_line);
 
 void print_token (token token_to_print, int mode);
 

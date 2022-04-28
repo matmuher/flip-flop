@@ -2,19 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "dict.h"
 
-struct dict_cell
-    {
-    char* key;
-    int value;
-    dict_cell* prev;
-    };
+const int DICT_INIT_VALUE = 0xBADEDA;
 
-
-typedef dict_cell* dict;
-
-#if 1
-dict_cell* add_dict_cell (dict ma_dict, char* key, int value)
+dict add_dict_cell (dict ma_dict, const char* key, int value)
     {
     // Allocate memory for new dict_cell
     dict_cell* cell_ptr = (dict_cell*) calloc (1, sizeof (dict_cell)); // Free!
@@ -26,7 +18,7 @@ dict_cell* add_dict_cell (dict ma_dict, char* key, int value)
 
     return cell_ptr;
     }
-#endif
+
 
 void print_dict (dict_cell* cell_ptr)
     {
@@ -42,29 +34,32 @@ void print_dict (dict_cell* cell_ptr)
     }
 
 
-dict_cell* search_in_dict (dict ma_dict, char* word)
+dict search_in_dict (dict ma_dict, const char* word)
     {
-    assert (ma_dict && word);
+    assert (word);
 
-    dict_cell* cur_cell = ma_dict;
-
-    while (cur_cell)
+    if (ma_dict)
         {
-        const int EQUAL = 0; // Is it good idea to define const's here?
+        dict_cell* cur_cell = ma_dict;
 
-        if (strcmp (word, cur_cell->key) == EQUAL)
+        while (cur_cell)
             {
-            return cur_cell;
-            }
+            const int EQUAL = 0;
 
-        cur_cell = cur_cell->prev;
+            if (strcmp (word, cur_cell->key) == EQUAL)
+                {
+                return cur_cell;
+                }
+
+            cur_cell = cur_cell->prev;
+            }
         }
 
     return NULL;
     }
 
 
-int dict_get_val (dict ma_dict, char* key)
+int dict_get_val (dict ma_dict,const char* key)
     {
     dict_cell* found_cell = search_in_dict (ma_dict, key);
 
@@ -79,7 +74,7 @@ int dict_get_val (dict ma_dict, char* key)
     }
 
 
-void dict_write_val (dict ma_dict, char* key, int write_val)
+void dict_write_val (dict ma_dict,const char* key, int write_val)
     {
     dict_cell* found_cell = search_in_dict (ma_dict, key);
 

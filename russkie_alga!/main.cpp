@@ -3,6 +3,8 @@
 #include "great_grammar.h"
 #include "lexo_parser.h"
 #include "..\hamlet\d_hamlet_functions.h"
+#include "..\dictionary\dict.h"
+#include "to_asm.h"
 
 void to_asm (node* root);
 
@@ -20,6 +22,12 @@ int main (int, char* argv[])
 
     // to_asm (root);
 
+    dict ma_dict = NULL;
+    ma_dict = collect_vars (ma_dict, root);
+    print_dict (ma_dict);
+
+    system ("pause");
+
     memory_free ();
     }
 
@@ -29,9 +37,12 @@ node* build_ast (const char* file_name)
     size_t lines_num = 0;
     line_buf* lines =  get_strings ((char*) file_name, &lines_num, true);
     token* parsed_line = lexo_parse (lines[0].beg_ptr);
+    parsed_line = lexo_parse_second_traversal (parsed_line);
     parsed_line_reader pl_reader = {0, parsed_line};
     print_pl (&pl_reader);
     system("pause");
     // Syntax parsing
-    return get_G (&pl_reader);
+    node* root = NULL;
+    root = get_G (&pl_reader);
+    return root;
     }
