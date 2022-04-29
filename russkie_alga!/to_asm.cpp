@@ -29,6 +29,14 @@ void ret_assembly (node* ret_node, FILE* asm_file, dict ma_dict);
 
 void def_assembly (node* def_node, FILE* asm_file, dict ma_dict);
 
+void if_assembly (node* sframe_node, FILE* asm_file, dict ma_dict);
+
+void while_assembly (node* sframe_node, FILE* asm_file, dict ma_dict);
+
+void cmp_assembly (node* cmp_node, FILE* asm_file, dict ma_dict, const char* mark_name, size_t mark_id);
+
+void sframe_assembly (node* sframe_node, FILE* asm_file, dict ma_dict);
+
 
 
 dict collect_vars (dict ma_dict, node* root)
@@ -106,6 +114,13 @@ void st_assembly (node* root, FILE* asm_file, dict ma_dict)
         case DEF:
             {
             def_assembly (st_body, asm_file, ma_dict);
+
+            break;
+            }
+
+        case SFRAME:
+            {
+            sframe_assembly (st_body, asm_file, ma_dict);
 
             break;
             }
@@ -336,4 +351,72 @@ void def_assembly (node* def_node, FILE* asm_file, dict ma_dict)
         }
     }
 
+
+void sframe_assembly (node* sframe_node, FILE* asm_file, dict ma_dict)
+    {
+    assert (sframe_node->ntype == SFRAME);
+
+    switch (sframe_node->content[0])
+        {
+        case 'w':
+
+            while_assembly (sframe_node, asm_file, ma_dict);
+
+            break;
+
+        case 'i':
+
+            if_assembly (sframe_node, asm_file, ma_dict);
+
+            break;
+
+        }
+    }
+
+
+void if_assembly (node* sframe_node, FILE* asm_file, dict ma_dict)
+    {
+    }
+
+
+void while_assembly (node* sframe_node, FILE* asm_file, dict ma_dict)
+    {
+    static size_t cond_id = 0;
+    static size_t while_id = 0;
+
+    fprintf (asm_file, "jmp :cond%d\n"
+                       "def while%d:\n",cond_id, while_id);
+
+    st_assembly (sframe_node->right_child, asm_file, ma_dict);
+
+    fprintf (asm_file, "def cond%d:\n", cond_id++);
+
+    cmp_assembly (sframe_node->left_child, asm_file, ma_dict, "while", while_id++);
+    }
+
+
+void cmp_assembly (node* cmp_node, FILE* asm_file, dict ma_dict, const char* mark_name, size_t mark_id)
+    {
+    expression_assembly (cmp_node->left_child, asm_file, ma_dict);
+
+    expression_assembly (cmp_node->right_child, asm_file, ma_dict);
+
+    switch (cmp_node->content[0])
+        {
+        case '>':
+
+            fprintf (asm_file, "jg :%s%d\n", mark_name, mark_id);
+            break;
+
+        case '<':
+
+            fprintf (asm_file, "jl :%s%d\n", mark_name, mark_id);
+            break;
+
+        case '=':
+
+            fprintf (asm_file, "je :%s%d\n", mark_name, mark_id);
+            break;
+        }
+    }
 

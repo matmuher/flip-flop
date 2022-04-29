@@ -19,15 +19,15 @@ int main (int, char* argv[])
     // dot_this_shit (root);
 
     dict ma_dict = NULL;
-    // ma_dict = collect_vars (ma_dict, root);
-    // print_dict (ma_dict);
+    ma_dict = collect_vars (ma_dict, root);
+    print_dict (ma_dict);
 
     system ("pause");
 
     #if 1
     FILE* asm_file = fopen ("asm.txt", "w");
 
-    ma_dict = NULL;
+    // ma_dict = NULL;
     st_assembly (root, asm_file, ma_dict);
 
     system ("pause");
