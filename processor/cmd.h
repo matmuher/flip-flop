@@ -49,3 +49,5 @@ DEF_CMD(r_sin,    23, ZERO_ARGS, PUSH(R_SIN))
 DEF_CMD(ret,      24, ZERO_ARGS, JUMP(POP))
 
 DEF_CMD(call,     25, ONE_ARG,   PUSH(prc->ip + 1); JUMP(ARG1))
+
+DEF_CMD(jne,      26, ONE_ARG,   CONDITION_JUMP(POP != POP))
