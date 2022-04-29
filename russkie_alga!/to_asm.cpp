@@ -25,6 +25,9 @@ void push_val_assembly (node* val_node, FILE* asm_file, dict ma_dict);
 
 void op_assembly (node* op_node, FILE* asm_file, dict ma_dict);
 
+void ret_assembly (node* ret_node, FILE* asm_file, dict ma_dict);
+
+
 
 dict collect_vars (dict ma_dict, node* root)
     {
@@ -63,18 +66,27 @@ dict try_node (dict ma_dict, node* current_node)
 
 void st_assembly (node* root, FILE* asm_file, dict ma_dict)
     {
-    switch (root->right_child->ntype)
+    node* st_body = root->right_child;
+
+    switch (st_body->ntype)
         {
         case INIT:
             {
-            init_assembly (root->right_child, asm_file, ma_dict);
+            init_assembly (st_body, asm_file, ma_dict);
 
             break;
             }
 
         case CALL:
             {
-            call_assembly (root->right_child, asm_file, ma_dict);
+            call_assembly (st_body, asm_file, ma_dict);
+
+            break;
+            }
+
+        case RET:
+            {
+            ret_assembly (st_body, asm_file, ma_dict);
 
             break;
             }
@@ -130,8 +142,6 @@ void expression_assembly (node* root, FILE* asm_file, dict ma_dict)
     if (root->right_child) expression_assembly (root->right_child, asm_file, ma_dict);
 
     expression_node_assembly (root, asm_file, ma_dict);
-
-    putc ('\n', asm_file);
     }
 
 
@@ -276,7 +286,19 @@ void pop_params (size_t params_num, FILE* asm_file)
     }
 
 
-void
+void ret_assembly (node* ret_node, FILE* asm_file, dict ma_dict)
+    {
+    expression_assembly (ret_node->right_child, asm_file, ma_dict);
 
+    // return value stores in ax
+    fprintf (asm_file, "pop ax\n"
+                       "ret\n");
+    }
+
+
+void def_assembly (node* ret_node, FILE* asm_file, dict ma_dict)
+    {
+
+    }
 
 

@@ -16,7 +16,7 @@ int main (int, char* argv[])
 
     node* root = build_ast (file_name);
 
-    // dot_this_shit (root);
+    dot_this_shit (root);
 
     dict ma_dict = NULL;
     ma_dict = collect_vars (ma_dict, root);

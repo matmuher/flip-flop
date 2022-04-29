@@ -189,7 +189,7 @@ ma_ty get_A (parsed_line_reader* pl_reader)
 
         node* ret_val = get_E (pl_reader);
 
-        return mono_oper (ret_val, "return");
+        return mono_oper (ret_val, "return", RET);
         }
     else
         {
