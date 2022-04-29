@@ -13,8 +13,18 @@ size_t push_params (node* cur_node, FILE* asm_file, dict ma_dict);
 
 void pop_params (size_t params_num, FILE* asm_file);
 
+void call_assembly (node* call_node, FILE* asm_file, dict ma_dict);
+
+void init_assembly (node* init_node, FILE* asm_file, dict ma_dict);
 
 void store_value_assembly (node* cur_node, FILE* asm_file, dict ma_dict);
+
+void var_assembly (node* var_node, FILE* asm_file, dict ma_dict, const char* cmd);
+
+void push_val_assembly (node* val_node, FILE* asm_file, dict ma_dict);
+
+void op_assembly (node* op_node, FILE* asm_file, dict ma_dict);
+
 
 dict collect_vars (dict ma_dict, node* root)
     {
@@ -50,62 +60,6 @@ dict try_node (dict ma_dict, node* current_node)
     return ma_dict;
     }
 
-void write_to_asm (const char* str)
-    {
-    static FILE* asm_file = fopen ("asm.txt", "w");
-
-    fprintf (asm_file, str);
-    }
-
-
-void op_node_process (node* op_node, FILE* asm_file, dict ma_dict)
-    {
-    assert (op_node->ntype == OP);
-
-    size_t ram_shift = 0;
-
-    // Left node process
-    node* left_node = op_node->left_child;
-    if (left_node->ntype == VAR)
-        {
-        ram_shift = dict_get_val (ma_dict, left_node->content);
-        fprintf (asm_file, "push [bx + %d]\n", ram_shift);
-        }
-    else if (left_node->ntype == VAL)
-        {
-        fprintf (asm_file, "push %s\n", left_node->content);
-        }
-
-    // Right node process
-    node* right_node = op_node->right_child;
-    if (right_node->ntype == VAR)
-        {
-        ram_shift = dict_get_val (ma_dict, right_node->content);
-        fprintf (asm_file, "push [bx + %d]\n", ram_shift);
-        }
-    else if (right_node->ntype == VAL)
-        {
-        fprintf (asm_file, "push %s\n", right_node->content);
-        }
-
-    // Op process
-    switch (op_node->content[0])
-        {
-        case '+':
-            fprintf (asm_file, "add\n");
-            break;
-        case '-':
-            fprintf (asm_file, "sub\n");
-            break;
-        case '*':
-            fprintf (asm_file, "mlt\n");
-            break;
-        case '/':
-            fprintf (asm_file, "saw\n");
-            break;
-        }
-    }
-
 
 void st_assembly (node* root, FILE* asm_file, dict ma_dict)
     {
@@ -113,41 +67,14 @@ void st_assembly (node* root, FILE* asm_file, dict ma_dict)
         {
         case INIT:
             {
-            node* init_node = root->right_child;
-
-            expression_assembly (init_node->right_child->right_child, asm_file, ma_dict);
-
-            store_value_assembly (init_node->left_child, asm_file, ma_dict);
+            init_assembly (root->right_child, asm_file, ma_dict);
 
             break;
             }
 
         case CALL:
             {
-            node* call_node = root->right_child;
-            puts ("Call is processing");
-
-            // Save base register
-            fprintf (asm_file, "push bx\n\n");
-
-            // Push parameters
-            size_t params_num = 0;
-            params_num = push_params (call_node->right_child, asm_file, ma_dict);
-            putc ('\n', asm_file);
-
-            // Prepare bx for addressing in new scope
-            fprintf (asm_file, "push bx\n"
-                               "push %d\n"
-                               "add\n"
-                               "pop bx\n\n", ma_dict->value + 1);
-
-            // Pop parameters in RAM to called function has access to them
-            pop_params (params_num, asm_file);
-
-            fprintf (asm_file, "call %s\n\n", call_node->left_child->content);
-
-            // Recover base register
-            fprintf (asm_file, "pop bx\n\n");
+            call_assembly (root->right_child, asm_file, ma_dict);
 
             break;
             }
@@ -159,6 +86,41 @@ void st_assembly (node* root, FILE* asm_file, dict ma_dict)
             break;
             }
         }
+    }
+
+void call_assembly (node* call_node, FILE* asm_file, dict ma_dict)
+    {
+    puts ("Call is processing");
+
+    // Save base register
+    fprintf (asm_file, "push bx\n\n");
+
+    // Push parameters
+    size_t params_num = 0;
+    params_num = push_params (call_node->right_child, asm_file, ma_dict);
+    putc ('\n', asm_file);
+
+    // Prepare bx for addressing in new scope
+    fprintf (asm_file, "push bx\n"
+                       "push %d\n"
+                       "add\n"
+                       "pop bx\n\n", ma_dict->value + 1);
+
+    // Pop parameters in RAM to called function has access to them
+    pop_params (params_num, asm_file);
+
+    fprintf (asm_file, "call %s\n\n", call_node->left_child->content);
+
+    // Recover base register
+    fprintf (asm_file, "pop bx\n\n");
+    }
+
+
+void init_assembly (node* init_node, FILE* asm_file, dict ma_dict)
+    {
+    expression_assembly (init_node->right_child->right_child, asm_file, ma_dict);
+
+    store_value_assembly (init_node->left_child, asm_file, ma_dict);
     }
 
 void expression_assembly (node* root, FILE* asm_file, dict ma_dict)
@@ -181,38 +143,21 @@ void expression_node_assembly (node* cur_node, FILE* asm_file, dict ma_dict)
         {
         case OP:
             {
-            switch (cur_node->content[0])
-                {
-                case '+':
-                    fprintf (asm_file, "add\n");
-                    break;
-                case '-':
-                    fprintf (asm_file, "sub\n");
-                    break;
-                case '*':
-                    fprintf (asm_file, "mlt\n");
-                    break;
-                case '/':
-                    fprintf (asm_file, "saw\n");
-                    break;
-                }
+            op_assembly (cur_node, asm_file, ma_dict);
+
             break;
             }
 
         case VAR:
             {
-            size_t ram_shift = 0;
-
-            ram_shift = dict_get_val (ma_dict, cur_node->content);
-
-            fprintf (asm_file, "push [bx + %d]\n", ram_shift);
+            var_assembly (cur_node, asm_file, ma_dict, "push");
 
             break;
             }
 
         case VAL:
             {
-            fprintf (asm_file, "push %s\n", cur_node->content);
+            push_val_assembly (cur_node, asm_file, ma_dict);
 
             break;
             }
@@ -254,18 +199,14 @@ size_t push_params (node* cur_node, FILE* asm_file, dict ma_dict)
             {
             case VAR:
                 {
-                size_t ram_shift = 0;
-
-                ram_shift = dict_get_val (ma_dict, cur_node->right_child->content);
-
-                fprintf (asm_file, "push [bx + %d]\n", ram_shift);
+                var_assembly (cur_node->right_child, asm_file, ma_dict, "push");
 
                 break;
                 }
 
             case VAL:
                 {
-                fprintf (asm_file, "push %s\n", cur_node->right_child->content);
+                push_val_assembly (cur_node->right_child, asm_file, ma_dict);
 
                 break;
                 }
@@ -289,6 +230,42 @@ size_t push_params (node* cur_node, FILE* asm_file, dict ma_dict)
     }
 
 
+void var_assembly (node* var_node, FILE* asm_file, dict ma_dict, const char* cmd)
+    {
+    size_t ram_shift = 0;
+
+    ram_shift = dict_get_val (ma_dict, var_node->content);
+
+    fprintf (asm_file, "%s [bx + %d]\n", cmd, ram_shift);
+    }
+
+
+void push_val_assembly (node* val_node, FILE* asm_file, dict ma_dict)
+    {
+    fprintf (asm_file, "push %s\n", val_node->content);
+    }
+
+
+void op_assembly (node* op_node, FILE* asm_file, dict ma_dict)
+    {
+    switch (op_node->content[0])
+                {
+                case '+':
+                    fprintf (asm_file, "add\n");
+                    break;
+                case '-':
+                    fprintf (asm_file, "sub\n");
+                    break;
+                case '*':
+                    fprintf (asm_file, "mlt\n");
+                    break;
+                case '/':
+                    fprintf (asm_file, "saw\n");
+                    break;
+                }
+    }
+
+
 void pop_params (size_t params_num, FILE* asm_file)
     {
     for (size_t param_id = 0; param_id < params_num; param_id++)
@@ -297,6 +274,9 @@ void pop_params (size_t params_num, FILE* asm_file)
         }
     putc ('\n', asm_file);
     }
+
+
+void
 
 
 
