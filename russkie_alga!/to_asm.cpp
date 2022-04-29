@@ -27,6 +27,8 @@ void op_assembly (node* op_node, FILE* asm_file, dict ma_dict);
 
 void ret_assembly (node* ret_node, FILE* asm_file, dict ma_dict);
 
+void def_assembly (node* def_node, FILE* asm_file, dict ma_dict);
+
 
 
 dict collect_vars (dict ma_dict, node* root)
@@ -52,6 +54,12 @@ dict try_node (dict ma_dict, node* current_node)
     // Shift relatively bx in current scope
     static size_t ram_shift = 0;
 
+    // Dictionary initialization
+    if (ma_dict == NULL)
+        {
+        ram_shift = 0;
+        }
+
     if (current_node->ntype == VAR)
         {
         if (!search_in_dict (ma_dict, current_node->content))
@@ -66,7 +74,11 @@ dict try_node (dict ma_dict, node* current_node)
 
 void st_assembly (node* root, FILE* asm_file, dict ma_dict)
     {
+    if (root->left_child) st_assembly (root->left_child, asm_file, ma_dict);
+
     node* st_body = root->right_child;
+
+    puts (st_body->content);
 
     switch (st_body->ntype)
         {
@@ -91,6 +103,13 @@ void st_assembly (node* root, FILE* asm_file, dict ma_dict)
             break;
             }
 
+        case DEF:
+            {
+            def_assembly (st_body, asm_file, ma_dict);
+
+            break;
+            }
+
         default:
             {
             printf ("[ERROR]: Error during processing of [%s]\n", root->content);
@@ -107,10 +126,11 @@ void call_assembly (node* call_node, FILE* asm_file, dict ma_dict)
     // Save base register
     fprintf (asm_file, "push bx\n\n");
 
-    // Push parameters
     size_t params_num = 0;
+    // Push parameters
     params_num = push_params (call_node->right_child, asm_file, ma_dict);
     putc ('\n', asm_file);
+
 
     // Prepare bx for addressing in new scope
     fprintf (asm_file, "push bx\n"
@@ -197,46 +217,44 @@ void store_value_assembly (node* cur_node, FILE* asm_file, dict ma_dict)
     }
 
 
-size_t push_params (node* cur_node, FILE* asm_file, dict ma_dict)
+size_t push_params (node* param_node, FILE* asm_file, dict ma_dict)
     {
-    static size_t params_num = 0;
+    assert (param_node->ntype == PARAM);
 
-    if (cur_node->ntype == PARAM)
+    size_t params_num = 0;
+
+    while (param_node)
         {
         params_num++;
 
-        switch (cur_node->right_child->ntype)
+        switch (param_node->right_child->ntype)
             {
             case VAR:
                 {
-                var_assembly (cur_node->right_child, asm_file, ma_dict, "push");
+                var_assembly (param_node->right_child, asm_file, ma_dict, "push");
 
                 break;
                 }
 
             case VAL:
                 {
-                push_val_assembly (cur_node->right_child, asm_file, ma_dict);
+                push_val_assembly (param_node->right_child, asm_file, ma_dict);
 
                 break;
                 }
 
             default:
                 {
-                printf ("[ERROR]: Unexpected node type [%s]\n", cur_node->right_child->content);
+                printf ("[ERROR]: Unexpected node type [%s]\n", param_node->right_child->content);
 
                 break;
                 }
             }
 
-        if (cur_node->left_child) push_params (cur_node->left_child, asm_file, ma_dict);
+        param_node = param_node->left_child;
+        }
 
-        return params_num;
-        }
-    else
-        {
-        printf ("[ERROR]: Try to process as parameter non-parameter node [%s]\n", cur_node->content);
-        }
+    return params_num;
     }
 
 
@@ -292,13 +310,30 @@ void ret_assembly (node* ret_node, FILE* asm_file, dict ma_dict)
 
     // return value stores in ax
     fprintf (asm_file, "pop ax\n"
-                       "ret\n");
+                       "ret\n\n");
     }
 
 
-void def_assembly (node* ret_node, FILE* asm_file, dict ma_dict)
+void def_assembly (node* def_node, FILE* asm_file, dict ma_dict)
     {
+    if (def_node)
+        {
+        assert (def_node->ntype == DEF);
 
+        node* funk_name = def_node->left_child->left_child;
+        fprintf(asm_file, "def %s:\n", funk_name->content);
+
+        dict local_dict = NULL;
+        local_dict = collect_vars (local_dict, def_node->right_child);
+
+        st_assembly (def_node->right_child, asm_file, local_dict);
+
+        free_dict (local_dict);
+        }
+    else
+        {
+        puts ("[ERROR]: Empty define node");
+        }
     }
 
 
