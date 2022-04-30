@@ -16,7 +16,7 @@ int main (int, char* argv[])
 
     node* root = build_ast (file_name);
 
-    // dot_this_shit (root);
+    dot_this_shit (root);
 
     dict ma_dict = NULL;
     ma_dict = collect_vars (ma_dict, root);
@@ -27,7 +27,10 @@ int main (int, char* argv[])
     #if 1
     FILE* asm_file = fopen ("asm.txt", "w");
 
-    // ma_dict = NULL;
+    ma_dict = NULL;
+    fprintf (asm_file, "push 0\n"
+                       "pop bx\n"
+                       "jump :main\n\n");
     st_assembly (root, asm_file, ma_dict);
 
     system ("pause");

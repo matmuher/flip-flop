@@ -1,5 +1,3 @@
-z:5
-main ()
-define main (){n:7;Fib (n);}
 define Fib (n){if(n=1){return 1;};if(n=2){return 1;};return Fib (n-1)+Fib (n-2);}
+define main (){n:7;return Fib (n);}
 $

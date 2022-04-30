@@ -5,7 +5,7 @@ dict collect_vars (dict ma_dict, node* root);
 
 dict try_node (dict ma_dict, node* current_node);
 
-void st_assembly (node* root, FILE* asm_file, dict ma_dict);
+void st_assembly (node* root, FILE* asm_file, dict ma_dict, int is_main = 0);
 
 
 
