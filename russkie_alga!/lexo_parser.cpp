@@ -8,10 +8,22 @@ token* lexo_parse_second_traversal (token* parsed_line)
     {
     size_t token_id = 0;
 
+    int func_def  = 0;
+
+
+    int func_call = 0;
+
+
     while (parsed_line[token_id].type != T_END)
         {
-        if (parsed_line[token_id].type == T_VAR && parsed_line[token_id + 1].type == T_DELIM &&
-            parsed_line[token_id + 1].content.servant == ' ' && parsed_line[token_id + 2].type == T_ROUND_BR)
+        func_def =  parsed_line[token_id + 1].type == T_DELIM        &&
+                    parsed_line[token_id + 1].content.servant == ' ' &&
+                    parsed_line[token_id + 2].type == T_ROUND_BR;
+
+        func_call = parsed_line[token_id + 1].type == T_ROUND_BR &&
+                    parsed_line[token_id + 1].content.servant == '(';
+
+        if (parsed_line[token_id].type == T_VAR && (func_def || func_call))
             {
             parsed_line[token_id].type = T_UFUNK;
             }
@@ -110,6 +122,7 @@ void print_pl (parsed_line_reader* pl_reader)
 
     while (pl_reader->pl[token_id - 1].type != T_END)
         {
+        printf("(%d)", token_id);
         print_token (pl_reader->pl[token_id++], 0);
         }
 

@@ -12,6 +12,8 @@ node* build_ast (const char* file_name)
     parsed_line = lexo_parse_second_traversal (parsed_line);
     parsed_line_reader pl_reader = {0, parsed_line};
 
+    print_pl (&pl_reader);
+
     // Syntax parsing
     node* root = NULL;
     root = get_G (&pl_reader);
@@ -24,15 +26,18 @@ void assembly (const char* file_name)
     {
     node* syntax_tree = build_ast (file_name);
 
+    // dot_this_shit (syntax_tree);
+
     FILE* asm_file = fopen ("asm.txt", "w");
 
     st_assembly (syntax_tree, asm_file, NULL);
-
-    dot_this_shit (syntax_tree);
 
     fprintf (asm_file, "say");
 
     fclose (asm_file);
 
     printf ("Assembly of %s was completed!\n", file_name);
+
+    system ("asma.exe asm.txt");
+    system ("processor.exe");
     }

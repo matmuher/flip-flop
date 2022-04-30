@@ -266,7 +266,7 @@ void def_assembly (node* def_node, FILE* asm_file, dict ma_dict)
         fprintf(asm_file, "def %s:\n", funk_name->content);
 
         dict local_dict = NULL;
-        local_dict = collect_vars (local_dict, def_node->right_child);
+        local_dict = collect_vars (local_dict, def_node);
 
         st_assembly (def_node->right_child, asm_file, local_dict, is_main);
 
@@ -298,9 +298,12 @@ void if_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, int is_main)
 
     cmp_assembly (sframe_node->left_child, asm_file, ma_dict, "if", if_id, REVERS);
 
+    size_t cur_if_id = if_id++;
+
     st_assembly (sframe_node->right_child, asm_file, ma_dict, is_main);
 
-    fprintf (asm_file, "def if%d:\n", if_id++);
+    fprintf (asm_file, "def if%d:\n"
+                       "say\n", cur_if_id);
     }
 
 

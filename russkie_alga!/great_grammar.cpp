@@ -453,8 +453,9 @@ ma_ty get_N (parsed_line_reader* pl_reader)
 // !Add error_code process via switch and define print
 ERROR_LIST syntax_error (parsed_line_reader* pl_reader, ERROR_LIST error_code)
     {
-    printf ("[SYNTAX ERROR: %d] -> ", error_code);
+    printf ("[SYNTAX ERROR: %d] ->|%d| ", error_code, TOKEN_ID);
     print_token (gfs(pl[TOKEN_ID]), 1);
+
 
     return error_code;
     }
