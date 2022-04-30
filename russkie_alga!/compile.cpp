@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include "great_grammar.h"
-#include "lexo_parser.h"
-#include "..\hamlet\d_hamlet_functions.h"
-#include "..\dictionary\dict.h"
-#include "to_asm.h"
+#include "compile.h"
 
 
 node* build_ast (const char* file_name)
@@ -26,11 +20,19 @@ node* build_ast (const char* file_name)
     }
 
 
-void compile (const char* file_name)
+void assembly (const char* file_name)
     {
     node* syntax_tree = build_ast (file_name);
 
-    FILE* asm_file = fopen (, "w");
+    FILE* asm_file = fopen ("asm.txt", "w");
 
     st_assembly (syntax_tree, asm_file, NULL);
+
+    dot_this_shit (syntax_tree);
+
+    fprintf (asm_file, "say");
+
+    fclose (asm_file);
+
+    printf ("Assembly of %s was completed!\n", file_name);
     }

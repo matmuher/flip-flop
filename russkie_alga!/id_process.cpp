@@ -7,7 +7,7 @@
 
 // To add a function you should add it to enum IDS, char* keywords[], determine_keyword (),
 // and describe its work in execute ()
-const char* sfunk[] = {"sinus", "cosus", "logus", "print"};
+const char* sfunk[] = {"sinus", "cosus", "logus", "print", "sqrt", "input"};
 const char* sframe[] = {"while", "if"};
 size_t sfunk_num = sizeof (sfunk) / sizeof (sfunk[0]);
 size_t sframe_num = sizeof (sframe) / sizeof (sframe[0]);

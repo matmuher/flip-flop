@@ -8,7 +8,7 @@ const size_t REVERS = 1,  NON_REVERS = 0,
 // Carry out recursive assembly of statements branch
 void st_assembly (node* root, FILE* asm_file, dict ma_dict, int is_main)
     {
-    if (root->left_child) st_assembly (root->left_child, asm_file, ma_dict);
+    if (root->left_child) st_assembly (root->left_child, asm_file, ma_dict, is_main);
 
     node* st_body = root->right_child;
 
@@ -22,7 +22,7 @@ void st_assembly (node* root, FILE* asm_file, dict ma_dict, int is_main)
 
         case DEF:    def_assembly (st_body, asm_file, ma_dict); break;
 
-        case SFRAME: sframe_assembly (st_body, asm_file, ma_dict); break;
+        case SFRAME: sframe_assembly (st_body, asm_file, ma_dict, is_main); break;
 
         default:     printf ("[ERROR]: st_assembly can't process [%s]\n", root->content);
         }
@@ -64,30 +64,68 @@ dict try_node (dict ma_dict, node* current_node)
 // Provides so-called "RAM-frame" (it's kind of stack frame, but with ram)
 void call_assembly (node* call_node, FILE* asm_file, dict ma_dict, int in_expression)
     {
-    // Save base register
-    fprintf (asm_file, "push bx\n\n");
+    assert (call_node->ntype == CALL);
 
-    // Push parameters
-    size_t params_num = 0;
-    params_num = push_params (call_node->right_child, asm_file, ma_dict);
-    putc ('\n', asm_file);
+    if (call_node->left_child->ntype == UFUNK)
+        {
+        // Save base register
+        fprintf (asm_file, "push bx\n\n");
 
-    // Prepare bx for addressing in new scope
-    fprintf (asm_file, "push bx\n"
-                       "push %d\n"
-                       "add\n"
-                       "pop bx\n", ma_dict->value + 1);
+        // Push parameters
+        size_t params_num = 0;
+        params_num = push_params (call_node->right_child, asm_file, ma_dict);
 
-    // Pop parameters in RAM to called function has access to them
-    pop_params (params_num, asm_file);
+        // Prepare bx for addressing in new scope
+        fprintf (asm_file, "push bx\n"
+                           "push %d\n"
+                           "add\n"
+                           "pop bx\n", ma_dict->value + 1);
 
-    fprintf (asm_file, "call :%s\n", call_node->left_child->content);
+        // Pop parameters in RAM to called function has access to them
+        pop_params (params_num, asm_file);
 
-    // Recover base register
-    fprintf (asm_file, "pop bx\n\n");
+        fprintf (asm_file, "call :%s\n", call_node->left_child->content);
 
-    // push ret value if in expression
-    if (in_expression) fprintf (asm_file, "push ax\n");
+        // Recover base register
+        fprintf (asm_file, "pop bx\n");
+
+        // push ret value if in expression
+        if (in_expression) fprintf (asm_file, "push ax\n");
+        }
+    else if (call_node->left_child->ntype == SFUNK)
+        {
+        // Push parameters
+        size_t params_num = 0;
+        params_num = push_params (call_node->right_child, asm_file, ma_dict);
+
+        switch (call_node->left_child->content[0])
+            {
+            case 'p':
+                {
+                for (size_t param_id = 0; param_id < params_num; param_id++)
+                    {
+                    fprintf (asm_file, "out\n"
+                                       "pop 0\n");
+                    }
+                break;
+                }
+
+            case 's':
+                {
+                assert (params_num == 1);
+                fprintf (asm_file, "sqrt\n");
+                break;
+                }
+
+            case 'i':
+                {
+                assert (params_num == 0);
+                fprintf (asm_file, "in\n");
+                break;
+                }
+            }
+        }
+    else printf ("[ERROR]: Can't process a function [%s]\n", call_node->left_child->content);
     }
 
 
@@ -104,11 +142,13 @@ void expression_assembly (node* root, FILE* asm_file, dict ma_dict)
     node* right = root->right_child;
     node* left = root->left_child;
 
-    if (right && (right->ntype == VAL ||  right->ntype == VAR || right->ntype == CALL))
+    if (right &&
+    (right->ntype == VAL ||  right->ntype == VAR || right->ntype == CALL || right->ntype == OP))
 
         expression_assembly (right, asm_file, ma_dict);
 
-    if (left &&  (left->ntype == VAL  ||  left->ntype == VAR  || left->ntype == CALL))
+    if (left &&
+    (left->ntype == VAL  ||  left->ntype == VAR  || left->ntype == CALL || left->ntype == OP))
 
         expression_assembly (left, asm_file, ma_dict);
 
@@ -208,9 +248,8 @@ void ret_assembly (node* ret_node, FILE* asm_file, dict ma_dict, int is_main)
     // return value stores in ax
     fprintf (asm_file, "pop ax\n");
 
-    if (is_main) fprintf (asm_file, "hlt\n\n");
-
-    else fprintf (asm_file, "ret\n\n");
+    if (is_main) {fprintf (asm_file, "hlt\n\n");}
+    else {fprintf (asm_file, "ret\n\n");}
     }
 
 
@@ -222,7 +261,7 @@ void def_assembly (node* def_node, FILE* asm_file, dict ma_dict)
 
         int is_main = 0;
         node* funk_name = def_node->left_child->left_child;
-        if (strcmp (funk_name->content, "main") == EQUAL) is_main = IS_MAIN;
+        if (strcmp (funk_name->content, "main") == EQUAL) {is_main = IS_MAIN; puts("[Main]\n");}
 
         fprintf(asm_file, "def %s:\n", funk_name->content);
 
@@ -237,7 +276,7 @@ void def_assembly (node* def_node, FILE* asm_file, dict ma_dict)
     }
 
 // Assembly standard frames: if, while
-void sframe_assembly (node* sframe_node, FILE* asm_file, dict ma_dict)
+void sframe_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, int is_main)
     {
     assert (sframe_node->ntype == SFRAME);
 
@@ -246,33 +285,33 @@ void sframe_assembly (node* sframe_node, FILE* asm_file, dict ma_dict)
     switch (sframe_node->content[0])
         {
         // while
-        case 'w': while_assembly (sframe_node, asm_file, ma_dict, cond_id++);break;
+        case 'w': while_assembly (sframe_node, asm_file, ma_dict, cond_id++, is_main);break;
         // if
-        case 'i': if_assembly (sframe_node, asm_file, ma_dict);break;
+        case 'i': if_assembly (sframe_node, asm_file, ma_dict, is_main);break;
         }
     }
 
 
-void if_assembly (node* sframe_node, FILE* asm_file, dict ma_dict)
+void if_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, int is_main)
     {
     static size_t if_id = 0;
 
     cmp_assembly (sframe_node->left_child, asm_file, ma_dict, "if", if_id, REVERS);
 
-    st_assembly (sframe_node->right_child, asm_file, ma_dict);
+    st_assembly (sframe_node->right_child, asm_file, ma_dict, is_main);
 
     fprintf (asm_file, "def if%d:\n", if_id++);
     }
 
 
-void while_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, size_t cond_id)
+void while_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, size_t cond_id, int is_main)
     {
     static size_t while_id = 0;
 
     fprintf (asm_file, "jump :cond%d\n"
                        "def while%d:\n",cond_id, while_id);
 
-    st_assembly (sframe_node->right_child, asm_file, ma_dict);
+    st_assembly (sframe_node->right_child, asm_file, ma_dict, is_main);
 
     fprintf (asm_file, "def cond%d:\n", cond_id);
 

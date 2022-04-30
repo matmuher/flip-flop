@@ -13,6 +13,8 @@ extern const size_t REVERS,  NON_REVERS,
                     IN_EXPR, OUT_EXPR,
                     IS_MAIN, NON_MAIN;
 
+// TODO: make a structure that contains all this constantly repeating parameters
+//                                |--------------\/
 void st_assembly (node* root, FILE* asm_file, dict ma_dict, int is_main = NON_MAIN);
 
 void expression_assembly (node* cur_node, FILE* asm_file, dict ma_dict);
@@ -42,11 +44,12 @@ void ret_assembly (node* ret_node, FILE* asm_file, dict ma_dict, int is_main = N
 void cmp_assembly (node* cmp_node, FILE* asm_file, dict ma_dict,
                    const char* mark_name, size_t mark_id, int revers = NON_REVERS);
 
-void sframe_assembly (node* sframe_node, FILE* asm_file, dict ma_dict);
+void sframe_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, int is_main = NON_MAIN);
 
-void if_assembly (node* sframe_node, FILE* asm_file, dict ma_dict);
+void if_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, int is_main = NON_MAIN);
 
-void while_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, size_t cond_id);
+void while_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, size_t cond_id, int is_main = NON_MAIN);
 
+dict try_node (dict ma_dict, node* current_node);
 
 #endif // TO_ASM_H_INCLUDED

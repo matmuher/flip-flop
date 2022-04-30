@@ -260,12 +260,10 @@ ma_ty get_E (parsed_line_reader* pl_reader)
 
             if (oper == '+')
                 {
-                // printf ("val + val2 : %d + %d\n", val, val2);
                 val = add (val, val2);
                 }
             else if (oper == '-')
                 {
-                // printf ("val - val2 : %d - %d\n", val, val2);
                 val = sub (val, val2);
                 }
             }
