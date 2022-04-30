@@ -346,7 +346,7 @@ ma_ty get_F (parsed_line_reader* pl_reader)
 
         TOKEN_ID++;
 
-        REQUIRE(' ');
+        // REQUIRE(' ');
 
         require ('(', pl_reader);
 

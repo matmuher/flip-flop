@@ -121,7 +121,7 @@ void put_zeros (char* const buffer, size_t file_size)
     char* cur_pos = buffer;
     while (cur_pos < buffer + file_size)
         {
-        if (*cur_pos == '\n')
+        if (*cur_pos == '!')
             {
             *cur_pos = '#';
             }

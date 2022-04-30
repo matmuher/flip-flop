@@ -1,157 +1,76 @@
-#include <assert.h>
-#include <string.h>
-#include "..\differ\tree_funks.h"
-#include "..\dictionary\dict.h"
-#include "..\differ\differ.h"
 #include "to_asm.h"
 
-
-void expression_assembly (node* cur_node, FILE* asm_file, dict ma_dict);
-
-void expression_node_assembly (node* cur_node, FILE* asm_file, dict ma_dict);
-
-size_t push_params (node* cur_node, FILE* asm_file, dict ma_dict);
-
-void pop_params (size_t params_num, FILE* asm_file);
-
-void call_assembly (node* call_node, FILE* asm_file, dict ma_dict, int in_expression = 0);
-
-void init_assembly (node* init_node, FILE* asm_file, dict ma_dict);
-
-void store_value_assembly (node* cur_node, FILE* asm_file, dict ma_dict);
-
-void var_assembly (node* var_node, FILE* asm_file, dict ma_dict, const char* cmd);
-
-void push_val_assembly (node* val_node, FILE* asm_file, dict ma_dict);
-
-void op_assembly (node* op_node, FILE* asm_file, dict ma_dict);
-
-void ret_assembly (node* ret_node, FILE* asm_file, dict ma_dict, int is_main = 0);
-
-void def_assembly (node* def_node, FILE* asm_file, dict ma_dict);
-
-void if_assembly (node* sframe_node, FILE* asm_file, dict ma_dict);
-
-void while_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, size_t cond_id);
-
-void cmp_assembly (node* cmp_node, FILE* asm_file, dict ma_dict,
-                   const char* mark_name, size_t mark_id, int revers = 0);
-
-void sframe_assembly (node* sframe_node, FILE* asm_file, dict ma_dict);
+const size_t REVERS = 1,  NON_REVERS = 0,
+             IN_EXPR = 1, OUT_EXPR = 0,
+             IS_MAIN = 1, NON_MAIN = 0;
 
 
-const int REVERS = 1;
-const int IN_EXPR = 1;
-const int IS_MAIN = 1;
-
-
-dict collect_vars (dict ma_dict, node* root)
-    {
-    ma_dict = try_node (ma_dict, root);
-
-    if (root->left_child)
-        {
-        ma_dict = collect_vars (ma_dict, root->left_child);
-        }
-
-    if (root->right_child)
-        {
-        ma_dict = collect_vars (ma_dict, root->right_child);
-        }
-
-    return ma_dict;
-    }
-
-
-dict try_node (dict ma_dict, node* current_node)
-    {
-    // Shift relatively bx in current scope
-    static size_t ram_shift = 0;
-
-    // Dictionary initialization
-    if (ma_dict == NULL)
-        {
-        ram_shift = 0;
-        }
-
-    if (current_node->ntype == VAR)
-        {
-        if (!search_in_dict (ma_dict, current_node->content))
-            {
-            ma_dict = add_dict_cell (ma_dict, current_node->content, ram_shift++);
-            }
-        }
-
-    return ma_dict;
-    }
-
-
+// Carry out recursive assembly of statements branch
 void st_assembly (node* root, FILE* asm_file, dict ma_dict, int is_main)
     {
     if (root->left_child) st_assembly (root->left_child, asm_file, ma_dict);
 
     node* st_body = root->right_child;
 
-    puts (st_body->content);
-
     switch (st_body->ntype)
         {
-        case INIT:
-            {
-            init_assembly (st_body, asm_file, ma_dict);
+        case INIT:   init_assembly (st_body, asm_file, ma_dict); break;
 
-            break;
-            }
+        case CALL:   call_assembly (st_body, asm_file, ma_dict); break;
 
-        case CALL:
-            {
-            call_assembly (st_body, asm_file, ma_dict);
+        case RET:    ret_assembly (st_body, asm_file, ma_dict, is_main); break;
 
-            break;
-            }
+        case DEF:    def_assembly (st_body, asm_file, ma_dict); break;
 
-        case RET:
-            {
-            ret_assembly (st_body, asm_file, ma_dict, is_main);
+        case SFRAME: sframe_assembly (st_body, asm_file, ma_dict); break;
 
-            break;
-            }
-
-        case DEF:
-            {
-            def_assembly (st_body, asm_file, ma_dict);
-
-            break;
-            }
-
-        case SFRAME:
-            {
-            sframe_assembly (st_body, asm_file, ma_dict);
-
-            break;
-            }
-
-        default:
-            {
-            printf ("[ERROR]: Error during processing of [%s]\n", root->content);
-
-            break;
-            }
+        default:     printf ("[ERROR]: st_assembly can't process [%s]\n", root->content);
         }
     }
 
+
+// Put variables from given subtree to dictionary
+dict collect_vars (dict ma_dict, node* root)
+    {
+    ma_dict = try_node (ma_dict, root);
+
+    if (root->left_child)  ma_dict = collect_vars (ma_dict, root->left_child);
+
+    if (root->right_child) ma_dict = collect_vars (ma_dict, root->right_child);
+
+    return ma_dict;
+    }
+
+
+// Put variable from given node to dictionary
+dict try_node (dict ma_dict, node* current_node)
+    {
+    // Shift relatively bx in current scope
+    static size_t ram_shift = 0;
+
+    // Dictionary initialization
+    if (ma_dict == NULL) {ram_shift = 0;}
+
+    // Add to dictionary
+    if (current_node->ntype == VAR && !search_in_dict (ma_dict, current_node->content))
+
+            ma_dict = add_dict_cell (ma_dict, current_node->content, ram_shift++);
+
+    return ma_dict;
+    }
+
+
+// Carry out assembly of function call
+// Provides so-called "RAM-frame" (it's kind of stack frame, but with ram)
 void call_assembly (node* call_node, FILE* asm_file, dict ma_dict, int in_expression)
     {
-    puts ("Call is processing");
-
     // Save base register
     fprintf (asm_file, "push bx\n\n");
 
-    size_t params_num = 0;
     // Push parameters
+    size_t params_num = 0;
     params_num = push_params (call_node->right_child, asm_file, ma_dict);
     putc ('\n', asm_file);
-
 
     // Prepare bx for addressing in new scope
     fprintf (asm_file, "push bx\n"
@@ -167,7 +86,7 @@ void call_assembly (node* call_node, FILE* asm_file, dict ma_dict, int in_expres
     // Recover base register
     fprintf (asm_file, "pop bx\n\n");
 
-    // push ret value if asked
+    // push ret value if in expression
     if (in_expression) fprintf (asm_file, "push ax\n");
     }
 
@@ -179,17 +98,17 @@ void init_assembly (node* init_node, FILE* asm_file, dict ma_dict)
     store_value_assembly (init_node->left_child, asm_file, ma_dict);
     }
 
+
 void expression_assembly (node* root, FILE* asm_file, dict ma_dict)
     {
     node* right = root->right_child;
-    if (right &&
-    (right->ntype == VAL ||  right->ntype == VAR || right->ntype == CALL))
+    node* left = root->left_child;
+
+    if (right && (right->ntype == VAL ||  right->ntype == VAR || right->ntype == CALL))
 
         expression_assembly (right, asm_file, ma_dict);
 
-    node* left = root->left_child;
-    if (left &&
-    (left->ntype == VAL ||  left->ntype == VAR || left->ntype == CALL))
+    if (left &&  (left->ntype == VAL  ||  left->ntype == VAR  || left->ntype == CALL))
 
         expression_assembly (left, asm_file, ma_dict);
 
@@ -203,52 +122,24 @@ void expression_node_assembly (node* cur_node, FILE* asm_file, dict ma_dict)
 
     switch (cur_node->ntype)
         {
-        case OP:
-            {
-            op_assembly (cur_node, asm_file, ma_dict);
+        case OP:   op_assembly (cur_node, asm_file, ma_dict); break;
 
-            break;
-            }
+        case VAR:  var_assembly (cur_node, asm_file, ma_dict, "push"); break;
 
-        case VAR:
-            {
-            var_assembly (cur_node, asm_file, ma_dict, "push");
+        case VAL:  push_val_assembly (cur_node, asm_file, ma_dict); break;
 
-            break;
-            }
+        case CALL: call_assembly (cur_node, asm_file, ma_dict, IN_EXPR); break;
 
-        case VAL:
-            {
-            push_val_assembly (cur_node, asm_file, ma_dict);
-
-            break;
-            }
-
-        case CALL:
-            {
-            call_assembly (cur_node, asm_file, ma_dict, IN_EXPR);
-
-            break;
-            }
-
-        default:
-            {
-            printf ("Unexpected member of expression: %s\n", cur_node->content);
-            }
+        default:   printf ("Unexpected member of expression: %s\n", cur_node->content);
         }
     }
 
 
 void store_value_assembly (node* cur_node, FILE* asm_file, dict ma_dict)
     {
-    if (cur_node->ntype == VAR)
-        {
-        var_assembly (cur_node, asm_file, ma_dict, "pop");
-        }
-    else
-        {
-        puts ("[ERROR]: Unable to initialize non-variable\n");
-        }
+    if (cur_node->ntype == VAR) var_assembly (cur_node, asm_file, ma_dict, "pop");
+
+    else puts ("[ERROR]: Unable to initialize non-variable\n");
     }
 
 
@@ -288,29 +179,24 @@ void push_val_assembly (node* val_node, FILE* asm_file, dict ma_dict)
 void op_assembly (node* op_node, FILE* asm_file, dict ma_dict)
     {
     switch (op_node->content[0])
-                {
-                case '+':
-                    fprintf (asm_file, "add\n");
-                    break;
-                case '-':
-                    fprintf (asm_file, "sub\n");
-                    break;
-                case '*':
-                    fprintf (asm_file, "mlt\n");
-                    break;
-                case '/':
-                    fprintf (asm_file, "saw\n");
-                    break;
-                }
+        {
+        case '+': fprintf (asm_file, "add\n");break;
+
+        case '-': fprintf (asm_file, "sub\n");break;
+
+        case '*': fprintf (asm_file, "mlt\n");break;
+
+        case '/': fprintf (asm_file, "saw\n");break;
+        }
     }
 
 
 void pop_params (size_t params_num, FILE* asm_file)
     {
     for (size_t param_id = 0; param_id < params_num; param_id++)
-        {
+
         fprintf (asm_file, "pop [bx+%d]\n", param_id);
-        }
+
     putc ('\n', asm_file);
     }
 
@@ -323,6 +209,7 @@ void ret_assembly (node* ret_node, FILE* asm_file, dict ma_dict, int is_main)
     fprintf (asm_file, "pop ax\n");
 
     if (is_main) fprintf (asm_file, "hlt\n\n");
+
     else fprintf (asm_file, "ret\n\n");
     }
 
@@ -346,13 +233,10 @@ void def_assembly (node* def_node, FILE* asm_file, dict ma_dict)
 
         free_dict (local_dict);
         }
-    else
-        {
-        puts ("[ERROR]: Empty define node");
-        }
+    else puts ("[ERROR]: Empty define node");
     }
 
-
+// Assembly standard frames: if, while
 void sframe_assembly (node* sframe_node, FILE* asm_file, dict ma_dict)
     {
     assert (sframe_node->ntype == SFRAME);
@@ -361,18 +245,10 @@ void sframe_assembly (node* sframe_node, FILE* asm_file, dict ma_dict)
 
     switch (sframe_node->content[0])
         {
-        case 'w':
-
-            while_assembly (sframe_node, asm_file, ma_dict, cond_id++);
-
-            break;
-
-        case 'i':
-
-            if_assembly (sframe_node, asm_file, ma_dict);
-
-            break;
-
+        // while
+        case 'w': while_assembly (sframe_node, asm_file, ma_dict, cond_id++);break;
+        // if
+        case 'i': if_assembly (sframe_node, asm_file, ma_dict);break;
         }
     }
 

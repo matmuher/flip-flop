@@ -55,8 +55,20 @@ token* lexo_parse (const char* line)
     #define ID_ASS id = dig_out_id (&begunok)
     #define VAL_ASS val = dig_out_val (&begunok)
     #define CHAR_ASS servant = *begunok++
+
+    // Only tabs and new lines can be used freely to format code
+    // Spaces are to be set in places, established by grammar
     while (begunok < line + line_length)
         {
+        // Skip '\n' and sequences of spaces
+        if (*begunok == '\n' ||
+            *begunok == '\t' ||
+           ((begunok + 1 != line + line_length) && *begunok == ' ' && *(begunok + 1) == ' '))
+             {
+             begunok++;
+             continue;
+             }
+
         token_type token_t = try_Id (begunok);
 
         switch (token_t)
