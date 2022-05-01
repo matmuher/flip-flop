@@ -158,8 +158,6 @@ void expression_assembly (node* root, FILE* asm_file, dict ma_dict)
 
 void expression_node_assembly (node* cur_node, FILE* asm_file, dict ma_dict)
     {
-    puts (cur_node->content);
-
     switch (cur_node->ntype)
         {
         case OP:   op_assembly (cur_node, asm_file, ma_dict); break;
@@ -261,7 +259,7 @@ void def_assembly (node* def_node, FILE* asm_file, dict ma_dict)
 
         int is_main = 0;
         node* funk_name = def_node->left_child->left_child;
-        if (strcmp (funk_name->content, "main") == EQUAL) {is_main = IS_MAIN; puts("[Main]\n");}
+        if (strcmp (funk_name->content, "main") == EQUAL) {is_main = IS_MAIN;}
 
         fprintf(asm_file, "def %s:\n", funk_name->content);
 
@@ -320,7 +318,6 @@ void while_assembly (node* sframe_node, FILE* asm_file, dict ma_dict, size_t con
 
     cmp_assembly (sframe_node->left_child, asm_file, ma_dict, "while", while_id++);
     }
-
 
 
 void cmp_assembly (node* cmp_node, FILE* asm_file, dict ma_dict,

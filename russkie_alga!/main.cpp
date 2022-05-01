@@ -8,8 +8,6 @@ int main (int, char* argv[])
 
     assembly (file_name);
 
-    memory_free ();
-
     return 0;
     }
 

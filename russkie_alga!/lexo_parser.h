@@ -1,6 +1,8 @@
 #ifndef LEXO_PARSER_H_INCLUDED
 #define LEXO_PARSER_H_INCLUDED
 
+extern const size_t NEW_LINE, NON_NEW_LINE;
+
 union token_content
     {
     char* id;
@@ -47,7 +49,7 @@ token* lexo_parse (const char* line);
 
 token* lexo_parse_second_traversal (token* parsed_line);
 
-void print_token (token token_to_print, int mode);
+void print_token (token token_to_print, int delimiter_mode);
 
 void print_pl (parsed_line_reader* pl_reader);
 

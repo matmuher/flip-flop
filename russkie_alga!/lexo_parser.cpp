@@ -4,24 +4,21 @@
 #include "lexo_parser.h"
 
 
+/*!
+@brief  Second traversal to differ user functions from ordinary variables
+*/
 token* lexo_parse_second_traversal (token* parsed_line)
     {
     size_t token_id = 0;
 
-    int func_def  = 0;
-
-
-    int func_call = 0;
-
-
     while (parsed_line[token_id].type != T_END)
         {
-        func_def =  parsed_line[token_id + 1].type == T_DELIM        &&
-                    parsed_line[token_id + 1].content.servant == ' ' &&
-                    parsed_line[token_id + 2].type == T_ROUND_BR;
+        int func_def =  parsed_line[token_id + 1].type == T_DELIM        &&
+                        parsed_line[token_id + 1].content.servant == ' ' &&
+                        parsed_line[token_id + 2].type == T_ROUND_BR;
 
-        func_call = parsed_line[token_id + 1].type == T_ROUND_BR &&
-                    parsed_line[token_id + 1].content.servant == '(';
+        int func_call = parsed_line[token_id + 1].type == T_ROUND_BR &&
+                        parsed_line[token_id + 1].content.servant == '(';
 
         if (parsed_line[token_id].type == T_VAR && (func_def || func_call))
             {
@@ -35,11 +32,10 @@ token* lexo_parse_second_traversal (token* parsed_line)
     }
 
 
-/*
-Parse string into tokens:
-
-for comprehensive list of tokens
-take a look in "lexo_parser.h, enum token_type"
+/*!
+@brief  Parse string into tokens:
+        for comprehensive list of tokens
+        take a look in "lexo_parser.h, enum token_type"
 */
 token* lexo_parse (const char* line)
     {
@@ -99,10 +95,7 @@ token* lexo_parse (const char* line)
             TOK_PROC (T_DEF, ID_ASS)
             TOK_PROC (T_RET, ID_ASS)
 
-            default:
-                {
-                printf ("[UNKNOWN TOKEN] : %s\n", begunok);
-                }
+            default: printf ("[UNKNOWN TOKEN] : %s\n", begunok);
             }
         }
     #undef TOK_PROC
@@ -115,7 +108,9 @@ token* lexo_parse (const char* line)
     }
 
 
-// pl is for parsed_line
+/*!
+@brief  Prints parsed line (stands for pl)
+*/
 void print_pl (parsed_line_reader* pl_reader)
     {
     size_t token_id = 0;
@@ -130,7 +125,11 @@ void print_pl (parsed_line_reader* pl_reader)
     }
 
 
-void print_token (token token_to_print, int mode) // 1 - with '\n', 0 - without
+// print token modes
+const size_t NEW_LINE     = 1,
+             NON_NEW_LINE = 0;
+
+void print_token (token token_to_print, int delimiter_mode) // 1 - with '\n', 0 - without
     {
     const int NEW_LINE_MODE = 1;
     const int SPACE_MODE = 0;
@@ -146,7 +145,7 @@ void print_token (token token_to_print, int mode) // 1 - with '\n', 0 - without
             {
             printf ("%s[%d] ", token_to_print.content.id, token_to_print.type);
 
-            if (mode == NEW_LINE_MODE)
+            if (delimiter_mode == NEW_LINE_MODE)
                 {
                 putchar ('\n');
                 }
@@ -164,10 +163,7 @@ void print_token (token token_to_print, int mode) // 1 - with '\n', 0 - without
             {
             printf ("%c[%d] ", token_to_print.content.servant, token_to_print.type);
 
-            if (mode == NEW_LINE_MODE)
-                {
-                putchar ('\n');
-                }
+            if (delimiter_mode == NEW_LINE_MODE) putchar ('\n');
 
             break;
             }
@@ -176,10 +172,7 @@ void print_token (token token_to_print, int mode) // 1 - with '\n', 0 - without
             {
             printf ("%lf[%d] ", token_to_print.content.val, token_to_print.type);
 
-            if (mode == NEW_LINE_MODE)
-                {
-                putchar ('\n');
-                }
+            if (delimiter_mode == NEW_LINE_MODE) putchar ('\n');
 
             break;
             }

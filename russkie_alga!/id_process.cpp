@@ -58,25 +58,6 @@ int are_equal (const char* left, const char* right)
     }
 
 
-#define IS_THIS(unknown_kw, kw) \
-    if (are_equal (unknown_kw, #kw)) \
-        {                            \
-        return kw;                   \
-        }
-// kw is for key_word
-kws determine_kw (char* unknown_kw)
-    {
-    IS_THIS(unknown_kw, sinus)
-    IS_THIS(unknown_kw, cosus)
-    IS_THIS(unknown_kw, logus)
-    IS_THIS(unknown_kw, print)
-
-    return undef_kw;
-    }
-#undef IS_THIS
-
-
-
 int isoper (char begunok)
     {
 

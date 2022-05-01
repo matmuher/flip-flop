@@ -58,20 +58,6 @@ void cur_read_pos (parsed_line_reader* pl_reader);
 
 int require (char requirement, parsed_line_reader* pl_reader);
 
-ma_ty execute (parsed_line_reader* pl_reader, size_t kw_token_id, ma_ty arg);
-
-
-enum kws
-    {
-    undef_kw = -1,
-    sinus = 1,
-    cosus = 2,
-    logus = 3,
-    print = 4,
-    };
-
-kws determine_kw (char* unknown_kw);
-
 // Copypaste? After all this time? Always...
 token_type try_Id (const char* begunok);
 
