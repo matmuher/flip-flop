@@ -36,11 +36,13 @@ void memory_free (death_note* note)
     {
     assert (note != NULL);
 
+    // printf ("Ptrs used: [%d]\n", note->grosse);
+
     while (note->grosse-- > 0)
         {
         free (note->ptrs_list[note->grosse]);
         note->ptrs_list[note->grosse] = NULL;
         }
 
-    puts ("Memory was successfully freed!");
+    // puts ("Memory was successfully freed!");
     }

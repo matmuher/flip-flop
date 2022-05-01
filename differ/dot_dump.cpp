@@ -33,6 +33,8 @@ void dot_dump_close (FILE* graph_dump)
 
 static void dot_connect_nuclear_family (node* parent_node, FILE* graph_log)
     {
+    puts (parent_node->content);
+
     // Pointers are used as IDs
     if (parent_node != NULL)
         {
@@ -40,11 +42,13 @@ static void dot_connect_nuclear_family (node* parent_node, FILE* graph_log)
 
         if (parent_node->left_child != NULL)
             {
+            puts (parent_node->left_child->content);
             fprintf (graph_log, "A%p -> A%p;\n", parent_node, parent_node->left_child);
             }
 
         if (parent_node->right_child != NULL)
             {
+            puts (parent_node->right_child->content);
             fprintf (graph_log, "A%p -> A%p;\n", parent_node, parent_node->right_child);
             }
         }
@@ -53,6 +57,7 @@ static void dot_connect_nuclear_family (node* parent_node, FILE* graph_log)
 
 void tree_dot_dump (node* current_node, FILE* graph_log)
     {
+
     if (current_node != NULL)
         {
         dot_connect_nuclear_family (current_node, graph_log);

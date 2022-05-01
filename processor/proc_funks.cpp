@@ -89,6 +89,12 @@ void proc_dmp (proc* prc)
              prc->reg[0], prc->reg[1], prc->reg[2], prc->reg[3]);
     LOG_NEW_LINE;
 
+    fprintf (prc->prc_log, "Ram: ");
+    for (size_t ram_id = 0; ram_id < NON_VIDEO_RAM_SIZE; ram_id++)
+        fprintf (prc->prc_log, "%d ", prc->ram[ram_id]);
+
+    LOG_NEW_LINE;
+
     vm_print (prc);
 
     LOG_NEW_LINE;

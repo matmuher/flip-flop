@@ -1,7 +1,7 @@
 #ifndef ELEPHANT_FUNCTIONS_H_INCLUDED
 #define ELEPHANT_FUNCTIONS_H_INCLUDED
 
-const size_t MAX_PTRS_NUM = 200;
+const size_t MAX_PTRS_NUM = 1000;
 
 /*!
 @brief Structure for containing pointers to

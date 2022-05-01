@@ -10,7 +10,7 @@
             {                                     \
             push (prc, prc->ram[prc->reg[1] + arg]); \
             }                           \
-        if (cmd & IMM_MASK)             \
+        else if (cmd & IMM_MASK)        \
             {                           \
             push (prc, arg);            \
             }                           \
@@ -46,7 +46,12 @@
         {                                        \
         prc->ram[arg] = POP;                     \
         }                                        \
+    else if (cmd & IMM_MASK)                     \
+        {                                        \
+        POP;                                     \
+        }                                        \
     }                                            \
+
 
 
 #define POP pop (prc)

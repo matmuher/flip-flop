@@ -5,7 +5,6 @@
 
 node* create_node (node_type ntype, const char* content_to_push)
     {
-    puts ("WA HELL");
     // Create node
     node* new_node = (node*) elephant_calloc (1, sizeof (node));
 

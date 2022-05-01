@@ -19,6 +19,12 @@ enum node_type
     DEF = 7,
     CALL = 8,
     UFUNK = 9,
+    PARAM = 10,
+    ST = 11,
+    CMP = 12,
+    FUNK = 13,
+    INIT = 14,
+    RET = 15,
     };
 
 

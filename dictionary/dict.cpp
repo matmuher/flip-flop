@@ -4,7 +4,80 @@
 #include <assert.h>
 #include "dict.h"
 
+
 const int DICT_INIT_VALUE = 0xBADEDA;
+
+
+dict_shelf put_in_shelf (dict_shelf ma_shelf, dict ma_dict)
+    {
+    dict_shelf new_shelf = (dict_shelf) calloc (1, sizeof (dict_shelf_element));
+
+    new_shelf->prev = ma_shelf;
+    new_shelf->cur_dic = ma_dict;
+
+    return new_shelf;
+    }
+
+
+dict_cell* search_in_shelf (dict_shelf ma_shelf, const char* word)
+    {
+    assert (word);
+
+    if (ma_shelf)
+        {
+        dict_shelf cur_shelf = ma_shelf;
+
+        while (cur_shelf)
+            {
+            dict_cell* found_word = NULL;
+            found_word = search_in_dict (cur_shelf->cur_dic, word);
+
+            if (found_word)
+                {
+                return found_word;
+                }
+
+            cur_shelf = cur_shelf->prev;
+            }
+        }
+
+    return NULL;
+    }
+
+
+void free_shelf (dict_shelf ma_shelf)
+    {
+    while (ma_shelf)
+        {
+        free_dict (ma_shelf->cur_dic);
+
+        dict_shelf doomed_shelf = ma_shelf;
+
+        ma_shelf = ma_shelf->prev;
+
+        free (doomed_shelf);
+        }
+
+    puts ("Shelf have been freed!");
+    }
+
+
+void print_shelf (dict_shelf ma_shelf)
+    {
+    size_t shelf_id = 0;
+
+    while (ma_shelf)
+        {
+        printf ("Shelf [%d]:\n", shelf_id++);
+
+        print_dict (ma_shelf->cur_dic);
+
+        putchar ('\n');
+
+        ma_shelf = ma_shelf->prev;
+        }
+    }
+
 
 dict add_dict_cell (dict ma_dict, const char* key, int value)
     {
@@ -20,17 +93,18 @@ dict add_dict_cell (dict ma_dict, const char* key, int value)
     }
 
 
-void print_dict (dict_cell* cell_ptr)
+void print_dict (dict ma_dict)
     {
-    if (cell_ptr)
-        {
-        printf ("%s : %d\n", cell_ptr->key, cell_ptr->value);
+    dict cell_ptr = ma_dict;
 
-        if (cell_ptr->prev)
-            {
-            print_dict (cell_ptr->prev);
-            }
+    while (cell_ptr)
+        {
+        printf ("%s:%d ", cell_ptr->key, cell_ptr->value);
+
+        cell_ptr = cell_ptr->prev;
         }
+
+    putchar ('\n');
     }
 
 
@@ -103,27 +177,21 @@ void free_dict (dict doomed_dict)
         free (doomed_cell);
         }
 
-    puts ("Dictionary was freed!");
+    // puts ("Dictionary was freed!");
     }
 
 
-#if 0
-int main ()
+dict_shelf delete_dict_from_shelf (dict_shelf ma_shelf)
     {
-    dict_cell* ma_dict = NULL;
+    if (ma_shelf)
+        {
+        dict_shelf doomed_shelf_element = ma_shelf;
 
-    ma_dict = add_dict_cell (ma_dict, "cow", 4);
-    ma_dict = add_dict_cell (ma_dict, "spider", 7);
-    ma_dict = add_dict_cell (ma_dict, "spider", 8);
+        ma_shelf = ma_shelf->prev;
 
-    printf ("cow : %d\n", dict_get_val (ma_dict, "cow"));
-    printf ("spider : %d\n", dict_get_val (ma_dict, "spider"));
+        free_dict (doomed_shelf_element->cur_dic);
+        free (doomed_shelf_element);
+        }
 
-    dict_write_val (ma_dict, "cow", -17);
-    printf ("cow : %d\n", dict_get_val (ma_dict, "cow"));
-
-    free_dict (ma_dict);
-
-    // print_dict (ma_dict);
+    return ma_shelf;
     }
-#endif
