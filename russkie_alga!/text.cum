@@ -1,0 +1,16 @@
+define main ()
+{
+	a:5;
+	b:6;
+	sqrt(b);
+	print(a);
+	if(a<b)
+	{
+		return b-a;
+	};
+	if(b<a)
+	{
+		return b-a;
+	};
+}!
+$

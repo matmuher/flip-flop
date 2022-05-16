@@ -10,7 +10,6 @@
 *.jpg
 *.bmp
 *.bat
-*.cum
 /russkie_alga!/*.png
 /hamlet/bin/*
 /hamlet/obj/*

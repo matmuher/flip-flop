@@ -4,7 +4,7 @@
 
 int main (int, char* argv[])
     {
-    const char* file_name = argv[1] ? argv[1] : "square_eq_solve.cum";
+    const char* file_name = argv[1] ? argv[1] : "text.cum";
 
     assembly (file_name);
 
